@@ -1,0 +1,69 @@
+{
+  "name": "v-rx",
+  "version": "0.0.0",
+  "sideEffects": false,
+  "description": "A state manager for Vue 3 based on rxjs",
+  "main": "dist/js",
+  "module": "dist/es",
+  "unpkg": "dist/es",
+  "typings": "src",
+  "files": [
+    "dist",
+    "src",
+    "LICENSE",
+    "tsconfig.json",
+    "tslint.json",
+    "README.md"
+  ],
+  "scripts": {
+    "test": "jest -i",
+    "build:js": "ttsc --outDir dist/js -t ES2015",
+    "build:es": "ttsc --outDir dist/es -t ES2015 --module esnext",
+    "build:next": "ttsc --outDir dist/esnext --module esnext",
+    "build:umd": "bili",
+    "build": "npm run checks && npm run build:js && npm run build:es && npm run build:next && npm run build:umd",
+    "dev": "tsc --noEmit -w",
+    "coverage": "cat ./coverage/lcov.info | coveralls",
+    "checks": "madge --circular --extensions ts src/index.ts",
+    "commit-build": "(git diff --quiet && git diff --staged --quiet) || (git commit -am \"Update dist\")",
+    "preversion": "npm t && npm run build && npm run commit-build",
+    "prerelease": "npm version prerelease --preid=rc && npm publish --tag next && git push",
+    "pre-minor": "npm version preminor --preid=rc && npm publish --tag next && git push",
+    "pre-major": "npm version premajor --preid=rc && npm publish --tag next && git push",
+    "patch": "npm version patch && npm publish && git push",
+    "minor": "npm version minor && npm publish && git push",
+    "major": "npm version major && npm publish && git push"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Raiondesu/v-rx.git"
+  },
+  "author": "Raiondesu",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/Raiondesu/v-rx/issues"
+  },
+  "homepage": "https://github.com/Raiondesu/v-rx#readme",
+  "jest": {
+    "preset": "ts-jest",
+    "verbose": true,
+    "coverageReporters": [
+      "lcov",
+      "text"
+    ],
+    "coveragePathIgnorePatterns": [
+      "/node_modules/",
+      "/tests?/",
+      "/dist/"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "branches": 90,
+        "functions": 100,
+        "lines": 100,
+        "statements": 100
+      }
+    },
+    "collectCoverage": true
+  }
+}
