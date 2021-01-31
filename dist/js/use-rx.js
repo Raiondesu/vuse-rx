@@ -1,11 +1,19 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useRxState = exports.useRx = void 0;
+exports.useRxState = exports.observeRef = exports.useSubject = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const util_1 = require("./util");
-function _useRX(stateUpdate) {
+function useSubject(subject) {
+    const _subject = subject !== null && subject !== void 0 ? subject : new rxjs_1.Subject();
+    const rState = vue_1.ref();
+    return [(state) => _subject.next(rState.value = state), rState, _subject.asObservable()];
+}
+exports.useSubject = useSubject;
+const observeRef = (ref) => new rxjs_1.Observable(ctx => vue_1.watch(ref, value => ctx.next(value)));
+exports.observeRef = observeRef;
+function _useRxState(stateUpdate) {
     const args$ = new rxjs_1.Subject();
     return [
         (...args) => args$.next(args),
@@ -14,12 +22,6 @@ function _useRX(stateUpdate) {
             : rxjs_1.of(update))),
     ];
 }
-function useRx(subject) {
-    const _subject = subject !== null && subject !== void 0 ? subject : new rxjs_1.Subject();
-    const rState = vue_1.ref(null);
-    return [(state) => _subject.next(rState.value = state), rState, _subject.asObservable()];
-}
-exports.useRx = useRx;
 const updateKeys = (prev) => (curr) => {
     var _a;
     for (const key in curr) {
@@ -40,12 +42,12 @@ function useRxState(initialState) {
                     ? newState.pipe(operators_1.map(update))
                     : rxjs_1.of(update(newState));
             }, state),
-            operators_1.takeUntil(util_1.createOnDestroySubject()),
+            operators_1.takeUntil(util_1.createOnDestroy$()),
         ];
         const handlers = {};
         const observables = [];
         for (const key in reducers) {
-            const [handler, state$] = _useRX(reducers[key]);
+            const [handler, state$] = _useRxState(reducers[key]);
             handlers[key] = handler;
             observables.push(state$);
         }

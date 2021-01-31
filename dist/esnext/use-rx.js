@@ -1,8 +1,14 @@
-import { isObservable, merge, of, Subject } from 'rxjs';
+import { isObservable, merge, Observable, of, Subject } from 'rxjs';
 import { map, mergeScan, switchMap, takeUntil } from 'rxjs/operators';
-import { reactive, ref } from 'vue';
-import { createOnDestroySubject } from "./util.js";
-function _useRX(stateUpdate) {
+import { reactive, ref, watch } from 'vue';
+import { createOnDestroy$ } from "./util.js";
+export function useSubject(subject) {
+    const _subject = subject ?? new Subject();
+    const rState = ref();
+    return [(state) => _subject.next(rState.value = state), rState, _subject.asObservable()];
+}
+export const observeRef = (ref) => new Observable(ctx => watch(ref, value => ctx.next(value)));
+function _useRxState(stateUpdate) {
     const args$ = new Subject();
     return [
         (...args) => args$.next(args),
@@ -10,11 +16,6 @@ function _useRX(stateUpdate) {
             ? update
             : of(update))),
     ];
-}
-export function useRx(subject) {
-    const _subject = subject ?? new Subject();
-    const rState = ref(null);
-    return [(state) => _subject.next(rState.value = state), rState, _subject.asObservable()];
 }
 const updateKeys = (prev) => (curr) => {
     for (const key in curr) {
@@ -35,12 +36,12 @@ export function useRxState(initialState) {
                     ? newState.pipe(map(update))
                     : of(update(newState));
             }, state),
-            takeUntil(createOnDestroySubject()),
+            takeUntil(createOnDestroy$()),
         ];
         const handlers = {};
         const observables = [];
         for (const key in reducers) {
-            const [handler, state$] = _useRX(reducers[key]);
+            const [handler, state$] = _useRxState(reducers[key]);
             handlers[key] = handler;
             observables.push(state$);
         }

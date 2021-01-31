@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOnDestroySubject = void 0;
+exports.createOnDestroy$ = void 0;
 const rxjs_1 = require("rxjs");
 const vue_1 = require("vue");
-const createOnDestroySubject = () => {
+const createOnDestroy$ = () => {
     if (!vue_1.getCurrentInstance()) {
         return rxjs_1.NEVER;
     }
@@ -13,5 +13,5 @@ const createOnDestroySubject = () => {
     });
     return onDestroy$.asObservable();
 };
-exports.createOnDestroySubject = createOnDestroySubject;
+exports.createOnDestroy$ = createOnDestroy$;
 //# sourceMappingURL=util.js.map

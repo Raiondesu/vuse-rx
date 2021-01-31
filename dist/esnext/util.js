@@ -1,6 +1,6 @@
 import { NEVER, Subject } from 'rxjs';
 import { getCurrentInstance, onUnmounted } from 'vue';
-export const createOnDestroySubject = () => {
+export const createOnDestroy$ = () => {
     if (!getCurrentInstance()) {
         return NEVER;
     }
