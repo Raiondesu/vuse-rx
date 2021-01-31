@@ -1,8 +1,8 @@
 import { isObservable, merge, Observable, of, Subject } from 'rxjs';
 import { OperatorFunction } from 'rxjs/internal/types';
 import { map, mergeScan, switchMap, takeUntil } from 'rxjs/operators';
-import { reactive, Ref, ref } from 'vue';
-import { createOnDestroySubject } from './util';
+import { reactive, Ref, ref, watch, WatchSource } from 'vue';
+import { createOnDestroy$ } from './util';
 
 declare module 'rxjs/internal/Observable' {
   interface Observable<T> {
@@ -23,26 +23,68 @@ declare module 'rxjs/internal/Observable' {
   }
 }
 
-export type StateHandler<S, Args extends any[] = any[]> =
-  | ((...args: Args) => Partial<S>)
-  | ((...args: Args) => Observable<Partial<S>>)
-  | ((...args: Args) => (state: S) => Partial<S>)
-  | ((...args: Args) => (state: S) => Observable<Partial<S>>);
+/**
+ * A reducer for the observable state
+ */
+export type StateReducer<S, Args extends any[] = any[]> =
+  | ((...args: Args) => Partial<S> | Observable<Partial<S>>)
+  | ((...args: Args) => (state: S) => Partial<S> | Observable<Partial<S>>);
 
-export type StateHandlers<S> = Record<string, StateHandler<S>>;
+/**
+ * A named collection of state reducers
+ */
+export type StateReducers<S> = Record<string, StateReducer<S>>;
+
+/**
+ * A method handler generated from a StateReducer
+ */
 export type ResHandler<A extends any[] = []> = (...args: A) => void;
 
+/**
+ * Resulting RX bindings:
+ *
+ * * 0 - a named collection of ResHandler-s
+ * * 1 - a reactive vue state
+ * * 2 - an rxjs observable
+ */
 export type RxResult<H, S, R = Readonly<S>> = readonly [
-  handler: H,
+  handlers: H,
   state: R,
   state$: Observable<S>,
 ];
 
-type ReducerHandler<R> = R extends StateHandler<any, infer Args>
+/**
+ * Creates a vue ref and a ref setter from the subject.
+ *
+ * When the setter is called, the subject emits.
+ *
+ * @param subject - a base subject to draw events from
+ * @returns [ref setter, ref, observable]
+ */
+export function useSubject<S>(subject?: Subject<S>): RxResult<ResHandler<[state: S]>, S, Ref<S | undefined>> {
+  const _subject = subject ?? new Subject<S>();
+  const rState = ref<S>();
+
+  return [(state: S) => _subject.next(rState.value = state), rState, _subject.asObservable()] as const;
+}
+
+/**
+ * Creates an observable from a vue ref.
+ *
+ * Each time a ref's value is changed - observable emits.
+ *
+ * Can also accept vue reactive objects and value factories.
+ *
+ * @param ref - a ref/reactive/factory to observe
+ * @returns an observable that watches the ref
+ */
+export const observeRef = <R>(ref: WatchSource<R>): Observable<R> => new Observable(ctx => watch(ref, value => ctx.next(value)));
+
+type ReducerHandler<R> = R extends StateReducer<any, infer Args>
   ? ResHandler<Args>
   : never;
 
-function _useRX<S>(stateUpdate: StateHandler<S>) {
+function _useRxState<S>(stateUpdate: StateReducer<S>) {
   const args$ = new Subject<any[]>();
 
   return [
@@ -59,15 +101,8 @@ function _useRX<S>(stateUpdate: StateHandler<S>) {
 }
 
 type PipeReducers<S> = {
-  <R extends StateHandlers<S>>(reducers: R): RxResult<{ [key in keyof R]: ReducerHandler<R[key]> }, S>;
+  <R extends StateReducers<S>>(reducers: R): RxResult<{ [key in keyof R]: ReducerHandler<R[key]> }, S>;
 };
-
-export function useRx<S>(subject?: Subject<S>): RxResult<ResHandler<[state: S]>, S, Ref<S | null>> {
-  const _subject = subject ?? new Subject<S>();
-  const rState = ref<S | null>(null) as Ref<S | null>;
-
-  return [(state: S) => _subject.next(rState.value = state), rState, _subject.asObservable()] as const;
-}
 
 const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
   for (const key in curr) {
@@ -77,12 +112,36 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
   return prev;
 };
 
+/**
+ * Allows to bind reducers to a state and an observable.
+ *
+ * First accepts state's default value,
+ * then accepts a map of state reducers.
+ *
+ * Each reducer can either return:
+ * * an updated part of the state:
+ *   ```
+ *   (v) => ({ value: v })
+ *   ```
+ * * an observable that emits an updated part of the state:
+ *   ```
+ *   (v) => new BehaviorSubject(v)
+ *   ```
+ * * a function that accepts the old state and returns either of the previous types:
+ *   ```
+ *   (v) => (oldState) => ({
+ *       value: oldState.value > v ? oldState.value : v
+ *   })
+ *   ```
+ *
+ * @param initialState
+ */
 export function useRxState<S extends Record<string, any>>(initialState: S): PipeReducers<S> {
   const state = reactive(initialState) as S;
 
-  return <PipeReducers<S>>function (reducers: StateHandlers<S>) {
+  return <PipeReducers<S>>function (reducers: StateReducers<S>) {
     const mergeStates = [
-      mergeScan((state: S, curr: ReturnType<StateHandler<S>>): Observable<S> => {
+      mergeScan((state: S, curr: ReturnType<StateReducer<S>>): Observable<S> => {
         const update = updateKeys(state);
         const newState = typeof curr === 'function'
           ? curr(state)
@@ -92,14 +151,14 @@ export function useRxState<S extends Record<string, any>>(initialState: S): Pipe
           ? newState.pipe(map(update))
           : of(update(newState));
       }, state),
-      takeUntil(createOnDestroySubject()),
+      takeUntil(createOnDestroy$()),
     ] as const;
 
     const handlers: Record<string, (payload: any) => any> = {};
-    const observables: Observable<ReturnType<StateHandler<S>>>[] = [];
+    const observables: Observable<ReturnType<StateReducer<S>>>[] = [];
 
     for (const key in reducers) {
-      const [handler, state$] = _useRX(reducers[key]);
+      const [handler, state$] = _useRxState(reducers[key]);
 
       handlers[key] = handler;
       observables.push(state$);
