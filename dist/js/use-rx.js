@@ -30,7 +30,6 @@ const updateKeys = (prev) => (curr) => {
     return prev;
 };
 function useRxState(initialState) {
-    const state = vue_1.reactive(initialState);
     return function (reducers) {
         const mergeStates = [
             operators_1.mergeScan((state, curr) => {
@@ -41,7 +40,7 @@ function useRxState(initialState) {
                 return rxjs_1.isObservable(newState)
                     ? newState.pipe(operators_1.map(update))
                     : rxjs_1.of(update(newState));
-            }, state),
+            }, initialState),
             operators_1.takeUntil(util_1.createOnDestroy$()),
         ];
         const handlers = {};
@@ -52,7 +51,7 @@ function useRxState(initialState) {
             observables.push(state$);
         }
         const events$ = rxjs_1.merge(...observables).pipe(...mergeStates);
-        return [handlers, state, events$];
+        return [handlers, initialState, events$];
     };
 }
 exports.useRxState = useRxState;

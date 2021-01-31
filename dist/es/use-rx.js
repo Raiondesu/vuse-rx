@@ -1,6 +1,6 @@
 import { isObservable, merge, Observable, of, Subject } from 'rxjs';
 import { map, mergeScan, switchMap, takeUntil } from 'rxjs/operators';
-import { reactive, ref, watch } from 'vue';
+import { ref, watch } from 'vue';
 import { createOnDestroy$ } from "./util.js";
 export function useSubject(subject) {
     const _subject = subject !== null && subject !== void 0 ? subject : new Subject();
@@ -25,7 +25,6 @@ const updateKeys = (prev) => (curr) => {
     return prev;
 };
 export function useRxState(initialState) {
-    const state = reactive(initialState);
     return function (reducers) {
         const mergeStates = [
             mergeScan((state, curr) => {
@@ -36,7 +35,7 @@ export function useRxState(initialState) {
                 return isObservable(newState)
                     ? newState.pipe(map(update))
                     : of(update(newState));
-            }, state),
+            }, initialState),
             takeUntil(createOnDestroy$()),
         ];
         const handlers = {};
@@ -47,7 +46,7 @@ export function useRxState(initialState) {
             observables.push(state$);
         }
         const events$ = merge(...observables).pipe(...mergeStates);
-        return [handlers, state, events$];
+        return [handlers, initialState, events$];
     };
 }
 //# sourceMappingURL=use-rx.js.map
