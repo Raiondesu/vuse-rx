@@ -115,6 +115,8 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
 /**
  * Allows to bind reducers to a state and an observable.
  *
+ * It isn't tied to Vue in any way, so can be used regardless
+ *
  * First accepts state's default value,
  * then accepts a map of state reducers.
  *
@@ -134,11 +136,9 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
  *   })
  *   ```
  *
- * @param initialState
+ * @param initialState an initial value for the reactive state
  */
 export function useRxState<S extends Record<string, any>>(initialState: S): PipeReducers<S> {
-  const state = reactive(initialState) as S;
-
   return <PipeReducers<S>>function (reducers: StateReducers<S>) {
     const mergeStates = [
       mergeScan((state: S, curr: ReturnType<StateReducer<S>>): Observable<S> => {
@@ -150,7 +150,7 @@ export function useRxState<S extends Record<string, any>>(initialState: S): Pipe
         return isObservable<Partial<S>>(newState)
           ? newState.pipe(map(update))
           : of(update(newState));
-      }, state),
+      }, initialState),
       takeUntil(createOnDestroy$()),
     ] as const;
 
@@ -166,6 +166,6 @@ export function useRxState<S extends Record<string, any>>(initialState: S): Pipe
 
     const events$ = merge(...observables).pipe(...mergeStates);
 
-    return [handlers, state, events$] as const;
+    return [handlers, initialState, events$] as const;
   };
 }
