@@ -123,6 +123,8 @@ type PipeReducers<S> = {
    *   ```
    *
    * @param reducers - a map of state update functions
+   *
+   * @returns [reducers, state, observable]
    */
   <R extends StateReducers<S>>(reducers: R): RxResult<{ [key in keyof R]: ReducerHandler<R[key]> }, S>;
 };
