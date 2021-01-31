@@ -1,3 +1,3 @@
 export * from "./use-rx.js";
-export * from "./tap-refs.js";
+export * from "./rx-refs.js";
 //# sourceMappingURL=index.js.map

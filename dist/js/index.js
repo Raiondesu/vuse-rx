@@ -11,5 +11,5 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./use-rx"), exports);
-__exportStar(require("./tap-refs"), exports);
+__exportStar(require("./rx-refs"), exports);
 //# sourceMappingURL=index.js.map
