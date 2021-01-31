@@ -45,7 +45,6 @@
   },
   "homepage": "https://github.com/Raiondesu/v-rx#readme",
   "devDependencies": {
-    "@rollup/plugin-typescript": "^8.1.1",
     "@types/jest": "^26.0.20",
     "@types/node": "^12.11.7",
     "@zoltu/typescript-transformer-append-js-extension": "^1.0.1",
@@ -53,6 +52,7 @@
     "coveralls": "^3.1.0",
     "jest": "^26.6.3",
     "madge": "^4.0.0",
+    "rollup-plugin-typescript2": "^0.29.0",
     "rxjs": "^6.6.3",
     "ts-jest": "^26.5.0",
     "ttypescript": "^1.5.12",
