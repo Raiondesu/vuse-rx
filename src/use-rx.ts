@@ -1,7 +1,7 @@
 import { isObservable, merge, Observable, of, Subject } from 'rxjs';
 import { OperatorFunction } from 'rxjs/internal/types';
 import { map, mergeScan, switchMap, takeUntil } from 'rxjs/operators';
-import { reactive, Ref, ref, watch, WatchSource } from 'vue';
+import { Ref, ref, watch, WatchSource } from 'vue';
 import { createOnDestroy$ } from './util';
 
 declare module 'rxjs/internal/Observable' {
