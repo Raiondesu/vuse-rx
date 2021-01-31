@@ -106,7 +106,7 @@
     "parserOptions": {
       "project": "tsconfig.json",
       "sourceType": "module",
-      "ecmaVersion": 2021
+      "ecmaVersion": 2020
     },
     "rules": {
       "no-console": "warn",

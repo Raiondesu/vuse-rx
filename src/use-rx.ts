@@ -53,7 +53,7 @@ function _useRX<S>(stateUpdate: StateHandler<S>) {
         isObservable<Partial<S>>(update)
           ? update
           : of(update)
-      )
+      ),
     ),
   ] as const;
 }
@@ -80,7 +80,7 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
 export function useRxState<S extends Record<string, any>>(initialState: S): PipeReducers<S> {
   const state = reactive(initialState) as S;
 
-  return <PipeReducers<S>>function (reduce: StateHandlers<S> | StateHandler<S>) {
+  return <PipeReducers<S>>function (reducers: StateHandlers<S>) {
     const mergeStates = [
       mergeScan((state: S, curr: ReturnType<StateHandler<S>>): Observable<S> => {
         const update = updateKeys(state);
@@ -95,17 +95,11 @@ export function useRxState<S extends Record<string, any>>(initialState: S): Pipe
       takeUntil(createOnDestroySubject()),
     ] as const;
 
-    if (typeof reduce === 'function') {
-      const [handler, state$] = _useRX(reduce);
-
-      return [handler, state, state$.pipe(...mergeStates)] as const;
-    }
-
     const handlers: Record<string, (payload: any) => any> = {};
     const observables: Observable<ReturnType<StateHandler<S>>>[] = [];
 
-    for (const key in reduce) {
-      const [handler, state$] = _useRX(reduce[key]);
+    for (const key in reducers) {
+      const [handler, state$] = _useRX(reducers[key]);
 
       handlers[key] = handler;
       observables.push(state$);

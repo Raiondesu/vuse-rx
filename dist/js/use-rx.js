@@ -29,7 +29,7 @@ const updateKeys = (prev) => (curr) => {
 };
 function useRxState(initialState) {
     const state = vue_1.reactive(initialState);
-    return function (reduce) {
+    return function (reducers) {
         const mergeStates = [
             operators_1.mergeScan((state, curr) => {
                 const update = updateKeys(state);
@@ -42,14 +42,10 @@ function useRxState(initialState) {
             }, state),
             operators_1.takeUntil(util_1.createOnDestroySubject()),
         ];
-        if (typeof reduce === 'function') {
-            const [handler, state$] = _useRX(reduce);
-            return [handler, state, state$.pipe(...mergeStates)];
-        }
         const handlers = {};
         const observables = [];
-        for (const key in reduce) {
-            const [handler, state$] = _useRX(reduce[key]);
+        for (const key in reducers) {
+            const [handler, state$] = _useRX(reducers[key]);
             handlers[key] = handler;
             observables.push(state$);
         }
