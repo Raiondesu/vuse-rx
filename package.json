@@ -12,7 +12,6 @@
     "src",
     "LICENSE",
     "tsconfig.json",
-    "tslint.json",
     "README.md"
   ],
   "scripts": {
@@ -57,7 +56,12 @@
     "ts-jest": "^26.5.0",
     "ttypescript": "^1.5.12",
     "typescript": "^4.1.3",
-    "vue": "^3.0.5"
+    "vue": "^3.0.5",
+    "eslint": "^6.7.2",
+    "eslint-plugin-import": "^2.20.2",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^4.2.1",
+    "eslint-plugin-standard": "^4.0.0"
   },
   "peerDependencies": {
     "rxjs": "^6.6.3",
@@ -84,5 +88,158 @@
       }
     },
     "collectCoverage": true
+  },
+  "eslintConfig": {
+    "root": true,
+    "env": {
+      "browser": true,
+      "es6": true,
+      "node": true
+    },
+    "extends": [
+      "eslint:recommended"
+    ],
+    "plugins": [
+      "@typescript-eslint",
+      "@typescript-eslint/tslint"
+    ],
+    "parserOptions": {
+      "project": "tsconfig.json",
+      "sourceType": "module",
+      "ecmaVersion": 2021
+    },
+    "rules": {
+      "no-console": "warn",
+      "no-debugger": "warn",
+      "@typescript-eslint/no-unused-vars": "warn",
+      "@typescript-eslint/no-explicit-any": "off",
+      "@typescript-eslint/no-empty-function": "off",
+      "@typescript-eslint/adjacent-overload-signatures": "error",
+      "@typescript-eslint/dot-notation": "error",
+      "@typescript-eslint/explicit-member-accessibility": [
+        "error",
+        {
+          "accessibility": "explicit"
+        }
+      ],
+      "indent": [
+        "error",
+        2,
+        {
+          "SwitchCase": 1
+        }
+      ],
+      "@typescript-eslint/member-delimiter-style": [
+        "error",
+        {
+          "multiline": {
+            "delimiter": "semi",
+            "requireLast": true
+          },
+          "singleline": {
+            "delimiter": "semi",
+            "requireLast": false
+          }
+        }
+      ],
+      "no-param-reassign": "error",
+      "@typescript-eslint/no-unnecessary-type-arguments": "warn",
+      "@typescript-eslint/no-var-requires": "error",
+      "quotes": [
+        "error",
+        "single"
+      ],
+      "@typescript-eslint/explicit-module-boundary-types": "off",
+      "@typescript-eslint/semi": [
+        "error",
+        "always"
+      ],
+      "@typescript-eslint/unbound-method": "off",
+      "arrow-body-style": "warn",
+      "comma-dangle": [
+        "error",
+        {
+          "objects": "always-multiline",
+          "arrays": "always-multiline",
+          "imports": "only-multiline",
+          "exports": "only-multiline",
+          "functions": "only-multiline"
+        }
+      ],
+      "constructor-super": "error",
+      "default-case": "error",
+      "no-cond-assign": "error",
+      "no-eval": "error",
+      "no-magic-numbers": [
+        "error",
+        {
+          "ignore": [
+            -1,
+            0,
+            1,
+            2,
+            42
+          ]
+        }
+      ],
+      "no-duplicate-imports": "error",
+      "no-new-wrappers": "error",
+      "no-return-await": "error",
+      "no-template-curly-in-string": "warn",
+      "no-throw-literal": "error",
+      "no-unsafe-finally": "error",
+      "padding-line-between-statements": [
+        "error",
+        {
+          "blankLine": "always",
+          "prev": "*",
+          "next": "return"
+        }
+      ],
+      "prefer-object-spread": "error",
+      "prefer-template": "error",
+      "space-before-function-paren": [
+        "error",
+        {
+          "anonymous": "always",
+          "named": "never",
+          "asyncArrow": "always"
+        }
+      ],
+      "use-isnan": "error",
+      "@typescript-eslint/tslint/config": [
+        "error",
+        {
+          "rules": {
+            "no-unnecessary-callback-wrapper": false,
+            "number-literal-format": true,
+            "return-undefined": true
+          }
+        }
+      ]
+    },
+    "ignorePatterns": [
+      "*.config.js"
+    ],
+    "overrides": [
+      {
+        "files": [
+          "**/__tests__/*.{j,t}s?(x)",
+          "**/tests/unit/**/*.spec.{j,t}s?(x)"
+        ],
+        "env": {
+          "jest": true
+        }
+      },
+      {
+        "files": [
+          "**/__tests__/*.{j,t}s?(x)",
+          "**/tests/unit/**/*.spec.{j,t}s?(x)"
+        ],
+        "env": {
+          "jest": true
+        }
+      }
+    ]
   }
 }
