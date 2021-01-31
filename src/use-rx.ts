@@ -101,6 +101,29 @@ function _useRxState<S>(stateUpdate: StateReducer<S>) {
 }
 
 type PipeReducers<S> = {
+  /**
+   * Allows to bind reducers to a state and an observable.
+   *
+   * Accepts a map of state reducers.
+   *
+   * Each reducer can either return:
+   * * an updated part of the state:
+   *   ```
+   *   (v) => ({ value: v })
+   *   ```
+   * * an observable that emits an updated part of the state:
+   *   ```
+   *   (v) => new BehaviorSubject(v)
+   *   ```
+   * * a function that accepts the old state and returns either of the previous types:
+   *   ```
+   *   (v) => (oldState) => ({
+   *       value: oldState.value > v ? oldState.value : v
+   *   })
+   *   ```
+   *
+   * @param reducers that update the state
+   */
   <R extends StateReducers<S>>(reducers: R): RxResult<{ [key in keyof R]: ReducerHandler<R[key]> }, S>;
 };
 
