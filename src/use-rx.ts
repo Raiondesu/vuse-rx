@@ -161,10 +161,10 @@ export function useRxState<S extends Record<string, any>>(initialState: S): Pipe
 
   return <PipeReducers<S>>function (reducers: StateReducers<S>) {
     const handlers: Record<string, (payload: any) => any> = {};
-    const observables: Observable<any[]>[] = [];
+    const observables: Observable<[string, any[]]>[] = [];
 
     for (const key in reducers) {
-      const args$ = new Subject<any[]>();
+      const args$ = new Subject<[string, any[]]>();
 
       handlers[key] = (...args: any[]) => args$.next([key, args]);
       observables.push(args$);
