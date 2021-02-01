@@ -89,14 +89,7 @@ function _useRxState<S>(stateUpdate: StateReducer<S>) {
 
   return [
     (...args: any[]) => args$.next(args),
-    args$.pipe(
-      map(args => stateUpdate(...args)),
-      switchMap(update =>
-        isObservable<Partial<S>>(update)
-          ? update
-          : of(update)
-      ),
-    ),
+    args$.pipe(map(args => stateUpdate(...args))),
   ] as const;
 }
 
