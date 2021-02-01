@@ -1,4 +1,4 @@
-import { isObservable, merge, Observable, of, Subject } from 'rxjs';
+import { BehaviorSubject, isObservable, merge, Observable, of, Subject } from 'rxjs';
 import { OperatorFunction } from 'rxjs/internal/types';
 import { map, mergeScan, takeUntil } from 'rxjs/operators';
 import { Ref, ref, watch, WatchSource } from 'vue';
@@ -61,9 +61,11 @@ export type RxResult<H, S, R = Readonly<S>> = readonly [
  * @param subject - a base subject to draw events from
  * @returns [ref setter, ref, observable]
  */
-export function useSubject<S>(subject?: Subject<S>): RxResult<ResHandler<[state: S]>, S, Readonly<Ref<S | undefined>>> {
+export function useSubject<S>(subject?: Subject<S>): RxResult<ResHandler<[state: S]>, S, Readonly<Ref<S | undefined>>>;
+export function useSubject<S>(subject: BehaviorSubject<S>): RxResult<ResHandler<[state: S]>, S, Readonly<Ref<S>>>;
+export function useSubject<S>(subject?: Subject<S> | BehaviorSubject<S>): RxResult<ResHandler<[state: S]>, S, Readonly<Ref<S | undefined>>> {
   const _subject = subject ?? new Subject<S>();
-  const rState = ref<S>();
+  const rState = ref((_subject as BehaviorSubject<S>).value) as Ref<S>;
 
   return [(state: S) => _subject.next(rState.value = state), rState, _subject.asObservable()] as const;
 }
