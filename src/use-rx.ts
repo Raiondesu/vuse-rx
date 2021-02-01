@@ -61,7 +61,7 @@ export type RxResult<H, S, R = Readonly<S>> = readonly [
  * @param subject - a base subject to draw events from
  * @returns [ref setter, ref, observable]
  */
-export function useSubject<S>(subject?: Subject<S>): RxResult<ResHandler<[state: S]>, S, Ref<S | undefined>> {
+export function useSubject<S>(subject?: Subject<S>): RxResult<ResHandler<[state: S]>, S, Readonly<Ref<S | undefined>>> {
   const _subject = subject ?? new Subject<S>();
   const rState = ref<S>();
 
