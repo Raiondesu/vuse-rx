@@ -1,6 +1,6 @@
 import { isObservable, merge, Observable, of, Subject } from 'rxjs';
 import { OperatorFunction } from 'rxjs/internal/types';
-import { map, mergeScan, switchMap, takeUntil } from 'rxjs/operators';
+import { map, mergeScan, takeUntil } from 'rxjs/operators';
 import { Ref, ref, watch, WatchSource } from 'vue';
 import { createOnDestroy$ } from './util';
 
