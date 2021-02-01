@@ -1,5 +1,5 @@
 import { isObservable, merge, Observable, of, Subject } from 'rxjs';
-import { map, mergeScan, switchMap, takeUntil } from 'rxjs/operators';
+import { map, mergeScan, takeUntil } from 'rxjs/operators';
 import { ref, watch } from 'vue';
 import { createOnDestroy$ } from "./util.js";
 export function useSubject(subject) {
@@ -8,15 +8,6 @@ export function useSubject(subject) {
     return [(state) => _subject.next(rState.value = state), rState, _subject.asObservable()];
 }
 export const observeRef = (ref) => new Observable(ctx => watch(ref, value => ctx.next(value)));
-function _useRxState(stateUpdate) {
-    const args$ = new Subject();
-    return [
-        (...args) => args$.next(args),
-        args$.pipe(map(args => stateUpdate(...args)), switchMap(update => isObservable(update)
-            ? update
-            : of(update))),
-    ];
-}
 const updateKeys = (prev) => (curr) => {
     var _a;
     for (const key in curr) {
@@ -25,27 +16,26 @@ const updateKeys = (prev) => (curr) => {
     return prev;
 };
 export function useRxState(initialState) {
+    const mergeStates = mergeScan((state, curr) => {
+        const update = updateKeys(state);
+        const newState = typeof curr === 'function'
+            ? curr(state)
+            : curr;
+        return isObservable(newState)
+            ? newState.pipe(map(update))
+            : of(update(newState));
+    }, initialState);
     return function (reducers) {
-        const mergeStates = [
-            mergeScan((state, curr) => {
-                const update = updateKeys(state);
-                const newState = typeof curr === 'function'
-                    ? curr(state)
-                    : curr;
-                return isObservable(newState)
-                    ? newState.pipe(map(update))
-                    : of(update(newState));
-            }, initialState),
-            takeUntil(createOnDestroy$()),
-        ];
         const handlers = {};
         const observables = [];
         for (const key in reducers) {
-            const [handler, state$] = _useRxState(reducers[key]);
+            const args$ = new Subject();
+            const handler = (...args) => args$.next(args);
+            const state$ = args$.pipe(map(args => reducers[key](...args)), mergeStates);
             handlers[key] = handler;
             observables.push(state$);
         }
-        const events$ = merge(...observables).pipe(...mergeStates);
+        const events$ = merge(...observables).pipe(takeUntil(createOnDestroy$()));
         return [handlers, initialState, events$];
     };
 }

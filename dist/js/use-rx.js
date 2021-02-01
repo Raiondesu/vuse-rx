@@ -13,15 +13,6 @@ function useSubject(subject) {
 exports.useSubject = useSubject;
 const observeRef = (ref) => new rxjs_1.Observable(ctx => vue_1.watch(ref, value => ctx.next(value)));
 exports.observeRef = observeRef;
-function _useRxState(stateUpdate) {
-    const args$ = new rxjs_1.Subject();
-    return [
-        (...args) => args$.next(args),
-        args$.pipe(operators_1.map(args => stateUpdate(...args)), operators_1.switchMap(update => rxjs_1.isObservable(update)
-            ? update
-            : rxjs_1.of(update))),
-    ];
-}
 const updateKeys = (prev) => (curr) => {
     var _a;
     for (const key in curr) {
@@ -30,27 +21,26 @@ const updateKeys = (prev) => (curr) => {
     return prev;
 };
 function useRxState(initialState) {
+    const mergeStates = operators_1.mergeScan((state, curr) => {
+        const update = updateKeys(state);
+        const newState = typeof curr === 'function'
+            ? curr(state)
+            : curr;
+        return rxjs_1.isObservable(newState)
+            ? newState.pipe(operators_1.map(update))
+            : rxjs_1.of(update(newState));
+    }, initialState);
     return function (reducers) {
-        const mergeStates = [
-            operators_1.mergeScan((state, curr) => {
-                const update = updateKeys(state);
-                const newState = typeof curr === 'function'
-                    ? curr(state)
-                    : curr;
-                return rxjs_1.isObservable(newState)
-                    ? newState.pipe(operators_1.map(update))
-                    : rxjs_1.of(update(newState));
-            }, initialState),
-            operators_1.takeUntil(util_1.createOnDestroy$()),
-        ];
         const handlers = {};
         const observables = [];
         for (const key in reducers) {
-            const [handler, state$] = _useRxState(reducers[key]);
+            const args$ = new rxjs_1.Subject();
+            const handler = (...args) => args$.next(args);
+            const state$ = args$.pipe(operators_1.map(args => reducers[key](...args)), mergeStates);
             handlers[key] = handler;
             observables.push(state$);
         }
-        const events$ = rxjs_1.merge(...observables).pipe(...mergeStates);
+        const events$ = rxjs_1.merge(...observables).pipe(operators_1.takeUntil(util_1.createOnDestroy$()));
         return [handlers, initialState, events$];
     };
 }
