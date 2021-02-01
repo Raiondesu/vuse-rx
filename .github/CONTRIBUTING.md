@@ -1,10 +1,10 @@
-# Contributing to `v-rx`
+# Contributing to `vusx`
 
-Please note - we have a [code of conduct](https://github.com/Raiondesu/v-rx/blob/master/.github/CODE_OF_CONDUCT.md),
+Please note - we have a [code of conduct](https://github.com/Raiondesu/vusx/blob/master/.github/CODE_OF_CONDUCT.md),
 please follow it in all your interactions with the project.
 
-1. [Start with an issue](https://github.com/Raiondesu/v-rx/issues/new/choose).\
-   If there's a bug or a feature request, feel free to [create an issue](https://github.com/Raiondesu/v-rx/issues/new/choose) first.
+1. [Start with an issue](https://github.com/Raiondesu/vusx/issues/new/choose).\
+   If there's a bug or a feature request, feel free to [create an issue](https://github.com/Raiondesu/vusx/issues/new/choose) first.
 
    This prevents submitting changes that are not thought through and, as a consequence, allows for a healthier and more productive way of coming with solutions to problems.
 

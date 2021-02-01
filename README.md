@@ -1,4 +1,4 @@
-# v-rx
+# vusx
 
 > (pronounced Vee-Rex)
 >

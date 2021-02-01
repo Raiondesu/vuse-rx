@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest your own idea for v-rx
+about: Suggest your own idea for vusx
 title: ''
 labels: enhancement
 assignees: ''

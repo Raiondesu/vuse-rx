@@ -3,7 +3,7 @@ import { Config } from 'bili';
 export default {
   input: 'src/index.ts',
   output: {
-    moduleName: 'v-rx',
+    moduleName: 'vusx',
     fileName: 'umd.js',
     format: 'umd-min',
     target: 'browser',

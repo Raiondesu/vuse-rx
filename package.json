@@ -1,5 +1,5 @@
 {
-  "name": "v-rx",
+  "name": "vusx",
   "version": "0.0.0",
   "sideEffects": false,
   "description": "A state manager for Vue 3 based on rxjs",
@@ -35,14 +35,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Raiondesu/v-rx.git"
+    "url": "git+https://github.com/Raiondesu/vusx.git"
   },
   "author": "Raiondesu",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/Raiondesu/v-rx/issues"
+    "url": "https://github.com/Raiondesu/vusx/issues"
   },
-  "homepage": "https://github.com/Raiondesu/v-rx#readme",
+  "homepage": "https://github.com/Raiondesu/vusx#readme",
   "devDependencies": {
     "@types/jest": "^26.0.20",
     "@types/node": "^12.11.7",
