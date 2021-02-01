@@ -102,7 +102,7 @@ type PipeReducers<S> = {
    *   ```
    * * an observable that emits an updated part of the state:
    *   ```
-   *   (v) => new BehaviorSubject(v)
+   *   (v) => new BehaviorSubject({ value: v })
    *   ```
    * * a function that accepts the old state and returns either of the previous types:
    *   ```
@@ -141,7 +141,7 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
  *   ```
  * * an observable that emits an updated part of the state:
  *   ```
- *   (v) => new BehaviorSubject(v)
+ *   (v) => new BehaviorSubject({ value: v })
  *   ```
  * * a function that accepts the old state and returns either of the previous types:
  *   ```
