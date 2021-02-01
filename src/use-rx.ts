@@ -84,15 +84,6 @@ type ReducerHandler<R> = R extends StateReducer<any, infer Args>
   ? ResHandler<Args>
   : never;
 
-function _useRxState<S>(stateUpdate: StateReducer<S>) {
-  const args$ = new Subject<any[]>();
-
-  return [
-    (...args: any[]) => args$.next(args),
-    args$.pipe(map(args => stateUpdate(...args))),
-  ] as const;
-}
-
 type PipeReducers<S> = {
   /**
    * Allows to bind reducers to a state and an observable.
@@ -157,32 +148,35 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
  * @param initialState an initial value for the reactive state
  */
 export function useRxState<S extends Record<string, any>>(initialState: S): PipeReducers<S> {
+  const mergeStates = mergeScan((state: S, curr: ReturnType<StateReducer<S>>): Observable<S> => {
+    const update = updateKeys(state);
+    const newState = typeof curr === 'function'
+      ? curr(state)
+      : curr;
+
+    return isObservable<Partial<S>>(newState)
+      ? newState.pipe(map(update))
+      : of(update(newState));
+  }, initialState);
+
   return <PipeReducers<S>>function (reducers: StateReducers<S>) {
-    const mergeStates = [
-      mergeScan((state: S, curr: ReturnType<StateReducer<S>>): Observable<S> => {
-        const update = updateKeys(state);
-        const newState = typeof curr === 'function'
-          ? curr(state)
-          : curr;
-
-        return isObservable<Partial<S>>(newState)
-          ? newState.pipe(map(update))
-          : of(update(newState));
-      }, initialState),
-      takeUntil(createOnDestroy$()),
-    ] as const;
-
     const handlers: Record<string, (payload: any) => any> = {};
     const observables: Observable<ReturnType<StateReducer<S>>>[] = [];
 
     for (const key in reducers) {
-      const [handler, state$] = _useRxState(reducers[key]);
+      const args$ = new Subject<any[]>();
+      const handler = (...args: any[]) => args$.next(args);
+
+      const state$ = args$.pipe(
+        map(args => reducers[key](...args)),
+        mergeStates
+      );
 
       handlers[key] = handler;
       observables.push(state$);
     }
 
-    const events$ = merge(...observables).pipe(...mergeStates);
+    const events$ = merge(...observables).pipe(takeUntil(createOnDestroy$()));
 
     return [handlers, initialState, events$] as const;
   };
