@@ -80,7 +80,10 @@ export function useSubject<S>(subject?: Subject<S> | BehaviorSubject<S>): RxResu
  * @param ref - a ref/reactive/factory to observe
  * @returns an observable that watches the ref
  */
-export const observeRef = <R>(ref: WatchSource<R>): Observable<R> => new Observable(ctx => watch(ref, value => ctx.next(value)));
+export const observeRef = <R>(ref: WatchSource<R>): Observable<R> => (
+  new Observable(ctx => watch(ref, value => ctx.next(value)))
+    .pipe(takeUntil(createOnDestroy$()))
+);
 
 type ReducerHandler<R> = R extends StateReducer<any, infer Args>
   ? ResHandler<Args>
