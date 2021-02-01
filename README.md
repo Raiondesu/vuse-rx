@@ -1,5 +1,5 @@
-# vusx
+<h1 align="center" style="text-align: center">
+  <img src="logo.svg" style="width:20%"/>
+</h1>
 
-> (pronounced Vee-Rex)
->
-> A state manager for Vue 3 based on rxjs
+<h3  align="center" style="text-align: center">A state manager for Vue 3 based on rxjs</h3>
