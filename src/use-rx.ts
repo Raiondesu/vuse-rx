@@ -127,9 +127,9 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
     reducers: R,
     map$: (
       state$: Observable<Readonly<S>>,
-      handlers: ReducerHandlers<R>,
+      reducers: R,
       state: Readonly<S>
-    ) => Observable<Readonly<S>> = identity
+    ) => Observable<Partial<S>> = identity
   ): RxResult<ReducerHandlers<R>, S> {
     const handlers = <ReducerHandlers<R>> {};
     const observables: Observable<[string, any[]] | S>[] = [];
@@ -147,6 +147,6 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
       takeUntil(createOnDestroy$())
     );
 
-    return [handlers, initialState, map$(events$, handlers, initialState)];
+    return [handlers, initialState, map$(events$, reducers, initialState).pipe(mergeStates)];
   };
 }
