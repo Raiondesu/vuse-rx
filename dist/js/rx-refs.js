@@ -1,8 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useRxRefs = exports.tapRefs = void 0;
+exports.syncRef = exports.observeRef = exports.useRxRefs = exports.tapRefs = void 0;
 const vue_1 = require("vue");
 const operators_1 = require("rxjs/operators");
+const rxjs_1 = require("rxjs");
+const util_1 = require("./util");
 const tapRefs = (observable, map, initialState) => {
     const ops = [];
     const refs = {};
@@ -27,4 +29,16 @@ const useRxRefs = (rxState, map) => {
     ];
 };
 exports.useRxRefs = useRxRefs;
+function observeRef(ref) {
+    return new rxjs_1.Observable(ctx => vue_1.watch(ref, value => ctx.next(value)))
+        .pipe(operators_1.takeUntil(util_1.createOnDestroy$()));
+}
+exports.observeRef = observeRef;
+;
+function syncRef(state, prop, map, refValue) {
+    const refVar = refValue !== null && refValue !== void 0 ? refValue : vue_1.ref(map(state[prop]));
+    observeRef(vue_1.toRef(state, prop)).subscribe(_ => refVar.value = map(_));
+    return refVar;
+}
+exports.syncRef = syncRef;
 //# sourceMappingURL=rx-refs.js.map

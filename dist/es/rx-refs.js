@@ -1,5 +1,7 @@
-import { ref } from 'vue';
-import { tap } from 'rxjs/operators';
+import { ref, toRef, watch } from 'vue';
+import { takeUntil, tap } from 'rxjs/operators';
+import { Observable } from 'rxjs';
+import { createOnDestroy$ } from "./util.js";
 export const tapRefs = (observable, map, initialState) => {
     const ops = [];
     const refs = {};
@@ -22,4 +24,14 @@ export const useRxRefs = (rxState, map) => {
         newState$,
     ];
 };
+export function observeRef(ref) {
+    return new Observable(ctx => watch(ref, value => ctx.next(value)))
+        .pipe(takeUntil(createOnDestroy$()));
+}
+;
+export function syncRef(state, prop, map, refValue) {
+    const refVar = refValue !== null && refValue !== void 0 ? refValue : ref(map(state[prop]));
+    observeRef(toRef(state, prop)).subscribe(_ => refVar.value = map(_));
+    return refVar;
+}
 //# sourceMappingURL=rx-refs.js.map

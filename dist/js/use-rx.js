@@ -1,18 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useRxState = exports.observeRef = exports.useSubject = void 0;
+exports.useRxState = exports.useSubject = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const util_1 = require("./util");
 function useSubject(subject) {
     const _subject = subject !== null && subject !== void 0 ? subject : new rxjs_1.Subject();
-    const rState = vue_1.ref();
+    const rState = vue_1.ref(_subject.value);
     return [(state) => _subject.next(rState.value = state), rState, _subject.asObservable()];
 }
 exports.useSubject = useSubject;
-const observeRef = (ref) => new rxjs_1.Observable(ctx => vue_1.watch(ref, value => ctx.next(value)));
-exports.observeRef = observeRef;
 const updateKeys = (prev) => (curr) => {
     var _a;
     for (const key in curr) {
@@ -26,22 +24,20 @@ function useRxState(initialState) {
         const newState = typeof curr === 'function'
             ? curr(state)
             : curr;
-        return rxjs_1.isObservable(newState)
-            ? newState.pipe(operators_1.map(update))
-            : rxjs_1.of(update(newState));
+        return (rxjs_1.isObservable(newState)
+            ? newState
+            : rxjs_1.of(newState)).pipe(operators_1.map(update));
     }, initialState);
-    return function (reducers) {
+    return function (reducers, map$ = rxjs_1.identity) {
         const handlers = {};
         const observables = [];
         for (const key in reducers) {
             const args$ = new rxjs_1.Subject();
-            const handler = (...args) => args$.next(args);
-            const state$ = args$.pipe(operators_1.map(args => reducers[key](...args)), mergeStates);
-            handlers[key] = handler;
-            observables.push(state$);
+            handlers[key] = ((...args) => args$.next([key, args]));
+            observables.push(args$);
         }
-        const events$ = rxjs_1.merge(...observables).pipe(operators_1.takeUntil(util_1.createOnDestroy$()));
-        return [handlers, initialState, events$];
+        const events$ = rxjs_1.merge(...observables).pipe(operators_1.map(args => Array.isArray(args) ? reducers[args[0]](...args[1]) : args), mergeStates, operators_1.takeUntil(util_1.createOnDestroy$()));
+        return [handlers, initialState, map$(events$, reducers, initialState).pipe(mergeStates)];
     };
 }
 exports.useRxState = useRxState;
