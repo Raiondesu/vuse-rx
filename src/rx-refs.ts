@@ -1,7 +1,8 @@
-import { ref, Ref } from 'vue';
-import { tap } from 'rxjs/operators';
+import { ref, Ref, watch, WatchSource } from 'vue';
+import { takeUntil, tap } from 'rxjs/operators';
 import { Observable, OperatorFunction } from 'rxjs';
 import { RxResult } from './use-rx';
+import { createOnDestroy$ } from './util';
 
 export type RefsMap<O, Optional = false> = Record<string, (state: Optional extends true ? Readonly<O> | void | undefined : Readonly<O>) => any>;
 
@@ -81,4 +82,21 @@ export const useRxRefs = <O, R, T extends RefsMap<O>>(
     state,
     newState$,
   ];
+};
+
+/**
+ * Creates an observable from a vue ref.
+ *
+ * Each time a ref's value is changed - observable emits.
+ *
+ * Can also accept vue reactive objects and value factories.
+ *
+ * @param ref - a ref/reactive/factory to observe
+ * @returns an observable that watches the ref
+ */
+export function observeRef<R>(ref: WatchSource<R>): Observable<R>;
+export function observeRef<R extends Record<string, any>>(ref: R): Observable<R>;
+export function observeRef<R extends Record<string, any> | WatchSource<any>>(ref: R): Observable<R> {
+  return new Observable<R>(ctx => watch(ref, value => ctx.next(value)))
+    .pipe(takeUntil(createOnDestroy$()))
 };
