@@ -1,4 +1,4 @@
-import { ref, Ref, watch, WatchSource } from 'vue';
+import { ref, Ref, toRef, watch, WatchSource } from 'vue';
 import { takeUntil, tap } from 'rxjs/operators';
 import { Observable, OperatorFunction } from 'rxjs';
 import { RxResult } from './use-rx';
@@ -100,3 +100,25 @@ export function observeRef<R extends Record<string, any> | WatchSource<any>>(ref
   return new Observable<R>(ctx => watch(ref, value => ctx.next(value)))
     .pipe(takeUntil(createOnDestroy$()))
 };
+
+/**
+ * Creates a one-side bind between a ref and a value from a reactive state.
+ *
+ * When the reactive state changes, the ref is updated, but not vice versa!
+ * @param state a reactive state to bind from
+ * @param prop a prop to bind from
+ * @param map a transformer map from the prop to the ref
+ * @param refVar a ref to bind
+ */
+export function syncRef<S extends Record<string, any>, K extends keyof S, R>(
+  state: S,
+  prop: K,
+  map: (value: S[K]) => R,
+  refValue?: Ref<R>
+): Ref<R> {
+  const refVar = refValue ?? ref(map(state[prop])) as Ref<R>;
+
+  observeRef<S[K]>(toRef(state, prop)).subscribe(_ => refVar.value = map(_));
+
+  return refVar;
+}
