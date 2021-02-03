@@ -112,15 +112,17 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
 export function useRxState<S extends Record<string, any>>(initialState: S) {
   const mergeStates = mergeScan((state: S, curr: ReturnType<StateReducer<S>>) => {
     const update = updateKeys(state);
+
     const newState = typeof curr === 'function'
       ? curr(state)
       : curr;
 
     return (
       isObservable<Partial<S>>(newState)
-        ? newState
-        : of(newState)
-    ).pipe(map(update));
+        ? newState.pipe(map(update))
+        // TODO: FIXME: there's a bug that causes mergeStates operator to execute twice
+        : of(update(newState))
+    );
   }, initialState);
 
   return function <R extends StateReducers<S>>(
@@ -132,21 +134,24 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
     ) => Observable<Partial<S>> = identity
   ): RxResult<ReducerHandlers<R>, S> {
     const handlers = <ReducerHandlers<R>> {};
-    const observables: Observable<[string, any[]] | S>[] = [];
+    const observables: Observable<any>[] = [];
 
     for (const key in reducers) {
-      const args$ = new Subject<[string, any[]]>();
+      const args$ = new Subject<any>();
 
-      handlers[key] = ((...args: any[]) => args$.next([key, args])) as ReducerHandler<R[keyof R]>;
+      handlers[key] = ((...args: any[]) => args$.next(reducers[key](...args))) as ReducerHandler<R[keyof R]>;
       observables.push(args$);
     }
 
-    const events$ = merge(...observables).pipe(
-      map(args => Array.isArray(args) ? reducers[args[0]](...args[1]) : args),
-      mergeStates,
-      takeUntil(createOnDestroy$())
-    );
+    const events$ = merge(...observables).pipe(mergeStates);
 
-    return [handlers, initialState, map$(events$, reducers, initialState).pipe(mergeStates)];
+    return [
+      handlers,
+      initialState,
+      map$(events$, reducers, initialState).pipe(
+        mergeStates,
+        takeUntil(createOnDestroy$())
+      )
+    ];
   };
 }
