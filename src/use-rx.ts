@@ -1,6 +1,6 @@
 import { BehaviorSubject, isObservable, merge, Observable, of, Subject, identity } from 'rxjs';
 import { OperatorFunction } from 'rxjs/internal/types';
-import { map, mergeScan, takeUntil } from 'rxjs/operators';
+import { map, mergeScan, scan, takeUntil } from 'rxjs/operators';
 import { Ref, ref } from 'vue';
 import { createOnDestroy$ } from './util';
 
@@ -148,7 +148,7 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
       handlers,
       initialState,
       map$(events$, reducers, initialState).pipe(
-        mergeStates,
+        scan((acc: S, curr) => (updateKeys(acc)(curr), acc)),
         takeUntil(createOnDestroy$())
       )
     ];
