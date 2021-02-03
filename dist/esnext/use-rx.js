@@ -1,5 +1,5 @@
 import { isObservable, merge, of, Subject, identity } from 'rxjs';
-import { map, mergeScan, takeUntil } from 'rxjs/operators';
+import { map, mergeScan, scan, takeUntil } from 'rxjs/operators';
 import { ref } from 'vue';
 import { createOnDestroy$ } from "./util.js";
 export function useSubject(subject) {
@@ -20,19 +20,23 @@ export function useRxState(initialState) {
             ? curr(state)
             : curr;
         return (isObservable(newState)
-            ? newState
-            : of(newState)).pipe(map(update));
+            ? newState.pipe(map(update))
+            : of(update(newState)));
     }, initialState);
     return function (reducers, map$ = identity) {
         const handlers = {};
         const observables = [];
         for (const key in reducers) {
             const args$ = new Subject();
-            handlers[key] = ((...args) => args$.next([key, args]));
+            handlers[key] = ((...args) => args$.next(reducers[key](...args)));
             observables.push(args$);
         }
-        const events$ = merge(...observables).pipe(map(args => Array.isArray(args) ? reducers[args[0]](...args[1]) : args), mergeStates, takeUntil(createOnDestroy$()));
-        return [handlers, initialState, map$(events$, reducers, initialState).pipe(mergeStates)];
+        const events$ = merge(...observables).pipe(mergeStates);
+        return [
+            handlers,
+            initialState,
+            map$(events$, reducers, initialState).pipe(scan((acc, curr) => updateKeys(acc)(curr), initialState), takeUntil(createOnDestroy$()))
+        ];
     };
 }
 //# sourceMappingURL=use-rx.js.map

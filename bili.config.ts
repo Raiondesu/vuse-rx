@@ -1,9 +1,9 @@
-import { Config } from 'bili';
+import type { Config } from 'bili';
 
 export default {
   input: 'src/index.ts',
   output: {
-    moduleName: 'vusx',
+    moduleName: 'vuse-rx',
     fileName: 'umd.js',
     format: 'umd-min',
     target: 'browser',

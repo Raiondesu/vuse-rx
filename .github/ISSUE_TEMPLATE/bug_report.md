@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Create a report to help improve vusx
+about: Create a report to help improve vuse-rx
 title: ''
 labels: bug
 assignees: ''
@@ -32,5 +32,5 @@ If applicable, add screenshots to help explain your problem.
  - Platform:
    - [] Browser [e.g. chrome, safari] (**version**)
    - [] Node (**version**)
- - `vusx` version: **v0.0.0**
+ - `vuse-rx` version: **v0.0.0**
 ---

@@ -25,19 +25,23 @@ function useRxState(initialState) {
             ? curr(state)
             : curr;
         return (rxjs_1.isObservable(newState)
-            ? newState
-            : rxjs_1.of(newState)).pipe(operators_1.map(update));
+            ? newState.pipe(operators_1.map(update))
+            : rxjs_1.of(update(newState)));
     }, initialState);
     return function (reducers, map$ = rxjs_1.identity) {
         const handlers = {};
         const observables = [];
         for (const key in reducers) {
             const args$ = new rxjs_1.Subject();
-            handlers[key] = ((...args) => args$.next([key, args]));
+            handlers[key] = ((...args) => args$.next(reducers[key](...args)));
             observables.push(args$);
         }
-        const events$ = rxjs_1.merge(...observables).pipe(operators_1.map(args => Array.isArray(args) ? reducers[args[0]](...args[1]) : args), mergeStates, operators_1.takeUntil(util_1.createOnDestroy$()));
-        return [handlers, initialState, map$(events$, reducers, initialState).pipe(mergeStates)];
+        const events$ = rxjs_1.merge(...observables).pipe(mergeStates);
+        return [
+            handlers,
+            initialState,
+            map$(events$, reducers, initialState).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), initialState), operators_1.takeUntil(util_1.createOnDestroy$()))
+        ];
     };
 }
 exports.useRxState = useRxState;
