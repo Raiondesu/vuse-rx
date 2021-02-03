@@ -148,7 +148,7 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
       handlers,
       initialState,
       map$(events$, reducers, initialState).pipe(
-        scan((acc: S, curr) => (updateKeys(acc)(curr), acc)),
+        scan((acc: S, curr) => updateKeys(acc)(curr), initialState),
         takeUntil(createOnDestroy$())
       )
     ];
