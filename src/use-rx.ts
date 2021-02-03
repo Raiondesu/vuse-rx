@@ -120,7 +120,6 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
     return (
       isObservable<Partial<S>>(newState)
         ? newState.pipe(map(update))
-        // TODO: FIXME: there's a bug that causes mergeStates operator to execute twice
         : of(update(newState))
     );
   }, initialState);
@@ -134,10 +133,10 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
     ) => Observable<Partial<S>> = identity
   ): RxResult<ReducerHandlers<R>, S> {
     const handlers = <ReducerHandlers<R>> {};
-    const observables: Observable<any>[] = [];
+    const observables: Observable<ReturnType<StateReducer<S>>>[] = [];
 
     for (const key in reducers) {
-      const args$ = new Subject<any>();
+      const args$ = new Subject<ReturnType<StateReducer<S>>>();
 
       handlers[key] = ((...args: any[]) => args$.next(reducers[key](...args))) as ReducerHandler<R[keyof R]>;
       observables.push(args$);
