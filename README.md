@@ -1,9 +1,9 @@
 <h1 align="center" style="text-align: center">
-  <img src="logo-g.png" style="width:20%"/>
+  <img src="logo-g.png"/>
 </h1>
 
-<h3  align="center" style="text-align: center">A state manager for Vue 3 based on rxjs</h3>
+<h3  align="center" style="text-align: center">A first-class rx state-manager for Vue 3</h3>
 
 
 ### Install
-`npm i -S https://github.com/Raiondesu/vusx.git`
+`npm i -S https://github.com/Raiondesu/vuse-rx.git`
