@@ -33,6 +33,20 @@
     "minor": "npm version minor && npm publish && git push",
     "major": "npm version major && npm publish && git push"
   },
+  "keywords": [
+    "vue",
+    "rxjs",
+    "vue3",
+    "rx",
+    "composition-api",
+    "hooks",
+    "store",
+    "state-manager",
+    "event-manager",
+    "typescript",
+    "type vuex",
+    "vuex alternative"
+  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Raiondesu/vuse-rx.git"
@@ -241,5 +255,8 @@
         }
       }
     ]
+  },
+  "dependencies": {
+    "if-const": "^1.0.0"
   }
 }

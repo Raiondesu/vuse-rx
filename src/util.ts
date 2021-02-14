@@ -1,3 +1,4 @@
+import ifConst from 'if-const';
 import { Observable } from 'rxjs';
 import { getCurrentInstance, onUnmounted } from 'vue';
 
@@ -8,10 +9,10 @@ import { getCurrentInstance, onUnmounted } from 'vue';
  *
  * @returns Observable\<void\> that emits on component unmount hook
  */
-export const createOnDestroy$ = () => new Observable<void>(ctx => {
-  if (getCurrentInstance()) {
+export const createOnDestroy$ = () => new Observable<void>(
+  ctx => ifConst(getCurrentInstance(), inst => {
     onUnmounted(() => {
       ctx.next();
-    });
-  }
-});
+    }, inst);
+  })
+);

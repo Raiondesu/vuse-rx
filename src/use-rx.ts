@@ -66,7 +66,7 @@ export function useSubject<S>(subject?: Subject<S> | BehaviorSubject<S>): RxResu
   const _subject = subject ?? new Subject<S>();
   const rState = ref((_subject as BehaviorSubject<S>).value) as Ref<S>;
 
-  return [(state: S) => _subject.next(rState.value = state), rState, _subject.asObservable()] as const;
+  return [(state: S) => _subject.next(rState.value = state), rState, _subject.asObservable()];
 }
 
 type ReducerHandler<R> = R extends StateReducer<any, infer Args>
@@ -148,7 +148,7 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
       handlers,
       initialState,
       map$(events$, reducers, initialState).pipe(
-        scan((acc: S, curr) => updateKeys(acc)(curr), initialState),
+        scan((acc, curr) => updateKeys(acc)(curr), initialState),
         takeUntil(createOnDestroy$())
       )
     ];
