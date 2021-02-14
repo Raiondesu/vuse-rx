@@ -1,4 +1,4 @@
-import { NEVER, Subject } from 'rxjs';
+import { Observable } from 'rxjs';
 import { getCurrentInstance, onUnmounted } from 'vue';
 
 /**
@@ -8,16 +8,10 @@ import { getCurrentInstance, onUnmounted } from 'vue';
  *
  * @returns Observable\<void\> that emits on component unmount hook
  */
-export const createOnDestroy$ = () => {
-  if (!getCurrentInstance()) {
-    return NEVER;
+export const createOnDestroy$ = () => new Observable<void>(ctx => {
+  if (getCurrentInstance()) {
+    onUnmounted(() => {
+      ctx.next();
+    });
   }
-
-  const onDestroy$ = new Subject<void>();
-
-  onUnmounted(() => {
-    onDestroy$.next();
-  });
-
-  return onDestroy$.asObservable();
-};
+});
