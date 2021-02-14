@@ -1,13 +1,9 @@
-import { NEVER, Subject } from 'rxjs';
+import ifConst from 'if-const';
+import { Observable } from 'rxjs';
 import { getCurrentInstance, onUnmounted } from 'vue';
-export const createOnDestroy$ = () => {
-    if (!getCurrentInstance()) {
-        return NEVER;
-    }
-    const onDestroy$ = new Subject();
+export const createOnDestroy$ = () => new Observable(ctx => ifConst(getCurrentInstance(), inst => {
     onUnmounted(() => {
-        onDestroy$.next();
-    });
-    return onDestroy$.asObservable();
-};
+        ctx.next();
+    }, inst);
+}));
 //# sourceMappingURL=util.js.map
