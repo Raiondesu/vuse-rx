@@ -257,6 +257,6 @@
     ]
   },
   "dependencies": {
-    "if-const": "^1.0.0"
+    "if-const": "^1.2.0"
   }
 }
