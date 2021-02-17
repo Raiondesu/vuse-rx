@@ -32,12 +32,17 @@ export function useRxState(initialState) {
             handlers[key] = ((...args) => args$.next(reducers[key](...args)));
             observables.push(args$);
         }
-        const events$ = merge(...observables).pipe(mergeStates);
-        return [
+        const state$ = map$(merge(...observables).pipe(mergeStates), reducers, initialState).pipe(scan((acc, curr) => updateKeys(acc)(curr), initialState), takeUntil(createOnDestroy$()));
+        const result = [
             handlers,
             initialState,
-            map$(events$, reducers, initialState).pipe(scan((acc, curr) => updateKeys(acc)(curr), initialState), takeUntil(createOnDestroy$()))
+            state$,
         ];
+        result.subscribe = (...args) => [
+            ...result,
+            state$.subscribe(...args),
+        ];
+        return result;
     };
 }
 //# sourceMappingURL=use-rx.js.map

@@ -36,12 +36,17 @@ function useRxState(initialState) {
             handlers[key] = ((...args) => args$.next(reducers[key](...args)));
             observables.push(args$);
         }
-        const events$ = rxjs_1.merge(...observables).pipe(mergeStates);
-        return [
+        const state$ = map$(rxjs_1.merge(...observables).pipe(mergeStates), reducers, initialState).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), initialState), operators_1.takeUntil(util_1.createOnDestroy$()));
+        const result = [
             handlers,
             initialState,
-            map$(events$, reducers, initialState).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), initialState), operators_1.takeUntil(util_1.createOnDestroy$()))
+            state$,
         ];
+        result.subscribe = (...args) => [
+            ...result,
+            state$.subscribe(...args),
+        ];
+        return result;
     };
 }
 exports.useRxState = useRxState;
