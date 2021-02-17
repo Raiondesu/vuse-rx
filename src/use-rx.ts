@@ -4,6 +4,7 @@ import { map, mergeScan, scan, takeUntil } from 'rxjs/operators';
 import { Ref, ref } from 'vue';
 import { createOnDestroy$ } from './util';
 
+// @ts-ignore - some environments incorrectly assume this module doesn't exist
 declare module 'rxjs/internal/Observable' {
   interface Observable<T> {
     pipe(): Observable<T>;
@@ -39,6 +40,13 @@ export type StateReducers<S> = Record<string, StateReducer<S>>;
  */
 export type ResHandler<A extends any[] = []> = (...args: A) => void;
 
+export type PipeSubscribe<Res extends RxResult<any, any>, S> = {
+  (...args: Parameters<Observable<S>['subscribe']>): readonly [
+    ...Res,
+    ReturnType<Observable<S>['subscribe']>,
+  ];
+};
+
 /**
  * Resulting RX bindings:
  *
@@ -51,6 +59,10 @@ export type RxResult<H, S, R = Readonly<S>> = readonly [
   state: R,
   state$: Observable<S>,
 ];
+
+export type SubscribableRxRes<H, S, R = Readonly<S>> = RxResult<H, S, R> & {
+  subscribe: PipeSubscribe<RxResult<H, S, R>, S>;
+};
 
 /**
  * Creates a vue ref and a ref setter from the subject.
@@ -131,7 +143,7 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
       reducers: R,
       state: Readonly<S>
     ) => Observable<Partial<S>> = identity
-  ): RxResult<ReducerHandlers<R>, S> {
+  ): SubscribableRxRes<ReducerHandlers<R>, S> {
     const handlers = <ReducerHandlers<R>> {};
     const observables: Observable<ReturnType<StateReducer<S>>>[] = [];
 
@@ -142,15 +154,26 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
       observables.push(args$);
     }
 
-    const events$ = merge(...observables).pipe(mergeStates);
+    const state$ = map$(
+      merge(...observables).pipe(mergeStates),
+      reducers,
+      initialState
+    ).pipe(
+      scan((acc, curr) => updateKeys(acc)(curr), initialState),
+      takeUntil(createOnDestroy$())
+    );
 
-    return [
+    const result = [
       handlers,
       initialState,
-      map$(events$, reducers, initialState).pipe(
-        scan((acc, curr) => updateKeys(acc)(curr), initialState),
-        takeUntil(createOnDestroy$())
-      )
-    ];
+      state$,
+    ] as any as SubscribableRxRes<ReducerHandlers<R>, S>;
+
+    result.subscribe = (...args: Parameters<Observable<S>['subscribe']>) => [
+      ...result,
+      state$.subscribe(...args),
+    ] as any;
+
+    return result;
   };
 }
