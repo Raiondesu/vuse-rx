@@ -4,7 +4,7 @@ exports.syncRef = exports.observeRef = exports.useRxRefs = exports.tapRefs = voi
 const vue_1 = require("vue");
 const operators_1 = require("rxjs/operators");
 const rxjs_1 = require("rxjs");
-const util_1 = require("./util");
+const until_1 = require("./hooks/until");
 const tapRefs = (observable, map, initialState) => {
     const ops = [];
     const refs = {};
@@ -30,8 +30,7 @@ const useRxRefs = (rxState, map) => {
 };
 exports.useRxRefs = useRxRefs;
 function observeRef(ref) {
-    return new rxjs_1.Observable(ctx => vue_1.watch(ref, value => ctx.next(value)))
-        .pipe(operators_1.takeUntil(util_1.createOnDestroy$()));
+    return until_1.untilUnmounted(new rxjs_1.Observable(ctx => vue_1.watch(ref, value => ctx.next(value))));
 }
 exports.observeRef = observeRef;
 ;

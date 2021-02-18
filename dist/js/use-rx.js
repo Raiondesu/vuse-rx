@@ -4,7 +4,7 @@ exports.useRxState = exports.useSubject = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
-const util_1 = require("./util");
+const until_1 = require("./hooks/until");
 function useSubject(subject) {
     const _subject = subject !== null && subject !== void 0 ? subject : new rxjs_1.Subject();
     const rState = vue_1.ref(_subject.value);
@@ -36,7 +36,7 @@ function useRxState(initialState) {
             handlers[key] = ((...args) => args$.next(reducers[key](...args)));
             observables.push(args$);
         }
-        const state$ = map$(rxjs_1.merge(...observables).pipe(mergeStates), reducers, initialState).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), initialState), operators_1.takeUntil(util_1.createOnDestroy$()));
+        const state$ = map$(rxjs_1.merge(...observables).pipe(mergeStates), reducers, initialState).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), initialState), until_1.pipeUntil(vue_1.onUnmounted));
         const result = [
             handlers,
             initialState,

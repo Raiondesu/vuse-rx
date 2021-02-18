@@ -1,7 +1,7 @@
 import { ref, toRef, watch } from 'vue';
-import { takeUntil, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { Observable } from 'rxjs';
-import { createOnDestroy$ } from "./util.js";
+import { untilUnmounted } from "./hooks/until.js";
 export const tapRefs = (observable, map, initialState) => {
     const ops = [];
     const refs = {};
@@ -25,8 +25,7 @@ export const useRxRefs = (rxState, map) => {
     ];
 };
 export function observeRef(ref) {
-    return new Observable(ctx => watch(ref, value => ctx.next(value)))
-        .pipe(takeUntil(createOnDestroy$()));
+    return untilUnmounted(new Observable(ctx => watch(ref, value => ctx.next(value))));
 }
 ;
 export function syncRef(state, prop, map, refValue) {

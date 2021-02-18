@@ -1,7 +1,7 @@
 import { isObservable, merge, of, Subject, identity } from 'rxjs';
-import { map, mergeScan, scan, takeUntil } from 'rxjs/operators';
-import { ref } from 'vue';
-import { createOnDestroy$ } from "./util.js";
+import { map, mergeScan, scan } from 'rxjs/operators';
+import { onUnmounted, ref } from 'vue';
+import { pipeUntil } from "./hooks/until.js";
 export function useSubject(subject) {
     const _subject = subject ?? new Subject();
     const rState = ref(_subject.value);
@@ -31,7 +31,7 @@ export function useRxState(initialState) {
             handlers[key] = ((...args) => args$.next(reducers[key](...args)));
             observables.push(args$);
         }
-        const state$ = map$(merge(...observables).pipe(mergeStates), reducers, initialState).pipe(scan((acc, curr) => updateKeys(acc)(curr), initialState), takeUntil(createOnDestroy$()));
+        const state$ = map$(merge(...observables).pipe(mergeStates), reducers, initialState).pipe(scan((acc, curr) => updateKeys(acc)(curr), initialState), pipeUntil(onUnmounted));
         const result = [
             handlers,
             initialState,
