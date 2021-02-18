@@ -7,8 +7,6 @@ module.exports = {
     repo: 'raiondesu/vuse-rx',
     docsDir: 'docs',
 
-    editLinks: true,
-    editLinkText: 'Edit this page on GitHub',
     lastUpdated: 'Last Updated',
 
     nav: [

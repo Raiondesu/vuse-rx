@@ -306,3 +306,7 @@ export default defineComponent({
   </div>
 </template>
 ```
+
+## Marble diagram
+
+![stopwatch diagram](/stopwatch.png)
