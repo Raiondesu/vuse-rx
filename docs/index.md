@@ -5,7 +5,7 @@ heroAlt: vuse-rx
 heroText: Vue 3 + rxjs = ❤
 tagline: First-class RX support for Vue 3
 actionText: Get Started
-actionLink: /guide/
+actionLink: /guide/getting-started
 features:
 - title: Composable
   details: Designed to work best with Vue 3's composition-api, allowing you to structure observables like never before
