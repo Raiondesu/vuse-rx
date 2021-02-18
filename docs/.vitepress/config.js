@@ -37,7 +37,7 @@ function getSidebar() {
         { text: 'What is vuse-rx?', link: '/guide/', activeMatch: '^/guide/$' },
         { text: 'Getting Started', link: '/guide/getting-started' },
         { text: 'Basic Example', link: '/guide/basics' },
-        { text: 'State Management', link: '/guide/state' }
+        { text: 'State Management', link: '/guide/state' },
       ]
     },
     {
@@ -46,7 +46,14 @@ function getSidebar() {
         { text: 'useRxState', link: '/api/use-rx-state' },
         { text: 'useSubject', link: '/api/use-subject' },
         { text: 'Reacive refs', link: '/api/refs' },
-        { text: 'Hooks', link: '/api/hooks' }
+        { text: 'Hooks', link: '/api/hooks' },
+      ]
+    },
+    {
+      text: 'Cookbook',
+      children: [
+        { text: 'Simple counter', link: '/recipies/counter' },
+        { text: 'Stopwatch', link: '/recipies/stopwatch' },
       ]
     }
   ]

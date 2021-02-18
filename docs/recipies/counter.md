@@ -1,22 +1,3 @@
-# Getting Started
-
-## Install
-
-### NPM / YARN
-`npm i vuse-rx`
-
-`yarn add vuse-rx`
-
-### Native browser
-
-```html
-<script type="module" src="https://unpkg.com/vuse-rx"></script>
-
-<!-- or a complete package with polyfills and etc. -->
-<script type="module" src="https://unpkg.com/vuse-rx/dist/umd.js"></script>
-```
-
-## Use
 
 A simple example of a counter state with an increment reducer:
 

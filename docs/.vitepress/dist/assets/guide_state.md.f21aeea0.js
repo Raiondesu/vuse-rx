@@ -1,0 +1,1 @@
+import{o as t,c as e}from"./app.fa954b05.js";const r='{"title":"","description":"","frontmatter":{},"relativePath":"api/use-rx-state.md","lastUpdated":1613663359319}',a={};a.render=function(r,a,o,i,p,s){return t(),e("div")};export default a;export{r as __pageData};
