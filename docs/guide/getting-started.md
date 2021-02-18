@@ -29,6 +29,7 @@ A simple example of a counter state with an increment reducer:
 <script lang="ts">
 import { defineComponent } from 'vue';
 import { useRxState } from 'vuse-rx';
+import { map } from 'rxjs/operators';
 
 export default defineComponent({
   setup() {

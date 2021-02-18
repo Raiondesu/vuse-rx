@@ -1,0 +1,1 @@
+import{o as t,c as e}from"./app.79644605.js";const r='{"title":"","description":"","frontmatter":{},"relativePath":"api/hooks.md","lastUpdated":1613663368588}',o={};o.render=function(r,o,a,i,p,d){return t(),e("div")};export default o;export{r as __pageData};
