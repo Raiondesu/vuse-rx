@@ -1,8 +1,10 @@
 import { BehaviorSubject, isObservable, merge, Observable, of, Subject, identity } from 'rxjs';
 import { OperatorFunction } from 'rxjs/internal/types';
 import { map, mergeScan, scan } from 'rxjs/operators';
-import { onUnmounted, reactive, Ref, ref } from 'vue';
+import { onUnmounted, reactive, Ref, ref, UnwrapRef } from 'vue';
 import { pipeUntil } from './hooks/until';
+
+type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
 
 // @ts-ignore - some environments incorrectly assume this module doesn't exist
 declare module 'rxjs/internal/Observable' {
@@ -121,7 +123,7 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
  *
  * @param initialState an initial value for the reactive state
  */
-export function useRxState<S extends Record<string, any>>(initialState: S) {
+export function useRxState<T extends Record<string, any>, S = UnwrapNestedRefs<T>>(initialState: T) {
   const reactiveState = reactive(initialState) as S;
 
   const mergeStates = mergeScan((state: S, curr: ReturnType<StateReducer<S>>) => {
