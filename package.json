@@ -257,8 +257,5 @@
         }
       }
     ]
-  },
-  "dependencies": {
-    "if-const": "^1.2.0"
   }
 }

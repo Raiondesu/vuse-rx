@@ -2,7 +2,7 @@ import { ref, Ref, toRef, watch, WatchSource } from 'vue';
 import { takeUntil, tap } from 'rxjs/operators';
 import { Observable, OperatorFunction } from 'rxjs';
 import { RxResult } from './use-rx';
-import { createOnDestroy$ } from './util';
+import { untilUnmounted } from './hooks/until';
 
 export type RefsMap<O, Optional = false> = Record<string, (state: Optional extends true ? Readonly<O> | void | undefined : Readonly<O>) => any>;
 
@@ -97,8 +97,9 @@ export const useRxRefs = <O, R, T extends RefsMap<O>>(
 export function observeRef<R>(ref: WatchSource<R>): Observable<R>;
 export function observeRef<R extends Record<string, any>>(ref: R): Observable<R>;
 export function observeRef<R extends Record<string, any> | WatchSource<any>>(ref: R): Observable<R> {
-  return new Observable<R>(ctx => watch(ref, value => ctx.next(value)))
-    .pipe(takeUntil(createOnDestroy$()))
+  return untilUnmounted(
+    new Observable<R>(ctx => watch(ref, value => ctx.next(value)))
+  );
 };
 
 /**
@@ -107,8 +108,8 @@ export function observeRef<R extends Record<string, any> | WatchSource<any>>(ref
  * When the reactive state changes, the ref is updated, but not vice versa!
  * @param state a reactive state to bind from
  * @param prop a prop to bind from
- * @param map a transformer map from the prop to the ref
- * @param refVar a ref to bind
+ * @param map a transformer map from the state prop to the ref
+ * @param refVar an existing ref to bind
  */
 export function syncRef<S extends Record<string, any>, K extends keyof S, R>(
   state: S,

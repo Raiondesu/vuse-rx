@@ -1,8 +1,8 @@
 import { BehaviorSubject, isObservable, merge, Observable, of, Subject, identity } from 'rxjs';
 import { OperatorFunction } from 'rxjs/internal/types';
-import { map, mergeScan, scan, takeUntil } from 'rxjs/operators';
-import { Ref, ref } from 'vue';
-import { createOnDestroy$ } from './util';
+import { map, mergeScan, scan } from 'rxjs/operators';
+import { onUnmounted, Ref, ref } from 'vue';
+import { pipeUntil } from './hooks/until';
 
 // @ts-ignore - some environments incorrectly assume this module doesn't exist
 declare module 'rxjs/internal/Observable' {
@@ -160,7 +160,7 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
       initialState
     ).pipe(
       scan((acc, curr) => updateKeys(acc)(curr), initialState),
-      takeUntil(createOnDestroy$())
+      pipeUntil(onUnmounted),
     );
 
     const result = [
