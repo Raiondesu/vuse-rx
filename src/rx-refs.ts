@@ -1,5 +1,5 @@
 import { ref, Ref, toRef, watch, WatchSource } from 'vue';
-import { takeUntil, tap } from 'rxjs/operators';
+import { tap } from 'rxjs/operators';
 import { Observable, OperatorFunction } from 'rxjs';
 import { RxResult } from './use-rx';
 import { untilUnmounted } from './hooks/until';

@@ -19,6 +19,7 @@ const updateKeys = (prev) => (curr) => {
     return prev;
 };
 function useRxState(initialState) {
+    const reactiveState = vue_1.reactive(initialState);
     const mergeStates = operators_1.mergeScan((state, curr) => {
         const update = updateKeys(state);
         const newState = typeof curr === 'function'
@@ -27,7 +28,7 @@ function useRxState(initialState) {
         return (rxjs_1.isObservable(newState)
             ? newState.pipe(operators_1.map(update))
             : rxjs_1.of(update(newState)));
-    }, initialState);
+    }, reactiveState);
     return function (reducers, map$ = rxjs_1.identity) {
         const handlers = {};
         const observables = [];
@@ -36,10 +37,10 @@ function useRxState(initialState) {
             handlers[key] = ((...args) => args$.next(reducers[key](...args)));
             observables.push(args$);
         }
-        const state$ = map$(rxjs_1.merge(...observables).pipe(mergeStates), reducers, initialState).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), initialState), until_1.pipeUntil(vue_1.onUnmounted));
+        const state$ = map$(rxjs_1.merge(...observables).pipe(mergeStates), reducers, reactiveState).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), reactiveState), until_1.pipeUntil(vue_1.onUnmounted));
         const result = [
             handlers,
-            initialState,
+            reactiveState,
             state$,
         ];
         result.subscribe = (...args) => [

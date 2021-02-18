@@ -1,7 +1,7 @@
 import { BehaviorSubject, isObservable, merge, Observable, of, Subject, identity } from 'rxjs';
 import { OperatorFunction } from 'rxjs/internal/types';
 import { map, mergeScan, scan } from 'rxjs/operators';
-import { onUnmounted, Ref, ref } from 'vue';
+import { onUnmounted, reactive, Ref, ref } from 'vue';
 import { pipeUntil } from './hooks/until';
 
 // @ts-ignore - some environments incorrectly assume this module doesn't exist
@@ -122,6 +122,8 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
  * @param initialState an initial value for the reactive state
  */
 export function useRxState<S extends Record<string, any>>(initialState: S) {
+  const reactiveState = reactive(initialState) as S;
+
   const mergeStates = mergeScan((state: S, curr: ReturnType<StateReducer<S>>) => {
     const update = updateKeys(state);
 
@@ -134,7 +136,7 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
         ? newState.pipe(map(update))
         : of(update(newState))
     );
-  }, initialState);
+  }, reactiveState);
 
   return function <R extends StateReducers<S>>(
     reducers: R,
@@ -157,15 +159,15 @@ export function useRxState<S extends Record<string, any>>(initialState: S) {
     const state$ = map$(
       merge(...observables).pipe(mergeStates),
       reducers,
-      initialState
+      reactiveState
     ).pipe(
-      scan((acc, curr) => updateKeys(acc)(curr), initialState),
+      scan((acc, curr) => updateKeys(acc)(curr), reactiveState),
       pipeUntil(onUnmounted),
     );
 
     const result = [
       handlers,
-      initialState,
+      reactiveState,
       state$,
     ] as any as SubscribableRxRes<ReducerHandlers<R>, S>;
 

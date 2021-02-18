@@ -1,6 +1,6 @@
 import { isObservable, merge, of, Subject, identity } from 'rxjs';
 import { map, mergeScan, scan } from 'rxjs/operators';
-import { onUnmounted, ref } from 'vue';
+import { onUnmounted, reactive, ref } from 'vue';
 import { pipeUntil } from "./hooks/until.js";
 export function useSubject(subject) {
     const _subject = subject ?? new Subject();
@@ -14,6 +14,7 @@ const updateKeys = (prev) => (curr) => {
     return prev;
 };
 export function useRxState(initialState) {
+    const reactiveState = reactive(initialState);
     const mergeStates = mergeScan((state, curr) => {
         const update = updateKeys(state);
         const newState = typeof curr === 'function'
@@ -22,7 +23,7 @@ export function useRxState(initialState) {
         return (isObservable(newState)
             ? newState.pipe(map(update))
             : of(update(newState)));
-    }, initialState);
+    }, reactiveState);
     return function (reducers, map$ = identity) {
         const handlers = {};
         const observables = [];
@@ -31,10 +32,10 @@ export function useRxState(initialState) {
             handlers[key] = ((...args) => args$.next(reducers[key](...args)));
             observables.push(args$);
         }
-        const state$ = map$(merge(...observables).pipe(mergeStates), reducers, initialState).pipe(scan((acc, curr) => updateKeys(acc)(curr), initialState), pipeUntil(onUnmounted));
+        const state$ = map$(merge(...observables).pipe(mergeStates), reducers, reactiveState).pipe(scan((acc, curr) => updateKeys(acc)(curr), reactiveState), pipeUntil(onUnmounted));
         const result = [
             handlers,
-            initialState,
+            reactiveState,
             state$,
         ];
         result.subscribe = (...args) => [

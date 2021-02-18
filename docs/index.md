@@ -1,121 +1,29 @@
-<h1 align="center" style="text-align: center">
-  <a href="https://vuse-rx.raiondesu.rocks"><img src="/logo-g.svg" alt="vuse-rx"/></a>
-</h1>
-
-<h3 align="center" style="text-align: center">A first-class RX integration for Vue 3</h3>
-<p align="center" style="text-align: center">
-  <a href="https://github.com/Raiondesu/vuse-rx/actions"><img src="https://img.shields.io/github/workflow/status/raiondesu/vuse-rx/CI?style=flat-square"/></a>
-  <a href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/v/vuse-rx?style=flat-square"/></a>
-  <a href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/bundlephobia/minzip/vuse-rx?style=flat-square"/></a>
-  <a href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/dt/vuse-rx?style=flat-square"/></a>
-  <a href="https://vuse-rx.raiondesu.rocks"><img src="https://img.shields.io/badge/docs-up-blue?style=flat-square"/></a>
-</p>
-
-### Install
-
-`npm i -S vuse-rx`
-
-### Use
-
-#### useRxState
-
-```ts
-import { reactive } from 'vue';
-import { interval, merge, of } from 'rxjs';
-import { filter, map, mapTo, switchMap } from 'rxjs/operators';
-
-// Define base state type
-interface State {
-  count: boolean;
-  speed: number;
-  value: number;
-  maxValue: number;
-  step: number;
-}
-
-// Define logic rules as simple functions
-const createState = () => reactive<State>({
-  count: false,
-  speed: 10,
-  value: 0,
-  maxValue: NaN,
-  step: 1,
-});
-
-const validateSpeed = (speed: number) => speed >= 1 ? speed : 1;
-
-const getNextValue = (state: State) => Math.min(state.value, state.maxValue) + (paused(state) ? 0 : state.step);
-
-const paused = (state: State) => (state.step > 0 && state.value >= state.maxValue) || !state.count;
-
-const calcDelay = (speed: number) => 1000 / speed;
-
-const onInterval = (mapValue: (state: State) => Partial<State>) => (state: State) => (
-  paused(state) ? of(state) : interval(calcDelay(state.speed)).pipe(
-    mapTo(state),
-    map(mapValue)
-  )
-);
-//
-
-// Define business rules as a Vue hook
-import { useRxState } from 'vuse-rx';
-
-export const useStopwatch = () => {
-  const initialState = createState();
-
-  // Note the double invocation here
-  return useRxState(initialState)(
-    // Implement basic state reducers
-    {
-      setStep: (step: number) => ({ step }),
-      setValue: (value: number) => ({ value }),
-      setSpeed: (speed: number) => ({ speed: validateSpeed(speed) }),
-
-      // Can return observables
-      setCountState: (play: boolean) => new BehaviorSubject({ count: play }),
+---
+home: true
+heroImage: /logo-g.svg
+heroAlt: vuse-rx
+heroText: Vue 3 + rxjs = ❤
+tagline: First-class RX support for Vue 3
+actionText: Get Started
+actionLink: /guide/
+features:
+- title: Composable
+  details: Designed to work best with Vue 3's composition-api, allowing you to structure observables like never before
+- title: Lightweight
+  details: Only a small 2kb (1kb gzipped) layer above rxjs (11kb) making it a much lighter alternative to other rx-driven solutions for Vue 3
+- title: Simple
+  details: The whole library only consists of simple, predictable pure functions, which are easy to use and understand
+---
 
 
-      // Can reference the "older" state by returning a function that accepts the state
-      setMaxValue: (max: number) => state => ({ maxValue: max, value: state.value > max ? max : state.value }),
-    },
+<div align="center" style="text-align:center;margin:-32px auto 32px">
+  <code>npm i vuse-rx</code>
+</div>
 
-    // Implement common business logic
-    (
-      /* state observable: */ state$,
-      /* reducers you just wrote above: */ reducers
-    ) => merge(
-      state$.pipe(switchMap(onInterval(_ => reducers.setValue(getNextValue(_))))),
-      state$.pipe(filter(_ => !paused(_)))
-    )
-  );
-};
-
-// Use it!
-
-const [
-  // Reducers are now actions
-  actions,
-
-  // state is reactive
-  // and can be used to display data in templates
-  state,
-
-  // fires each time an action is activated
-  state$
-] = useStopwatch();
-
-state$.subscribe(newState => console.log('state updated:', newState));
-
-actions.setValue(1);
-// logs:
-// state updated: {count: false, speed: 10, value: 1, maxValue: NaN, step: 1}
-
-actions.setCountState(true);
-// logs:
-// state updated: {count: true, speed: 10, value: 1, maxValue: NaN, step: 1}
-
-console.log('state:', state);
-// logs:
-// state: {count: true, speed: 10, value: 1, maxValue: NaN, step: 1}
-```
+<div align="center" style="text-align:center;margin:0 auto">
+  <a style="margin:0 4px" href="https://github.com/Raiondesu/vuse-rx/actions"><img src="https://img.shields.io/github/workflow/status/raiondesu/vuse-rx/CI?style=flat-square"/></a>
+  <a style="margin:0 4px" href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/v/vuse-rx?style=flat-square"/></a>
+  <a style="margin:0 4px" href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/bundlephobia/minzip/vuse-rx?style=flat-square"/></a>
+  <a style="margin:0 4px" href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/dt/vuse-rx?style=flat-square"/></a>
+  <a style="margin:0 4px" href="https://vuse-rx.raiondesu.rocks"><img src="https://img.shields.io/badge/docs-up-blue?style=flat-square"/></a>
+</div>
