@@ -2,7 +2,7 @@
   <img :src="$withBase('/logo-g.svg')" alt="vuse-rx"/>
 </h1>
 
-<h3 align="center" style="text-align: center">A first-class rx state-manager for Vue 3</h3>
+<h3 align="center" style="text-align: center">A first-class RX integration for Vue 3</h3>
 <p align="center" style="text-align: center">
   <a href="https://github.com/Raiondesu/vuse-rx/actions"><img src="https://img.shields.io/github/workflow/status/raiondesu/vuse-rx/CI?style=flat-square"/></a>
   <a href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/v/vuse-rx?style=flat-square"/></a>
