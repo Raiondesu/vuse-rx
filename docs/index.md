@@ -1,5 +1,5 @@
 <h1 align="center" style="text-align: center">
-  <img :src="$withBase('/logo-g.svg')" alt="vuse-rx"/>
+  <img src="/logo-g.svg" alt="vuse-rx"/>
 </h1>
 
 <h3 align="center" style="text-align: center">A first-class RX integration for Vue 3</h3>
