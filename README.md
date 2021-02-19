@@ -40,7 +40,7 @@ export default defineComponent({
 
     return {
       increment: handlers.increment,
-      count
+      state
     };
   }
 });
