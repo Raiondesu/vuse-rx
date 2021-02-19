@@ -9,10 +9,7 @@ export default defineComponent({
       increment: () => state => ({ count: state.count + 1 })
     });
 
-    // let's, for example, double the counter and output it to console
-    state$
-      .pipe(map(state => ({ count: state.count * 2 })))
-      .subscribe(state => console.log('doubled counter: ', state.count));
+    state$.subscribe(state => console.log('counter: ', state.count));
 
     return {
       increment: handlers.increment,

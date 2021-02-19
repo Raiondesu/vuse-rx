@@ -34,7 +34,6 @@ function getSidebar() {
       children: [
         { text: 'What is vuse-rx?', link: '/guide/', activeMatch: '^/guide/$' },
         { text: 'Getting Started', link: '/guide/getting-started' },
-        { text: 'Basic Example', link: '/guide/basics' },
         { text: 'State Management', link: '/guide/state' },
       ]
     },

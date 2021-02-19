@@ -95,7 +95,7 @@ export const useRxRefs = <O, R, T extends RefsMap<O>>(
  * @returns an observable that watches the ref
  */
 export function observeRef<R>(ref: WatchSource<R>): Observable<R>;
-export function observeRef<R extends Record<string, any>>(ref: R): Observable<R>;
+export function observeRef<R extends Record<string, any>>(reactiveState: R): Observable<R>;
 export function observeRef<R extends Record<string, any> | WatchSource<any>>(ref: R): Observable<R> {
   return untilUnmounted(
     new Observable<R>(ctx => watch(ref, value => ctx.next(value)))
