@@ -1,0 +1,1 @@
+import{o as t,c as a}from"./app.14fdaa21.js";const e='{"title":"","description":"","frontmatter":{},"relativePath":"api/hooks.md","lastUpdated":1613663368588}',r={};r.render=function(e,r,o,d,i,p){return t(),a("div")};export default r;export{e as __pageData};

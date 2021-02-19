@@ -175,7 +175,7 @@ export default defineComponent({
   <div>
     <!-- Convert speedRef value to string and set it as the counter's speed -->
     <!-- using the reducer that was defined earlier -->
-    <input v-model="speedRef" @change="setSpeed(+speedRef)"/>
+    <input v-model="speedRef" @blur.capture="setSpeed(+speedRef)"/>
 
     <!-- Shorthand buttons to increment or decrement speed -->
     <button @click="setSpeed(+speedRef - 1)">-</button>
@@ -288,7 +288,7 @@ export default defineComponent({
     <button @click="setValue(+setToRef)">Set value</button>
   </div>
   <div>
-    <input v-model="speedRef"/>
+    <input v-model="speedRef" @blur.capture="setSpeed(+speedRef)"/>
     <button @click="setSpeed(+speedRef - 1)">-</button>
     <button @click="setSpeed(+speedRef + 1)">+</button>
   </div>

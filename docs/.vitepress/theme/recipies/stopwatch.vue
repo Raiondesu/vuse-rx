@@ -79,7 +79,7 @@ export default defineComponent({
       <button @click="setValue(+setToRef)">Set value</button>
     </div>
     <div class="flex justify center mt-2">
-      <input v-model="speedRef"/>
+      <input v-model="speedRef" @blur.capture="setSpeed(+speedRef)"/>
       <button @click="setSpeed(+speedRef - 1)">-</button>
       <button @click="setSpeed(+speedRef + 1)">+</button>
     </div>
