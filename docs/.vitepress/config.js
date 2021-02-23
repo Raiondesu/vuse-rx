@@ -41,16 +41,15 @@ function getSidebar() {
       text: 'API',
       children: [
         { text: 'useRxState', link: '/api/use-rx-state' },
-        { text: 'useSubject', link: '/api/use-subject' },
-        { text: 'Reacive refs', link: '/api/refs' },
+        { text: 'Reactive refs', link: '/api/refs' },
         { text: 'Hooks', link: '/api/hooks' },
       ]
     },
     {
       text: 'Cookbook',
       children: [
-        { text: 'Simple counter', link: '/recipies/counter' },
-        { text: 'Stopwatch', link: '/recipies/stopwatch' },
+        { text: 'Simple counter', link: '/recipes/counter' },
+        { text: 'Stopwatch', link: '/recipes/stopwatch' },
       ]
     }
   ]

@@ -1,12 +1,7 @@
 import { isObservable, merge, of, Subject, identity } from 'rxjs';
 import { map, mergeScan, scan } from 'rxjs/operators';
-import { onUnmounted, reactive, ref } from 'vue';
+import { onUnmounted, reactive } from 'vue';
 import { pipeUntil } from "./hooks/until.js";
-export function useSubject(subject) {
-    const _subject = subject !== null && subject !== void 0 ? subject : new Subject();
-    const rState = ref(_subject.value);
-    return [(state) => _subject.next(rState.value = state), rState, _subject.asObservable()];
-}
 const updateKeys = (prev) => (curr) => {
     var _a;
     for (const key in curr) {
@@ -14,6 +9,7 @@ const updateKeys = (prev) => (curr) => {
     }
     return prev;
 };
+const getAction$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
 export function useRxState(initialState) {
     const reactiveState = reactive(initialState);
     const mergeStates = mergeScan((state, curr) => {
@@ -26,24 +22,21 @@ export function useRxState(initialState) {
             : of(update(newState)));
     }, reactiveState);
     return function (reducers, map$ = identity) {
-        const handlers = {};
-        const observables = [];
+        const actions = {};
+        const actions$ = {};
         for (const key in reducers) {
             const args$ = new Subject();
-            handlers[key] = ((...args) => args$.next(reducers[key](...args)));
-            observables.push(args$);
+            actions[key] = ((...args) => args$.next(reducers[key](...args)));
+            actions$[getAction$Name(key)] = args$.pipe(mergeStates);
         }
-        const state$ = map$(merge(...observables).pipe(mergeStates), reducers, reactiveState).pipe(scan((acc, curr) => updateKeys(acc)(curr), reactiveState), pipeUntil(onUnmounted));
-        const result = [
-            handlers,
-            reactiveState,
+        const state$ = map$(merge(...Object.values(actions$)), reducers, reactiveState, actions$).pipe(scan((acc, curr) => updateKeys(acc)(curr), reactiveState), pipeUntil(onUnmounted));
+        const result = {
+            actions,
+            state: reactiveState,
             state$,
-        ];
-        result.subscribe = (...args) => [
-            ...result,
-            state$.subscribe(...args),
-        ];
-        return result;
+            actions$,
+        };
+        return Object.assign(Object.assign({}, result), { subscribe: (...args) => (Object.assign(Object.assign({}, result), { subscription: state$.subscribe(...args) })) });
     };
 }
 //# sourceMappingURL=use-rx.js.map

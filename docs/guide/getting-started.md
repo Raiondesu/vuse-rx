@@ -28,4 +28,4 @@ It's fully typed and therefore has **first-class TypeScript support**.
 
 ## Use
 
-See [recipies](/recipies/counter) or [api](api/use-rx-state) for detailed usage instructions.
+See [recipes](/recipes/counter) or [api](api/use-rx-state) for detailed usage instructions.

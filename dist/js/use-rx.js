@@ -1,16 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useRxState = exports.useSubject = void 0;
+exports.useRxState = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const until_1 = require("./hooks/until");
-function useSubject(subject) {
-    const _subject = subject !== null && subject !== void 0 ? subject : new rxjs_1.Subject();
-    const rState = vue_1.ref(_subject.value);
-    return [(state) => _subject.next(rState.value = state), rState, _subject.asObservable()];
-}
-exports.useSubject = useSubject;
 const updateKeys = (prev) => (curr) => {
     var _a;
     for (const key in curr) {
@@ -18,6 +12,7 @@ const updateKeys = (prev) => (curr) => {
     }
     return prev;
 };
+const getAction$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
 function useRxState(initialState) {
     const reactiveState = vue_1.reactive(initialState);
     const mergeStates = operators_1.mergeScan((state, curr) => {
@@ -30,24 +25,21 @@ function useRxState(initialState) {
             : rxjs_1.of(update(newState)));
     }, reactiveState);
     return function (reducers, map$ = rxjs_1.identity) {
-        const handlers = {};
-        const observables = [];
+        const actions = {};
+        const actions$ = {};
         for (const key in reducers) {
             const args$ = new rxjs_1.Subject();
-            handlers[key] = ((...args) => args$.next(reducers[key](...args)));
-            observables.push(args$);
+            actions[key] = ((...args) => args$.next(reducers[key](...args)));
+            actions$[getAction$Name(key)] = args$.pipe(mergeStates);
         }
-        const state$ = map$(rxjs_1.merge(...observables).pipe(mergeStates), reducers, reactiveState).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), reactiveState), until_1.pipeUntil(vue_1.onUnmounted));
-        const result = [
-            handlers,
-            reactiveState,
+        const state$ = map$(rxjs_1.merge(...Object.values(actions$)), reducers, reactiveState, actions$).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), reactiveState), until_1.pipeUntil(vue_1.onUnmounted));
+        const result = {
+            actions,
+            state: reactiveState,
             state$,
-        ];
-        result.subscribe = (...args) => [
-            ...result,
-            state$.subscribe(...args),
-        ];
-        return result;
+            actions$,
+        };
+        return Object.assign(Object.assign({}, result), { subscribe: (...args) => (Object.assign(Object.assign({}, result), { subscription: state$.subscribe(...args) })) });
     };
 }
 exports.useRxState = useRxState;

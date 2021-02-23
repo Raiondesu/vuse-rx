@@ -1,6 +1,6 @@
 import DefaultTheme from 'vitepress/theme';
-import CounterDemo from './recipies/counter.vue';
-import StopwatchDemo from './recipies/stopwatch.vue';
+import CounterDemo from './recipes/counter.vue';
+import StopwatchDemo from './recipes/stopwatch.vue';
 
 export default {
   ...DefaultTheme,

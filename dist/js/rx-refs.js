@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.syncRef = exports.observeRef = exports.useRxRefs = exports.tapRefs = void 0;
+exports.syncRef = exports.fromRef = exports.useRxRefs = exports.tapRefs = void 0;
 const vue_1 = require("vue");
 const operators_1 = require("rxjs/operators");
 const rxjs_1 = require("rxjs");
@@ -12,31 +12,33 @@ const tapRefs = (observable, map, initialState) => {
         refs[key] = vue_1.ref(map[key](initialState));
         ops.push(operators_1.tap(state => refs[key].value = map[key](state)));
     }
-    return [
+    return {
         refs,
-        observable.pipe(...ops),
-    ];
+        state$: observable.pipe(...ops),
+    };
 };
 exports.tapRefs = tapRefs;
 const useRxRefs = (rxState, map) => {
-    const [handlers, state, state$] = rxState;
-    const [refs, newState$] = exports.tapRefs(state$, map, state);
-    return [
+    const { actions, state, state$ } = rxState;
+    const { refs, state$: newState$ } = exports.tapRefs(state$, map, state);
+    return {
         refs,
-        handlers,
+        actions,
         state,
-        newState$,
-    ];
+        state$: newState$,
+    };
 };
 exports.useRxRefs = useRxRefs;
-function observeRef(ref) {
+function fromRef(ref) {
     return until_1.untilUnmounted(new rxjs_1.Observable(ctx => vue_1.watch(ref, value => ctx.next(value))));
 }
-exports.observeRef = observeRef;
+exports.fromRef = fromRef;
 ;
 function syncRef(state, prop, map, refValue) {
-    const refVar = refValue !== null && refValue !== void 0 ? refValue : vue_1.ref(map(state[prop]));
-    observeRef(vue_1.toRef(state, prop)).subscribe(_ => refVar.value = map(_));
+    const _map = (vue_1.isRef(map) || !map) ? (_) => _ : map;
+    const _refValue = refValue !== null && refValue !== void 0 ? refValue : (vue_1.isRef(map) ? map : undefined);
+    const refVar = _refValue !== null && _refValue !== void 0 ? _refValue : vue_1.ref(_map(state[prop]));
+    fromRef(vue_1.toRef(state, prop)).subscribe(_ => refVar.value = _map(_));
     return refVar;
 }
 exports.syncRef = syncRef;

@@ -1,8 +1,8 @@
-import { ref, Ref, toRef, watch, WatchSource } from 'vue';
+import { isRef, ref, Ref, toRef, UnwrapRef, watch, WatchSource } from 'vue';
 import { tap } from 'rxjs/operators';
 import { Observable, OperatorFunction } from 'rxjs';
-import { RxResult } from './use-rx';
 import { untilUnmounted } from './hooks/until';
+import type { RxResult } from './use-rx';
 
 export type RefsMap<O, Optional = false> = Record<string, (state: Optional extends true ? Readonly<O> | void | undefined : Readonly<O>) => any>;
 
@@ -26,24 +26,24 @@ export const tapRefs: {
   <O, T extends RefsMap<O, true>>(
     observable: Observable<O>,
     map: T
-  ): [refs: RefsObj<T>, observable$: Observable<O>];
+  ): { refs: RefsObj<T>, state$: Observable<O> };
 
   <O, T extends RefsMap<O>>(
     observable: Observable<O>,
     map: T,
     initialState: O
-  ): [refs: RefsObj<T>, observable$: Observable<O>];
+  ): { refs: RefsObj<T>, state$: Observable<O> };
 
   <O, T extends RefsMap<O, true>>(
     observable: Observable<O>,
     map: T,
     initialState?: O
-  ): [refs: RefsObj<T>, observable$: Observable<O>];
+  ): { refs: RefsObj<T>, state$: Observable<O> };
 } = <O, T extends RefsMap<O, true>>(
   observable: Observable<O>,
   map: T,
   initialState?: O
-): [refs: RefsObj<T>, observable$: Observable<O>] => {
+): { refs: RefsObj<T>, state$: Observable<O> } => {
   const ops: OperatorFunction<O, O>[] = [];
   const refs = {} as RefsObj<T>;
 
@@ -53,10 +53,10 @@ export const tapRefs: {
     ops.push(tap(state => refs[key].value = map[key](state)));
   }
 
-  return [
+  return {
     refs,
-    observable.pipe(...ops),
-  ];
+    state$: observable.pipe(...ops),
+  };
 }
 
 /**
@@ -72,16 +72,16 @@ export const tapRefs: {
 export const useRxRefs = <O, R, T extends RefsMap<O>>(
   rxState: RxResult<R, O>,
   map: T,
-): [refs: RefsObj<T>, ...rx: RxResult<R, O>] => {
-  const [ handlers, state, state$ ] = rxState;
-  const [ refs, newState$ ] = tapRefs(state$, map, state);
+): { refs: RefsObj<T> } & RxResult<R, O> => {
+  const { actions, state, state$ } = rxState;
+  const { refs, state$: newState$ } = tapRefs(state$, map, state);
 
-  return [
+  return {
     refs,
-    handlers,
+    actions,
     state,
-    newState$,
-  ];
+    state$: newState$,
+  };
 };
 
 /**
@@ -94,13 +94,27 @@ export const useRxRefs = <O, R, T extends RefsMap<O>>(
  * @param ref - a ref/reactive/factory to observe
  * @returns an observable that watches the ref
  */
-export function observeRef<R>(ref: WatchSource<R>): Observable<R>;
-export function observeRef<R extends Record<string, any>>(reactiveState: R): Observable<R>;
-export function observeRef<R extends Record<string, any> | WatchSource<any>>(ref: R): Observable<R> {
+export function fromRef<R>(ref: WatchSource<R>): Observable<R>;
+export function fromRef<R extends Record<string, any>>(reactiveState: R): Observable<R>;
+export function fromRef<R extends Record<string, any> | WatchSource<any>>(ref: R): Observable<R> {
   return untilUnmounted(
     new Observable<R>(ctx => watch(ref, value => ctx.next(value)))
   );
 };
+
+/**
+ * Creates a one-side bind between a ref and a value from a reactive state.
+ *
+ * When the reactive state changes, the ref is updated, but not vice versa!
+ * @param state a reactive state to bind from
+ * @param prop a prop to bind from
+ * @param refVar an existing ref to bind
+ */
+export function syncRef<S extends Record<string, any>, K extends keyof S>(
+  state: S,
+  prop: K,
+  refValue?: Ref<S[K]>
+): Ref<S[K]>;
 
 /**
  * Creates a one-side bind between a ref and a value from a reactive state.
@@ -116,10 +130,19 @@ export function syncRef<S extends Record<string, any>, K extends keyof S, R>(
   prop: K,
   map: (value: S[K]) => R,
   refValue?: Ref<R>
+): Ref<R>;
+export function syncRef<S extends Record<string, any>, K extends keyof S, R>(
+  state: S,
+  prop: K,
+  map?: ((value: S[K]) => R) | Ref<R>,
+  refValue?: Ref<R>
 ): Ref<R> {
-  const refVar = refValue ?? ref(map(state[prop])) as Ref<R>;
+  const _map = (isRef(map) || !map) ? (_: S[K]) => _ : map;
+  const _refValue = refValue ?? (isRef(map) ? map : undefined);
 
-  observeRef<S[K]>(toRef(state, prop)).subscribe(_ => refVar.value = map(_));
+  const refVar = _refValue ?? ref(_map(state[prop])) as Ref<R>;
+
+  fromRef<S[K]>(toRef(state, prop)).subscribe(_ => refVar.value = _map(_));
 
   return refVar;
 }

@@ -1,7 +1,7 @@
-import { BehaviorSubject, isObservable, merge, Observable, of, Subject, identity } from 'rxjs';
+import { isObservable, merge, Observable, of, Subject, identity } from 'rxjs';
 import { OperatorFunction } from 'rxjs/internal/types';
 import { map, mergeScan, scan } from 'rxjs/operators';
-import { onUnmounted, reactive, Ref, ref, UnwrapRef } from 'vue';
+import { onUnmounted, reactive, Ref, UnwrapRef } from 'vue';
 import { pipeUntil } from './hooks/until';
 
 type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
@@ -38,56 +38,45 @@ export type StateReducer<S, Args extends any[] = any[]> =
 export type StateReducers<S> = Record<string, StateReducer<S>>;
 
 /**
- * A method handler generated from a StateReducer
+ * A method action generated from a StateReducer
  */
-export type ResHandler<A extends any[] = []> = (...args: A) => void;
-
-export type PipeSubscribe<Res extends RxResult<any, any>, S> = {
-  (...args: Parameters<Observable<S>['subscribe']>): readonly [
-    ...Res,
-    ReturnType<Observable<S>['subscribe']>,
-  ];
-};
+export type ResAction<A extends any[] = []> = (...args: A) => void;
 
 /**
  * Resulting RX bindings:
  *
- * * 0 - a named collection of ResHandler-s
- * * 1 - a reactive vue state
- * * 2 - an rxjs observable
+ * * actions - a named collection of ResAction-s
+ * * state - a reactive vue state
+ * * state$ - an rxjs observable
  */
-export type RxResult<H, S, R = Readonly<S>> = readonly [
-  handlers: H,
-  state: R,
-  state$: Observable<S>,
-];
-
-export type SubscribableRxRes<H, S, R = Readonly<S>> = RxResult<H, S, R> & {
-  subscribe: PipeSubscribe<RxResult<H, S, R>, S>;
+export type RxResult<H, S, R = Readonly<S>> = {
+  readonly actions: H;
+  readonly state: R;
+  readonly state$: Observable<S>;
 };
 
-/**
- * Creates a vue ref and a ref setter from the subject.
- *
- * When the setter is called, the subject emits.
- *
- * @param subject - a base subject to draw events from
- * @returns [ref setter, ref, observable]
- */
-export function useSubject<S>(subject: BehaviorSubject<S>): RxResult<ResHandler<[state: S]>, S, Readonly<Ref<S>>>;
-export function useSubject<S>(subject?: Subject<S>): RxResult<ResHandler<[state: S]>, S, Readonly<Ref<S | undefined>>>;
-export function useSubject<S>(subject?: Subject<S> | BehaviorSubject<S>): RxResult<ResHandler<[state: S]>, S, Readonly<Ref<S | undefined>>> {
-  const _subject = subject ?? new Subject<S>();
-  const rState = ref((_subject as BehaviorSubject<S>).value) as Ref<S>;
+type Action$<Name extends string> = `on${Capitalize<Name>}`;
 
-  return [(state: S) => _subject.next(rState.value = state), rState, _subject.asObservable()];
-}
+type ReducerObservables<H, R> = {
+  readonly [key in Action$<Extract<keyof H, string>>]: Observable<R>;
+};
 
-type ReducerHandler<R> = R extends StateReducer<any, infer Args>
-  ? ResHandler<Args>
+export type SubscribableRxRes<H, S, R = Readonly<S>> = RxResult<H, S, R> & {
+  readonly actions$: ReducerObservables<H, R>;
+  readonly subscribe: PipeSubscribe<SubscribableRxRes<H, S, R>, S>;
+};
+
+export type PipeSubscribe<Res extends SubscribableRxRes<any, any>, S> = {
+  (...args: Parameters<Observable<S>['subscribe']>): Omit<Res, 'subscribe'> & {
+    readonly subscription: ReturnType<Observable<S>['subscribe']>;
+  };
+};
+
+type ReducerAction<R> = R extends StateReducer<any, infer Args>
+  ? ResAction<Args>
   : never;
 
-type ReducerHandlers<R> = { [key in keyof R]: ReducerHandler<R[key]> };
+type ReducerActions<R> = { [key in keyof R]: ReducerAction<R[key]> };
 
 const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
   for (const key in curr) {
@@ -96,6 +85,8 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
 
   return prev;
 };
+
+const getAction$Name = <K extends string>(name: K): Action$<K> => `on${name[0].toUpperCase()}${name.slice(1)}` as Action$<K>;
 
 /**
  * Allows to bind reducers to a state and an observable.
@@ -123,8 +114,10 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
  *
  * @param initialState an initial value for the reactive state
  */
-export function useRxState<T extends Record<string, any>, S = UnwrapNestedRefs<T>>(initialState: T) {
-  const reactiveState = reactive(initialState) as S;
+export function useRxState<T extends Record<string, any>>(initialState: T) {
+  type S = UnwrapNestedRefs<T>;
+
+  const reactiveState: S = reactive(initialState);
 
   const mergeStates = mergeScan((state: S, curr: ReturnType<StateReducer<S>>) => {
     const update = updateKeys(state);
@@ -145,39 +138,43 @@ export function useRxState<T extends Record<string, any>, S = UnwrapNestedRefs<T
     map$: (
       state$: Observable<Readonly<S>>,
       reducers: R,
-      state: Readonly<S>
+      state: Readonly<S>,
+      actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>
     ) => Observable<Partial<S>> = identity
-  ): SubscribableRxRes<ReducerHandlers<R>, S> {
-    const handlers = <ReducerHandlers<R>> {};
-    const observables: Observable<ReturnType<StateReducer<S>>>[] = [];
+  ): SubscribableRxRes<ReducerActions<R>, S> {
+    const actions = <ReducerActions<R>> {};
+    const actions$: Record<string, Observable<S>> = {};
 
     for (const key in reducers) {
       const args$ = new Subject<ReturnType<StateReducer<S>>>();
 
-      handlers[key] = ((...args: any[]) => args$.next(reducers[key](...args))) as ReducerHandler<R[keyof R]>;
-      observables.push(args$);
+      actions[key] = ((...args: any[]) => args$.next(reducers[key](...args))) as ReducerAction<R[keyof R]>;
+      actions$[getAction$Name(key)] = args$.pipe(mergeStates);
     }
 
     const state$ = map$(
-      merge(...observables).pipe(mergeStates),
+      merge(...Object.values(actions$)),
       reducers,
-      reactiveState
+      reactiveState,
+      actions$,
     ).pipe(
       scan((acc, curr) => updateKeys(acc)(curr), reactiveState),
       pipeUntil(onUnmounted),
     );
 
-    const result = [
-      handlers,
-      reactiveState,
+    const result = {
+      actions,
+      state: reactiveState,
       state$,
-    ] as any as SubscribableRxRes<ReducerHandlers<R>, S>;
+      actions$,
+    };
 
-    result.subscribe = (...args: Parameters<Observable<S>['subscribe']>) => [
+    return {
       ...result,
-      state$.subscribe(...args),
-    ] as any;
-
-    return result;
+      subscribe: (...args: Parameters<Observable<S>['subscribe']>) => ({
+        ...result,
+        subscription: state$.subscribe(...args),
+      }),
+    } as any as SubscribableRxRes<ReducerActions<R>, S>;
   };
 }
