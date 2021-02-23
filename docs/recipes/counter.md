@@ -7,11 +7,10 @@ A simple example of a counter state with an increment reducer:
 
 The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/counter.vue).
 
-```vue {3,12-14,27}
+```vue {2,12-15,17-20,29,30}
 <script lang="ts">
+import { useRxState, syncRef } from 'vuse-rx';
 import { defineComponent } from 'vue';
-import { useRxState } from 'vuse-rx';
-import { map } from 'rxjs/operators';
 
 export default defineComponent({
   setup() {
@@ -20,14 +19,26 @@ export default defineComponent({
       state,
       state$
     } = useRxState({ count: 0 })({
-      increment: () => state => ({ count: state.count + 1 })
+      // stateful reducer
+      increment: () => state => ({
+        count: state.count + 1
+      }),
+
+      // stateless reducer
+      setCount: (count: string) => ({
+        count: isNaN(count) ? 0 : count
+      }),
     });
 
     state$.subscribe(state => console.log('counter: ', state.count));
 
     return {
       increment,
-      state
+      state,
+
+      // One-way data binding from reactive state (with type convertation)
+      // Needed to have a separate "user-input" state for the counter
+      countRef: syncRef(state, 'count', String),
     };
   }
 });
@@ -35,5 +46,8 @@ export default defineComponent({
 
 <template>
   <button @click="increment">increment {{ state.count }}</button>
+  <br>
+  <input v-model="countRef"/>
+  <button @click="setCount(countRef)">set count to {{ countRef }}</button>
 </template>
 ```

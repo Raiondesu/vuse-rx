@@ -1,23 +1,27 @@
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { useRxState } from 'vuse-rx';
-import { map } from 'rxjs/operators';
+import { defineComponent } from 'vue';
+import { useRxState, syncRef } from 'vuse-rx';
 
 export default defineComponent({
   setup() {
     const {
-      actions: { increment },
+      actions: { increment, setCount },
       state,
       state$
     } = useRxState({ count: 0 })({
-      increment: () => state => ({ count: state.count + 1 })
+      increment: () => state => ({ count: state.count + 1 }),
+      setCount: (count: string) => ({ count: isNaN(Number(count)) ? 0 : Number(count) }),
     });
 
     state$.subscribe(state => console.log('counter: ', state.count));
 
     return {
       increment,
-      state
+      setCount,
+      state,
+
+      // One-way data binding from reactive state (with type convertation)
+      countRef: syncRef(state, 'count', String),
     };
   }
 });
@@ -25,4 +29,7 @@ export default defineComponent({
 
 <template>
   <button @click="increment">increment {{ state.count }}</button>
+  <br>
+  <input v-model="countRef"/>
+  <button @click="setCount(countRef)">set count to {{ countRef }}</button>
 </template>
