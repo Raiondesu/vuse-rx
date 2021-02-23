@@ -1,6 +1,6 @@
-import { isObservable, merge, Observable, of, Subject, identity, interval } from 'rxjs';
+import { isObservable, merge, Observable, of, Subject, identity } from 'rxjs';
 import { OperatorFunction } from 'rxjs/internal/types';
-import { map, mapTo, mergeScan, scan, switchMap, tap } from 'rxjs/operators';
+import { map, mergeScan, scan } from 'rxjs/operators';
 import { onUnmounted, reactive, Ref, UnwrapRef } from 'vue';
 import { pipeUntil } from './hooks/until';
 
