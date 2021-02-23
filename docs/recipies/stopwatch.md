@@ -8,6 +8,8 @@ This is a simple stopwatch with configurable increment step, interval and maximu
   <StopwatchDemo/>
 </ClientOnly>
 
+The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipies/stopwatch.vue).
+
 ## Step-by-step
 
 ### Basics
@@ -98,7 +100,7 @@ const useStopwatch = () => rxState(
         // if stopwatch is paused, proceed with no changes
         ? of(state)
         // otherwise - create a timer
-        : timer(0, calcDelay(state)).pipe(
+        : interval(calcDelay(state)).pipe(
             mapTo(state),
             // that increments the state on each tick
             map(increment()),
@@ -125,7 +127,7 @@ import { syncRef } from 'vuse-rx';
 export default defineComponent({
   setup() {
     // Retrieve reducers and a fully reactive state
-    const [handlers, state] = useStopwatch()
+    const { handlers, state } = useStopwatch()
       // a shorthand to subscribe to our newly created observalble, neat!
       .subscribe(state => console.log('state updated: ', state));
 
@@ -199,114 +201,3 @@ export default defineComponent({
   </div>
 </template>
 ```
-
-## Complete component
-
-Combining all the steps together, this is the complete stopwatch component:
-
-```vue {5,28-34,51,52,57}
-<script lang="ts">
-import { defineComponent, ref } from 'vue';
-import { map, mapTo, switchMap, takeWhile } from 'rxjs/operators';
-import { of, timer } from 'rxjs';
-import { useRxState, syncRef } from 'vuse-rx';
-
-const rxState = useRxState({
-  count: false,
-  speed: 5,
-  value: 0,
-  maxValue: NaN,
-  step: 1,
-});
-
-const calcDelay = state => 1000 / state.speed;
-
-const paused = state => !state.count || state.step === 0 || (
-  state.step > 0 && state.value >= state.maxValue
-);
-
-const clampValue = (maxValue, value) => ({
-  maxValue,
-  value: value > maxValue ? maxValue : value
-});
-
-const useStopwatch = () => rxState(
-  {
-    setCountState: play => ({ count: play }),
-    setStep: step => ({ step }),
-    setSpeed: speed => ({ speed: Math.max(1, speed) }),
-
-    increment: () => state => clampValue(state.maxValue, state.value + state.step),
-    setValue: value => state => clampValue(state.maxValue, value),
-    setMaxValue: max => state => clampValue(max, state.value),
-  },
-  (state$, { increment }) => state$.pipe(
-    switchMap(state =>
-      paused(state)
-        ? of(state)
-        : timer(0, calcDelay(state)).pipe(
-            mapTo(state),
-            takeWhile(state => !paused(state)),
-            map(increment()),
-          )
-    ),
-  )
-);
-
-export default defineComponent({
-  setup() {
-    const [handlers, state] = useStopwatch()
-      .subscribe(state => console.log('state updated: ', state));
-
-    return {
-      ...handlers,
-      state,
-      speedRef: syncRef(state, 'speed', String),
-      stepRef: ref(String(state.step)),
-      setToRef: ref(String(state.value)),
-      maxRef: ref(String(state.maxValue)),
-
-      setMaxValue: maxRef => handlers.setMaxValue(maxRef === '' ? NaN : +maxRef),
-    };
-  },
-});
-</script>
-
-<template>
-  <div>
-    <p v-for="(value, key) in state" :key="key">{{key}}: {{value}}</p>
-  </div>
-  <div>
-    <button @click="setCountState(!state.count)">{{ state.count ? 'Pause' : 'Start' }}</button>
-    <button @click="setValue(0)">Reset</button>
-  </div>
-  <div>
-    <button @click="setStep(-state.step)">Count {{ state.step > 0 ? 'down' : 'up' }}</button>
-  </div>
-  <div>
-    <input v-model="setToRef"/>
-    <button @click="setValue(+setToRef)">Set value</button>
-  </div>
-  <div>
-    <input v-model="speedRef" @blur.capture="setSpeed(+speedRef)"/>
-    <button @click="setSpeed(+speedRef - 1)">-</button>
-    <button @click="setSpeed(+speedRef + 1)">+</button>
-  </div>
-  <div>
-    <input v-model="stepRef"/>
-    <button @click="setStep(+stepRef)">Set step</button>
-  </div>
-  <div>
-    <input v-model="maxRef"
-      @keyup.enter="setMaxValue(maxRef)"
-      @focus.capture="isNaN(maxRef) && (maxRef = '')"
-      @blur.capture="maxRef = maxRef === '' || isNaN(maxRef) ? 'NaN' : maxRef"
-    />
-    <button @click="setMaxValue(maxRef)">Set maximum</button>
-  </div>
-</template>
-```
-
-## Marble diagram
-
-![stopwatch diagram](/stopwatch.png)

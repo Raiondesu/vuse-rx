@@ -9,20 +9,20 @@ export const tapRefs = (observable, map, initialState) => {
         refs[key] = ref(map[key](initialState));
         ops.push(tap(state => refs[key].value = map[key](state)));
     }
-    return [
+    return {
         refs,
-        observable.pipe(...ops),
-    ];
+        state$: observable.pipe(...ops),
+    };
 };
 export const useRxRefs = (rxState, map) => {
-    const [handlers, state, state$] = rxState;
-    const [refs, newState$] = tapRefs(state$, map, state);
-    return [
+    const { handlers, state, state$ } = rxState;
+    const { refs, state$: newState$ } = tapRefs(state$, map, state);
+    return {
         refs,
         handlers,
         state,
-        newState$,
-    ];
+        state$: newState$,
+    };
 };
 export function observeRef(ref) {
     return untilUnmounted(new Observable(ctx => watch(ref, value => ctx.next(value))));

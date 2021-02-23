@@ -28,11 +28,11 @@ import { useRxState } from 'vuse-rx';
 
 export default defineComponent({
   setup() {
-    const [
+    const {
       handlers,
       state,
       state$ // state observable
-    ] = useRxState({ count: 0 })({
+    } = useRxState({ count: 0 })({
       increment: () => state => ({ count: state.count + 1 })
     });
 
@@ -55,4 +55,4 @@ export default defineComponent({
 ## Contributing
 
 Pull requests and stars are always welcome. ❤\
-For bugs and feature requests, [please create an issue](../../issues/new).
+For bugs and feature requests, [please create an issue](https://github.com/Raiondesu/vuse-rx/issues/new).

@@ -1,7 +1,7 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { map, mapTo, switchMap, takeWhile } from 'rxjs/operators';
-import { of, timer } from 'rxjs';
+import { map, mapTo, switchMap } from 'rxjs/operators';
+import { of, interval } from 'rxjs';
 import { useRxState, syncRef } from 'vuse-rx';
 
 const rxState = useRxState({
@@ -35,7 +35,7 @@ const useStopwatch = () => rxState(
     switchMap(state =>
       paused(state)
         ? of(state)
-        : timer(0, 1000 / state.speed).pipe(
+        : interval(1000 / state.speed).pipe(
             mapTo(state),
             map(increment()),
           )
@@ -45,7 +45,7 @@ const useStopwatch = () => rxState(
 
 export default defineComponent({
   setup() {
-    const [handlers, state] = useStopwatch()
+    const { handlers, state } = useStopwatch()
       .subscribe(state => console.log('state updated: ', state));
 
     return {

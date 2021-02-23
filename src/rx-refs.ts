@@ -1,8 +1,8 @@
-import { ref, Ref, toRef, watch, WatchSource } from 'vue';
+import { ref, Ref, toRef, UnwrapRef, watch, WatchSource } from 'vue';
 import { tap } from 'rxjs/operators';
 import { Observable, OperatorFunction } from 'rxjs';
-import { RxResult } from './use-rx';
 import { untilUnmounted } from './hooks/until';
+import type { RxResult } from './use-rx';
 
 export type RefsMap<O, Optional = false> = Record<string, (state: Optional extends true ? Readonly<O> | void | undefined : Readonly<O>) => any>;
 
@@ -26,24 +26,24 @@ export const tapRefs: {
   <O, T extends RefsMap<O, true>>(
     observable: Observable<O>,
     map: T
-  ): [refs: RefsObj<T>, observable$: Observable<O>];
+  ): { refs: RefsObj<T>, state$: Observable<O> };
 
   <O, T extends RefsMap<O>>(
     observable: Observable<O>,
     map: T,
     initialState: O
-  ): [refs: RefsObj<T>, observable$: Observable<O>];
+  ): { refs: RefsObj<T>, state$: Observable<O> };
 
   <O, T extends RefsMap<O, true>>(
     observable: Observable<O>,
     map: T,
     initialState?: O
-  ): [refs: RefsObj<T>, observable$: Observable<O>];
+  ): { refs: RefsObj<T>, state$: Observable<O> };
 } = <O, T extends RefsMap<O, true>>(
   observable: Observable<O>,
   map: T,
   initialState?: O
-): [refs: RefsObj<T>, observable$: Observable<O>] => {
+): { refs: RefsObj<T>, state$: Observable<O> } => {
   const ops: OperatorFunction<O, O>[] = [];
   const refs = {} as RefsObj<T>;
 
@@ -53,10 +53,10 @@ export const tapRefs: {
     ops.push(tap(state => refs[key].value = map[key](state)));
   }
 
-  return [
+  return {
     refs,
-    observable.pipe(...ops),
-  ];
+    state$: observable.pipe(...ops),
+  };
 }
 
 /**
@@ -72,16 +72,16 @@ export const tapRefs: {
 export const useRxRefs = <O, R, T extends RefsMap<O>>(
   rxState: RxResult<R, O>,
   map: T,
-): [refs: RefsObj<T>, ...rx: RxResult<R, O>] => {
-  const [ handlers, state, state$ ] = rxState;
-  const [ refs, newState$ ] = tapRefs(state$, map, state);
+): { refs: RefsObj<T> } & RxResult<R, O> => {
+  const { handlers, state, state$ } = rxState;
+  const { refs, state$: newState$ } = tapRefs(state$, map, state);
 
-  return [
+  return {
     refs,
     handlers,
     state,
-    newState$,
-  ];
+    state$: newState$,
+  };
 };
 
 /**
