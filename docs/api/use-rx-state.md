@@ -208,5 +208,5 @@ const countRef = syncRef(state, 'count', String),
 ```
 
 <ClientOnly>
-  <CounterDemo simple/>
+  <CounterDemo/>
 </ClientOnly>
