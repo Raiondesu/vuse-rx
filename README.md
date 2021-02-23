@@ -37,7 +37,10 @@ import { tap } from 'rxjs/operators';
 export default defineComponent({
   setup() {
     const {
-      actions,
+      actions: {
+        increment,
+        setCount
+      },
       state,
       state$ // state observable
     } = useRxState({ count: 0 })({
@@ -50,7 +53,7 @@ export default defineComponent({
       // stateless reducer
       setCount: (count: string) => ({
         // custom business logic
-        count: isNaN(count) ? 0 : count
+        count: isNaN(Number(count)) ? 0 : Number(count)
       }),
     }, state$ => state$.pipe(tap(state => console.log('state is updated', state))));
 
@@ -58,8 +61,8 @@ export default defineComponent({
     state$.subscribe(state => console.log('counter: ', state.count));
 
     return {
-      increment: actions.increment,
-      setCount: actions.setCount,
+      increment,
+      setCount,
       state,
 
       // One-way data binding from reactive state (with type convertation)

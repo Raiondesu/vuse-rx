@@ -17,13 +17,6 @@ module.exports = {
     ],
 
     sidebar: getSidebar(),
-  },
-  markdown: {
-    // options for markdown-it-anchor
-    anchor: { permalink: false },
-
-    // options for markdown-it-toc
-    toc: { includeLevel: [1, 2] },
   }
 };
 
@@ -34,7 +27,6 @@ function getSidebar() {
       children: [
         { text: 'What is vuse-rx?', link: '/guide/', activeMatch: '^/guide/$' },
         { text: 'Getting Started', link: '/guide/getting-started' },
-        { text: 'State Management', link: '/guide/state' },
       ]
     },
     {

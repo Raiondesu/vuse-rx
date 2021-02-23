@@ -91,8 +91,6 @@ const getAction$Name = <K extends string>(name: K): Action$<K> => `on${name[0].t
 /**
  * Allows to bind reducers to a state and an observable.
  *
- * It isn't tied to Vue in any way, so can be used regardless
- *
  * First accepts state's default value,
  * then accepts a map of state reducers.
  *

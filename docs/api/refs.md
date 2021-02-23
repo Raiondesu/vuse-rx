@@ -36,7 +36,13 @@ function syncRef<S extends Record<string, any>, K extends keyof S, R>(
   prop: K,
   map: (value: S[K]) => R,
   refValue?: Ref<R>
-): Ref<R>
+): Ref<R>;
+
+function syncRef<S extends Record<string, any>, K extends keyof S>(
+  state: S,
+  prop: K,
+  refValue?: Ref<S[K]>
+): Ref<S[K]>;
 ```
 
 Creates a one-side bind between a ref and a value from a reactive state.\

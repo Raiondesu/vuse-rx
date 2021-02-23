@@ -33,6 +33,6 @@ while also adding some more pros on top of that:
 - Seamless integration between Vue's reactivity and flexibility of rxjs;
 - Ability to use "native" Vue APIs in harmony with observables;
 - First-class TypeScript support;
-- [Sane state management](/guide/state) out-of the box;
+- [Sane state management](/api/use-rx-state) out-of the box;
 
 Thanks to that last one, `vuse-rx` also eliminates the need to use `vuex` for most projects that already use `rxjs`!

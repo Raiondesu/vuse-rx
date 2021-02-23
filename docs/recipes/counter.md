@@ -7,7 +7,7 @@ A simple example of a counter state with an increment reducer:
 
 The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/counter.vue).
 
-```vue {2,12-15,17-20,29,30}
+```vue {2,12-15,17-20,29-31}
 <script lang="ts">
 import { useRxState, syncRef } from 'vuse-rx';
 import { defineComponent } from 'vue';
