@@ -8,7 +8,7 @@ This is a simple stopwatch with configurable increment step, interval and maximu
   <StopwatchDemo/>
 </ClientOnly>
 
-The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipies/stopwatch.vue).
+The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/stopwatch.vue).
 
 ## Step-by-step
 
@@ -127,12 +127,12 @@ import { syncRef } from 'vuse-rx';
 export default defineComponent({
   setup() {
     // Retrieve reducers and a fully reactive state
-    const { handlers, state } = useStopwatch()
+    const { actions, state } = useStopwatch()
       // a shorthand to subscribe to our newly created observalble, neat!
       .subscribe(state => console.log('state updated: ', state));
 
     return {
-      ...handlers,
+      ...actions,
       state,
       stepRef: ref(String(state.step)),
       setToRef: ref(String(state.value)),
@@ -141,8 +141,8 @@ export default defineComponent({
       // update speedRef whenever the state.speed property changes
       speedRef: syncRef(state, 'speed', String),
 
-      // override one of the handlers to interpret empty string as NaN instead of 0
-      setMaxValue: maxRef => handlers.setMaxValue(maxRef === '' ? NaN : +maxRef),
+      // override one of the actions to interpret empty string as NaN instead of 0
+      setMaxValue: maxRef => actions.setMaxValue(maxRef === '' ? NaN : +maxRef),
     };
   },
 });

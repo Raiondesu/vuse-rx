@@ -8,7 +8,7 @@ const updateKeys = (prev) => (curr) => {
     }
     return prev;
 };
-const getHandler$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
+const getAction$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
 export function useRxState(initialState) {
     const reactiveState = reactive(initialState);
     const mergeStates = mergeScan((state, curr) => {
@@ -21,19 +21,19 @@ export function useRxState(initialState) {
             : of(update(newState)));
     }, reactiveState);
     return function (reducers, map$ = identity) {
-        const handlers = {};
-        const handlers$ = {};
+        const actions = {};
+        const actions$ = {};
         for (const key in reducers) {
             const args$ = new Subject();
-            handlers[key] = ((...args) => args$.next(reducers[key](...args)));
-            handlers$[getHandler$Name(key)] = args$.pipe(mergeStates);
+            actions[key] = ((...args) => args$.next(reducers[key](...args)));
+            actions$[getAction$Name(key)] = args$.pipe(mergeStates);
         }
-        const state$ = map$(merge(...Object.values(handlers$)), reducers, reactiveState, handlers$).pipe(scan((acc, curr) => updateKeys(acc)(curr), reactiveState), pipeUntil(onUnmounted));
+        const state$ = map$(merge(...Object.values(actions$)), reducers, reactiveState, actions$).pipe(scan((acc, curr) => updateKeys(acc)(curr), reactiveState), pipeUntil(onUnmounted));
         const result = {
-            handlers,
+            actions,
             state: reactiveState,
             state$,
-            handlers$,
+            actions$,
         };
         return {
             ...result,

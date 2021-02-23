@@ -45,18 +45,18 @@ const useStopwatch = () => rxState(
 
 export default defineComponent({
   setup() {
-    const { handlers, state } = useStopwatch()
+    const { actions, state } = useStopwatch()
       .subscribe(state => console.log('state updated: ', state));
 
     return {
-      ...handlers,
+      ...actions,
       state,
       setToRef: ref(String(state.value)),
       maxRef: ref(String(state.maxValue)),
       stepRef: ref(String(state.step)),
       speedRef: syncRef(state, 'speed', String),
 
-      setMaxValue: (maxRef: string) => handlers.setMaxValue(maxRef === '' ? NaN : +maxRef),
+      setMaxValue: (maxRef: string) => actions.setMaxValue(maxRef === '' ? NaN : +maxRef),
     };
   },
 });

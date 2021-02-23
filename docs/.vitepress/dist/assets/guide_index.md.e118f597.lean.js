@@ -1,0 +1,1 @@
+import{o as e,c as s,a as t}from"./app.09f85e8d.js";const o='{"title":"What is vuse-rx?","description":"","frontmatter":{},"headers":[{"level":2,"title":"Why?","slug":"why"}],"relativePath":"guide/index.md","lastUpdated":1613695217599}',a={},i=t('',10);a.render=function(t,o,a,r,n,l){return e(),s("div",null,[i])};export default a;export{o as __pageData};

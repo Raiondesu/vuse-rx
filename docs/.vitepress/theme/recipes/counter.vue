@@ -1,17 +1,17 @@
 <script lang="ts">
 import { defineComponent, ref } from 'vue';
-import { useSubject } from 'vuse-rx';
+import { useRxState } from 'vuse-rx';
 import { map } from 'rxjs/operators';
 
 export default defineComponent({
   setup() {
     const {
-      handlers: {
-        setState
-      },
+      actions: { increment },
       state,
       state$
-    } = useSubject<number>();
+    } = useRxState({ count: 0 })({
+      increment: () => state => ({ count: state.count + 1 })
+    });
 
     state$.subscribe(state => console.log('counter: ', state.count));
 

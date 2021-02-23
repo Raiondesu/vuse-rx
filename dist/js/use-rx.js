@@ -12,7 +12,7 @@ const updateKeys = (prev) => (curr) => {
     }
     return prev;
 };
-const getHandler$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
+const getAction$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
 function useRxState(initialState) {
     const reactiveState = vue_1.reactive(initialState);
     const mergeStates = operators_1.mergeScan((state, curr) => {
@@ -25,19 +25,19 @@ function useRxState(initialState) {
             : rxjs_1.of(update(newState)));
     }, reactiveState);
     return function (reducers, map$ = rxjs_1.identity) {
-        const handlers = {};
-        const handlers$ = {};
+        const actions = {};
+        const actions$ = {};
         for (const key in reducers) {
             const args$ = new rxjs_1.Subject();
-            handlers[key] = ((...args) => args$.next(reducers[key](...args)));
-            handlers$[getHandler$Name(key)] = args$.pipe(mergeStates);
+            actions[key] = ((...args) => args$.next(reducers[key](...args)));
+            actions$[getAction$Name(key)] = args$.pipe(mergeStates);
         }
-        const state$ = map$(rxjs_1.merge(...Object.values(handlers$)), reducers, reactiveState, handlers$).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), reactiveState), until_1.pipeUntil(vue_1.onUnmounted));
+        const state$ = map$(rxjs_1.merge(...Object.values(actions$)), reducers, reactiveState, actions$).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), reactiveState), until_1.pipeUntil(vue_1.onUnmounted));
         const result = {
-            handlers,
+            actions,
             state: reactiveState,
             state$,
-            handlers$,
+            actions$,
         };
         return Object.assign(Object.assign({}, result), { subscribe: (...args) => (Object.assign(Object.assign({}, result), { subscription: state$.subscribe(...args) })) });
     };

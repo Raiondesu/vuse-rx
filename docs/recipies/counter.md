@@ -5,7 +5,7 @@ A simple example of a counter state with an increment reducer:
   <CounterDemo/>
 </ClientOnly>
 
-The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipies/counter.vue).
+The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/counter.vue).
 
 ```vue {3,12-14,27}
 <script lang="ts">
@@ -16,7 +16,7 @@ import { map } from 'rxjs/operators';
 export default defineComponent({
   setup() {
     const {
-      handlers: { increment },
+      actions: { increment },
       state,
       state$
     } = useRxState({ count: 0 })({

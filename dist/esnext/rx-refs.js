@@ -15,11 +15,11 @@ export const tapRefs = (observable, map, initialState) => {
     };
 };
 export const useRxRefs = (rxState, map) => {
-    const { handlers, state, state$ } = rxState;
+    const { actions, state, state$ } = rxState;
     const { refs, state$: newState$ } = tapRefs(state$, map, state);
     return {
         refs,
-        handlers,
+        actions,
         state,
         state$: newState$,
     };
