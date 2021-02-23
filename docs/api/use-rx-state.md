@@ -118,5 +118,5 @@ state$.subscribe(state => console.log('counter: ', state.count));
 ```
 
 <ClientOnly>
-  <CounterDemo/>
+  <CounterDemo simple/>
 </ClientOnly>

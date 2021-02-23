@@ -3,7 +3,10 @@ import { defineComponent } from 'vue';
 import { useRxState, syncRef } from 'vuse-rx';
 
 export default defineComponent({
-  setup() {
+  props: {
+    simple: Boolean,
+  },
+  setup(props) {
     const {
       actions: { increment, setCount },
       state,
@@ -30,6 +33,6 @@ export default defineComponent({
 <template>
   <button @click="increment">increment {{ state.count }}</button>
   <br>
-  <input v-model="countRef"/>
-  <button @click="setCount(countRef)">set count to {{ countRef }}</button>
+  <input v-if="!simple" v-model="countRef"/>
+  <button v-if="!simple" @click="setCount(countRef)">set count to {{ countRef }}</button>
 </template>
