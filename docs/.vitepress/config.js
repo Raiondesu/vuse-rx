@@ -41,7 +41,7 @@ function getSidebar() {
       text: 'API',
       children: [
         { text: 'useRxState', link: '/api/use-rx-state' },
-        { text: 'Reacive refs', link: '/api/refs' },
+        { text: 'Reactive refs', link: '/api/refs' },
         { text: 'Hooks', link: '/api/hooks' },
       ]
     },
