@@ -169,6 +169,10 @@ The function then returns a pretty complex object, with the first three properti
 
 ## [Basic example](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/counter.vue)
 
+<ClientOnly>
+  <CounterDemo/>
+</ClientOnly>
+
 ```js
 const {
   actions: {
@@ -206,7 +210,3 @@ const countRef = syncRef(state, 'count', String),
   <button @click="setCount(countRef)">set count to {{ countRef }}</button>
 </template>
 ```
-
-<ClientOnly>
-  <CounterDemo/>
-</ClientOnly>
