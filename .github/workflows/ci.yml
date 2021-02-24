@@ -12,6 +12,9 @@ on:
 jobs:
   prepare:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lib
 
     steps:
     - uses: actions/checkout@v2
@@ -22,6 +25,9 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lib
 
     needs: prepare
     steps:
@@ -30,6 +36,9 @@ jobs:
 
   docs:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: lib
 
     needs: prepare
     steps:
