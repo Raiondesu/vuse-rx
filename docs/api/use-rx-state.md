@@ -153,7 +153,12 @@ useRxState(state)(
     console.log('This is an initial reactive state', state);
     console.log('This is a map of all actions to their secific observables', actions$);
 
+    // By the way, state$ is just merged actions$,
+    // so this
     return state$.pipe(tap(state => console.log('this is logged on each action', state)));
+    // and this
+    return merge(...Object.values(actions$)).pipe(tap(state => console.log('this is logged on each action', state)));
+    // are identical
   }
 )
 ```
