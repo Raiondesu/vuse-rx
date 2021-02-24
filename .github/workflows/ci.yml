@@ -10,8 +10,7 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
-
+  prepare:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,8 +19,20 @@ jobs:
       with:
         node-version: 14.x
     - run: npm ci
+
+  build:
+    runs-on: ubuntu-latest
+
+    needs: prepare
+    steps:
     - run: npm run build
     - run: npm test
+
+  docs:
+    runs-on: ubuntu-latest
+
+    needs: prepare
+    steps:
     - run: npm run docs:build
     - uses: EndBug/add-and-commit@v7.0.0
       with:
