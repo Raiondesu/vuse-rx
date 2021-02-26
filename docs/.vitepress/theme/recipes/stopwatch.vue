@@ -2,15 +2,15 @@
 import { defineComponent, ref } from 'vue';
 import { map, mapTo, switchMap } from 'rxjs/operators';
 import { of, interval } from 'rxjs';
-import { useRxState, syncRef } from 'vuse-rx';
+import { useRxState, syncRef } from 'vuse-rx/src';
 
-const rxState = useRxState({
+const createStopwatch = useRxState(() => ({
   count: false,
   speed: 5,
   value: 0,
   maxValue: NaN,
   step: 1,
-});
+}));
 
 const paused = state => !state.count || state.step === 0 || (
   state.step > 0 && state.value >= state.maxValue
@@ -21,7 +21,7 @@ const clampValue = (maxValue: number, value: number) => ({
   value: value > maxValue ? maxValue : value
 });
 
-const useStopwatch = () => rxState(
+const useStopwatch = () => createStopwatch(
   {
     setCountState: play => ({ count: play }),
     setStep: step => ({ step }),

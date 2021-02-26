@@ -19,8 +19,10 @@ First, let's define some basic reactive state for our stopwatch:
 ```js
 import { useRxState } from 'vuse-rx';
 
-// useRxState accepts an initial state for the system
-const rxState = useRxState({
+// useRxState accepts an initial state for the system.
+// Let's pass a factory into it,
+// so that it can create a new state for each stopwatch instance
+const createStopwatch = useRxState(() => ({
   // Determines if the stopwatch is counting
   count: false,
 
@@ -36,7 +38,7 @@ const rxState = useRxState({
 
   // Step of the increment
   step: 1,
-});
+}));
 ```
 
 And some "business-rules":
@@ -70,7 +72,7 @@ or an observable that emits a part of the state.
 ```js
 // It's handy to wrap everything into a neat vue hook
 // which encapsulates the whole functionality
-const useStopwatch = () => rxState(
+const useStopwatch = () => createStopwatch(
   // Reducers
   {
     // Play/Pause functionality

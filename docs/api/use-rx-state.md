@@ -57,7 +57,7 @@ And returns a reactive state, actions, and some observables to make things easie
 
 ```ts
 function <S extends Record<string, any>>(
-  initialState: S
+  initialState: S | (() => S)
 ) => <R extends StateReducers<S>>(
   reducers: R,
   map$?: (
@@ -88,8 +88,10 @@ This function is split into two parts:
 ### **State**
 
 ```ts
-<S extends Record<string, any>>(initialState: S) => Function
+<S extends Record<string, any>>(initialState: S | (() => S)) => Function
 ```
+
+Accepts either a state object or a state factory function.
 
 There's only one aspect to this function and only one purpose - to remember the initial state and infer (or set) its type.
 

@@ -1,4 +1,4 @@
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 import { onUnmounted } from 'vue';
 import { VueHook, fromHook } from './from';

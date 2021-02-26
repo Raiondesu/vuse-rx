@@ -1,5 +1,5 @@
+import type { OperatorFunction } from 'rxjs/internal/types';
 import { isObservable, merge, Observable, of, Subject, identity } from 'rxjs';
-import { OperatorFunction } from 'rxjs/internal/types';
 import { map, mergeScan, scan } from 'rxjs/operators';
 import { onUnmounted, reactive, Ref, UnwrapRef } from 'vue';
 import { pipeUntil } from './hooks/until';
@@ -58,7 +58,7 @@ export type RxResult<H, S, R = Readonly<S>> = {
 type Action$<Name extends string> = `on${Capitalize<Name>}`;
 
 type ReducerObservables<H, R> = {
-  readonly [key in Action$<Extract<keyof H, string>>]: Observable<R>;
+  [key in Action$<Extract<keyof H, string>>]: Observable<R>;
 };
 
 export type SubscribableRxRes<H, S, R = Readonly<S>> = RxResult<H, S, R> & {
@@ -78,6 +78,18 @@ type ReducerAction<R> = R extends StateReducer<any, infer Args>
 
 type ReducerActions<R> = { [key in keyof R]: ReducerAction<R[key]> };
 
+type CreateRxState<S> = {
+  <R extends StateReducers<S>>(
+    reducers: R,
+    map$: (
+      state$: Observable<Readonly<S>>,
+      reducers: R,
+      state: Readonly<S>,
+      actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>
+    ) => Observable<Partial<S>>
+  ): SubscribableRxRes<ReducerActions<R>, S>;
+}
+
 const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
   for (const key in curr) {
     prev[key] = curr[key] ?? prev[key];
@@ -87,6 +99,28 @@ const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
 };
 
 const getAction$Name = <K extends string>(name: K): Action$<K> => `on${name[0].toUpperCase()}${name.slice(1)}` as Action$<K>;
+
+const createRxResult = <S, Actions>(result: {
+  actions: Actions,
+  state: S,
+  state$: Observable<S>,
+  actions$: ReducerObservables<Actions, S>
+}): SubscribableRxRes<Actions, S> => ({
+  ...result,
+  subscribe: (...args: Parameters<Observable<S>['subscribe']>) => ({
+    ...result,
+    subscription: result.state$.subscribe(...args),
+  }),
+})
+
+const maybeCall = <T, A extends any[]>(
+  fn: T | ((...args: A) => T),
+  ...args: A
+) => (
+  typeof fn === 'function'
+    ? (fn as (...args: A) => T)(...args)
+    : fn
+);
 
 /**
  * Allows to bind reducers to a state and an observable.
@@ -112,24 +146,10 @@ const getAction$Name = <K extends string>(name: K): Action$<K> => `on${name[0].t
  *
  * @param initialState an initial value for the reactive state
  */
-export function useRxState<T extends Record<string, any>>(initialState: T) {
+export function useRxState<S extends Record<string, any>>(initialState: () => S): CreateRxState<S>;
+export function useRxState<S extends Record<string, any>>(initialState: S): CreateRxState<S>;
+export function useRxState<T extends Record<string, any>>(initialState: T | (() => T)) {
   type S = UnwrapNestedRefs<T>;
-
-  const reactiveState: S = reactive(initialState);
-
-  const mergeStates = mergeScan((state: S, curr: ReturnType<StateReducer<S>>) => {
-    const update = updateKeys(state);
-
-    const newState = typeof curr === 'function'
-      ? curr(state)
-      : curr;
-
-    return (
-      isObservable<Partial<S>>(newState)
-        ? newState.pipe(map(update))
-        : of(update(newState))
-    );
-  }, reactiveState);
 
   return function <R extends StateReducers<S>>(
     reducers: R,
@@ -140,39 +160,46 @@ export function useRxState<T extends Record<string, any>>(initialState: T) {
       actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>
     ) => Observable<Partial<S>> = identity
   ): SubscribableRxRes<ReducerActions<R>, S> {
-    const actions = <ReducerActions<R>> {};
-    const actions$: Record<string, Observable<S>> = {};
+    type ReducerResult = ReturnType<StateReducer<S>>;
+    type Actions = ReducerActions<R>;
+
+    const state = reactive(maybeCall(initialState));
+
+    const mergeStates = mergeScan((prev: S, curr: ReducerResult) => {
+      const newState = maybeCall(curr, prev);
+
+      return (
+        isObservable<Partial<S>>(newState)
+          ? newState
+          : of(newState)
+      ).pipe(map(updateKeys(prev)));
+    }, state);
+
+    const actions = <Actions> {};
+    const actions$ = <ReducerObservables<Actions, S>> {};
 
     for (const key in reducers) {
-      const args$ = new Subject<ReturnType<StateReducer<S>>>();
+      const mutations$ = new Subject<ReducerResult>();
 
-      actions[key] = ((...args: any[]) => args$.next(reducers[key](...args))) as ReducerAction<R[keyof R]>;
-      actions$[getAction$Name(key)] = args$.pipe(mergeStates);
+      actions[key] = ((...args: any[]) => mutations$.next(reducers[key](...args))) as ReducerAction<R[keyof R]>;
+      actions$[getAction$Name(key)] = mutations$.pipe(mergeStates);
     }
 
     const state$ = map$(
-      merge(...Object.values(actions$)),
+      merge(...Object.values(actions$ as Record<string, Observable<S>>)),
       reducers,
-      reactiveState,
+      state,
       actions$,
     ).pipe(
-      scan((acc, curr) => updateKeys(acc)(curr), reactiveState),
+      scan((acc, curr) => updateKeys(acc)(curr), state),
       pipeUntil(onUnmounted),
     );
 
-    const result = {
+    return createRxResult({
       actions,
-      state: reactiveState,
+      state,
       state$,
       actions$,
-    };
-
-    return {
-      ...result,
-      subscribe: (...args: Parameters<Observable<S>['subscribe']>) => ({
-        ...result,
-        subscription: state$.subscribe(...args),
-      }),
-    } as any as SubscribableRxRes<ReducerActions<R>, S>;
+    });
   };
 }

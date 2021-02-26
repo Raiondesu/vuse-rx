@@ -1,4 +1,4 @@
-import { isRef, ref, Ref, toRef, UnwrapRef, watch, WatchSource } from 'vue';
+import { isRef, ref, Ref, toRef, watch, WatchSource } from 'vue';
 import { tap } from 'rxjs/operators';
 import { Observable, OperatorFunction } from 'rxjs';
 import { untilUnmounted } from './hooks/until';
@@ -145,4 +145,53 @@ export function syncRef<S extends Record<string, any>, K extends keyof S, R>(
   fromRef<S[K]>(toRef(state, prop)).subscribe(_ => refVar.value = _map(_));
 
   return refVar;
+}
+
+const defineDesc = <T>(
+  ref: Ref<T>,
+  desc: PropertyDescriptor,
+  descTo: PropertyDescriptor,
+  map?: (v: T) => any
+) => {
+  Object.defineProperty(ref, 'value', {
+    get: desc?.get,
+    set: v => {
+      desc.set?.(v);
+      descTo.set?.(map?.(v) ?? v);
+    }
+  });
+}
+
+export function syncRefs<R>(
+  ref1: Ref<R>,
+): Ref<R>;
+export function syncRefs<R1, R2>(
+  ref1: Ref<R1>,
+  mapTo: (value: R1) => R2,
+  mapFrom: (value: R2) => R1,
+  ref2: Ref<R2>,
+): Ref<R2>;
+export function syncRefs<R1, R2>(
+  ref1: Ref<R1>,
+  mapTo: (value: R1) => R2,
+  mapFrom: (value: R2) => R1,
+  defaultValue?: R2,
+): Ref<R2>;
+export function syncRefs<R1, R2 = R1>(
+  ref1: Ref<R1>,
+  mapTo?: (value: R1) => R2,
+  mapFrom?: (value: R2) => R1,
+  _ref2?: Ref<R2> | R2,
+): Ref<R2> {
+  const ref2 = <Ref<R2>> ref(_ref2 ?? mapTo?.(ref1.value));
+
+  const desc1 = Object.getOwnPropertyDescriptor(ref1, 'value');
+  const desc2 = Object.getOwnPropertyDescriptor(ref2, 'value');
+
+  if (desc1 && desc2) {
+    defineDesc(ref1, desc1, desc2, mapTo);
+    defineDesc(ref2, desc2, desc1, mapFrom);
+  }
+
+  return ref2;
 }
