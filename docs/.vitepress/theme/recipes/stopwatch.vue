@@ -2,7 +2,7 @@
 import { defineComponent, ref } from 'vue';
 import { map, mapTo, switchMap } from 'rxjs/operators';
 import { of, interval } from 'rxjs';
-import { useRxState, syncRef } from 'vuse-rx/src';
+import { useRxState, syncRef } from 'vuse-rx';
 
 const createStopwatch = useRxState(() => ({
   count: false,

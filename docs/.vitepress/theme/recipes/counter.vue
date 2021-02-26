@@ -1,6 +1,6 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
-import { useRxState, syncRef } from 'vuse-rx/src';
+import { useRxState, syncRef } from 'vuse-rx';
 
 export default defineComponent({
   props: {
