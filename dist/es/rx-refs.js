@@ -35,4 +35,24 @@ export function syncRef(state, prop, map, refValue) {
     fromRef(toRef(state, prop)).subscribe(_ => refVar.value = _map(_));
     return refVar;
 }
+const defineDesc = (ref, desc, descTo, map) => {
+    Object.defineProperty(ref, 'value', {
+        get: desc === null || desc === void 0 ? void 0 : desc.get,
+        set: v => {
+            var _a, _b, _c;
+            (_a = desc.set) === null || _a === void 0 ? void 0 : _a.call(desc, v);
+            (_b = descTo.set) === null || _b === void 0 ? void 0 : _b.call(descTo, (_c = map === null || map === void 0 ? void 0 : map(v)) !== null && _c !== void 0 ? _c : v);
+        }
+    });
+};
+export function syncRefs(ref1, mapTo, mapFrom, _ref2) {
+    const ref2 = ref(_ref2 !== null && _ref2 !== void 0 ? _ref2 : mapTo === null || mapTo === void 0 ? void 0 : mapTo(ref1.value));
+    const desc1 = Object.getOwnPropertyDescriptor(ref1, 'value');
+    const desc2 = Object.getOwnPropertyDescriptor(ref2, 'value');
+    if (desc1 && desc2) {
+        defineDesc(ref1, desc1, desc2, mapTo);
+        defineDesc(ref2, desc2, desc1, mapFrom);
+    }
+    return ref2;
+}
 //# sourceMappingURL=rx-refs.js.map

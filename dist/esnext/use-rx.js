@@ -9,39 +9,39 @@ const updateKeys = (prev) => (curr) => {
     return prev;
 };
 const getAction$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
+const createRxResult = (result) => ({
+    ...result,
+    subscribe: (...args) => ({
+        ...result,
+        subscription: result.state$.subscribe(...args),
+    }),
+});
+const maybeCall = (fn, ...args) => (typeof fn === 'function'
+    ? fn(...args)
+    : fn);
 export function useRxState(initialState) {
-    const reactiveState = reactive(initialState);
-    const mergeStates = mergeScan((state, curr) => {
-        const update = updateKeys(state);
-        const newState = typeof curr === 'function'
-            ? curr(state)
-            : curr;
-        return (isObservable(newState)
-            ? newState.pipe(map(update))
-            : of(update(newState)));
-    }, reactiveState);
     return function (reducers, map$ = identity) {
+        const state = reactive(maybeCall(initialState));
+        const mergeStates = mergeScan((prev, curr) => {
+            const newState = maybeCall(curr, prev);
+            return (isObservable(newState)
+                ? newState
+                : of(newState)).pipe(map(updateKeys(prev)));
+        }, state);
         const actions = {};
         const actions$ = {};
         for (const key in reducers) {
-            const args$ = new Subject();
-            actions[key] = ((...args) => args$.next(reducers[key](...args)));
-            actions$[getAction$Name(key)] = args$.pipe(mergeStates);
+            const mutations$ = new Subject();
+            actions[key] = ((...args) => mutations$.next(reducers[key](...args)));
+            actions$[getAction$Name(key)] = mutations$.pipe(mergeStates);
         }
-        const state$ = map$(merge(...Object.values(actions$)), reducers, reactiveState, actions$).pipe(scan((acc, curr) => updateKeys(acc)(curr), reactiveState), pipeUntil(onUnmounted));
-        const result = {
+        const state$ = map$(merge(...Object.values(actions$)), reducers, state, actions$).pipe(scan((acc, curr) => updateKeys(acc)(curr), state), pipeUntil(onUnmounted));
+        return createRxResult({
             actions,
-            state: reactiveState,
+            state,
             state$,
             actions$,
-        };
-        return {
-            ...result,
-            subscribe: (...args) => ({
-                ...result,
-                subscription: state$.subscribe(...args),
-            }),
-        };
+        });
     };
 }
 //# sourceMappingURL=use-rx.js.map
