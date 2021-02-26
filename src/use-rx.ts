@@ -81,7 +81,7 @@ type ReducerActions<R> = { [key in keyof R]: ReducerAction<R[key]> };
 type CreateRxState<S> = {
   <R extends StateReducers<S>>(
     reducers: R,
-    map$: (
+    map$?: (
       state$: Observable<Readonly<S>>,
       reducers: R,
       state: Readonly<S>,
