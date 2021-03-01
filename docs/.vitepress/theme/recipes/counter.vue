@@ -1,8 +1,11 @@
 <script lang="ts">
-import { defineComponent } from 'vue';
+import { defineComponent, toRef } from 'vue';
 import { useRxState, syncRef } from 'vuse-rx';
+import { setToWindow } from '../set-window';
+import Console from '../console.vue';
 
 export default defineComponent({
+  components: { Console },
   props: {
     simple: Boolean,
   },
@@ -18,21 +21,26 @@ export default defineComponent({
 
     state$.subscribe(state => console.log('counter: ', state.count));
 
-    return {
+    return setToWindow({
+      syncRef,
+      useRxState,
       increment,
       setCount,
       state,
 
       // One-way data binding from reactive state (with type convertation)
-      countRef: syncRef(state, 'count', String),
-    };
+      countRef: syncRef(toRef(state, 'count'), { to: String }),
+    });
   }
 });
 </script>
 
 <template>
-  <button @click="increment">increment {{ state.count }}</button>
-  <br>
-  <input v-if="!simple" v-model="countRef"/>
-  <button v-if="!simple" @click="setCount(countRef)">set count to {{ countRef }}</button>
+  <main>
+    <button @click="increment">increment {{ state.count }}</button>
+    <br>
+    <input v-if="!simple" v-model="countRef"/>
+    <button v-if="!simple" @click="setCount(countRef)">set count to {{ countRef }}</button>
+  </main>
+  <console/>
 </template>

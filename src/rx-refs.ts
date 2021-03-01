@@ -1,6 +1,6 @@
-import { isRef, ref, Ref, toRef, watch, WatchSource } from 'vue';
+import { isRef, ref, Ref, toRef, UnwrapRef, watch, WatchSource } from 'vue';
 import { tap } from 'rxjs/operators';
-import { Observable, OperatorFunction } from 'rxjs';
+import { identity, Observable, OperatorFunction } from 'rxjs';
 import { untilUnmounted } from './hooks/until';
 import type { RxResult } from './use-rx';
 
@@ -102,95 +102,99 @@ export function fromRef<R extends Record<string, any> | WatchSource<any>>(ref: R
   );
 };
 
-/**
- * Creates a one-side bind between a ref and a value from a reactive state.
- *
- * When the reactive state changes, the ref is updated, but not vice versa!
- * @param state a reactive state to bind from
- * @param prop a prop to bind from
- * @param refVar an existing ref to bind
- */
-export function syncRef<S extends Record<string, any>, K extends keyof S>(
-  state: S,
-  prop: K,
-  refValue?: Ref<S[K]>
-): Ref<S[K]>;
+type Mapper<F, T> = (value: F) => T;
+
+type Mappers<R1, R2> = {
+  /**
+   * A map from the first ref to the second
+   */
+  to: Mapper<R1, R2>,
+
+  /**
+   * A map from the second ref to the first
+   *
+   * It will create a two-way bind between the refs
+   */
+  from?: Mapper<R2, R1>,
+};
 
 /**
- * Creates a one-side bind between a ref and a value from a reactive state.
- *
- * When the reactive state changes, the ref is updated, but not vice versa!
- * @param state a reactive state to bind from
- * @param prop a prop to bind from
- * @param map a transformer map from the state prop to the ref
- * @param refVar an existing ref to bind
+ * Defines a one-way binding from ref1 to ref2\
+ * with an ability to convert value's type on-the-fly
+ * @param ref1 the source of the binding
+ * @param ref2 the destination of the binding
+ * @param mapValue describes how to transform the value on ref1 update
+ * @returns watch stop handle
  */
-export function syncRef<S extends Record<string, any>, K extends keyof S, R>(
-  state: S,
-  prop: K,
-  map: (value: S[K]) => R,
-  refValue?: Ref<R>
-): Ref<R>;
-export function syncRef<S extends Record<string, any>, K extends keyof S, R>(
-  state: S,
-  prop: K,
-  map?: ((value: S[K]) => R) | Ref<R>,
-  refValue?: Ref<R>
-): Ref<R> {
-  const _map = (isRef(map) || !map) ? (_: S[K]) => _ : map;
-  const _refValue = refValue ?? (isRef(map) ? map : undefined);
+export const bindRefs = <R1, R2>(ref1: Ref<R1>, ref2: Ref<R2>, mapValue: Mapper<R1, R2>) =>
+  watch(ref1, _ => ref2.value = mapValue(_));
 
-  const refVar = _refValue ?? ref(_map(state[prop])) as Ref<R>;
-
-  fromRef<S[K]>(toRef(state, prop)).subscribe(_ => refVar.value = _map(_));
-
-  return refVar;
-}
-
-const defineDesc = <T>(
-  ref: Ref<T>,
-  desc: PropertyDescriptor,
-  descTo: PropertyDescriptor,
-  map?: (v: T) => any
-) => {
-  Object.defineProperty(ref, 'value', {
-    get: desc?.get,
-    set: v => {
-      desc.set?.(v);
-      descTo.set?.(map?.(v) ?? v);
-    }
-  });
-}
-
-export function syncRefs<R>(
+/**
+ * Creates a two-way bind with a ref.
+ *
+ * When a passed ref changes, so does the resulting ref
+ *
+ * @param ref1 an existing ref to bind
+ * @returns a new ref bound to the passed one
+ */
+export function syncRef<R>(
   ref1: Ref<R>,
 ): Ref<R>;
-export function syncRefs<R1, R2>(
+
+/**
+ * Creates a binding between two refs.
+ *
+ * The binding can be:
+ * - One-way if only the `to` mapper is defined.
+ * - Two-way if both `to` and `from` mappers are defined
+ *
+ * The first ref serves as an origin point for the transformation,\
+ * values **from** the second ref and **to** the second ref are mapped from it
+ *
+ * @param ref1 an origin point for the transformation,\
+ * values **from** the second ref and **to** the second ref are mapped from it
+ * @param map a transformer map from one ref to another
+ * @param ref2 an existing ref to bind
+ * @returns ref2
+ */
+export function syncRef<R1, R2>(
   ref1: Ref<R1>,
-  mapTo: (value: R1) => R2,
-  mapFrom: (value: R2) => R1,
+  map: Mappers<R1, R2>,
   ref2: Ref<R2>,
 ): Ref<R2>;
-export function syncRefs<R1, R2>(
+
+/**
+ * Creates a ref that is bound to the passed ref.
+ *
+ * The binding can be:
+ * - One-way if only the `to` mapper is defined.
+ * - Two-way if both `to` and `from` mappers are defined
+ *
+ * The ref serves as an origin point for the transformation,\
+ * values **from** the second ref and **to** the second ref are mapped from it
+ *
+ * @param ref1 an origin point for the transformation,\
+ * values **from** the second ref and **to** the second ref are mapped from it
+ * @param map a transformer map from one ref to another
+ * @param defaultValue for the new ref
+ * @returns a new ref with defaultValue
+ */
+export function syncRef<R1, R2>(
   ref1: Ref<R1>,
-  mapTo: (value: R1) => R2,
-  mapFrom: (value: R2) => R1,
+  map: Mappers<R1, UnwrapRef<R2>>,
   defaultValue?: R2,
-): Ref<R2>;
-export function syncRefs<R1, R2 = R1>(
+): Ref<UnwrapRef<R2>>;
+export function syncRef<R1, R2 = R1>(
   ref1: Ref<R1>,
-  mapTo?: (value: R1) => R2,
-  mapFrom?: (value: R2) => R1,
+  map?: Mappers<R1, R2>,
   _ref2?: Ref<R2> | R2,
 ): Ref<R2> {
-  const ref2 = <Ref<R2>> ref(_ref2 ?? mapTo?.(ref1.value));
+  const ref2 = <Ref<R2>> ref(_ref2 ?? map?.to?.(ref1.value) ?? ref1.value);
 
-  const desc1 = Object.getOwnPropertyDescriptor(ref1, 'value');
-  const desc2 = Object.getOwnPropertyDescriptor(ref2, 'value');
+  bindRefs(ref1, ref2, map?.to ?? identity as Mapper<R1, R2>);
 
-  if (desc1 && desc2) {
-    defineDesc(ref1, desc1, desc2, mapTo);
-    defineDesc(ref2, desc2, desc1, mapFrom);
+  if (!map || map?.from) {
+    bindRefs(ref2, ref1, map?.from ?? identity as Mapper<R2, R1>);
   }
 
   return ref2;

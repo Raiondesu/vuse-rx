@@ -10,6 +10,8 @@ This is a simple stopwatch with configurable increment step, interval and maximu
 
 The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/stopwatch.vue).
 
+Every variable is exposed to `window`, so open the console and play with it!
+
 ## Step-by-step
 
 ### Basics
@@ -123,7 +125,7 @@ let's define how it's displayed to the user.
 <script>
 // paste the code from earlier steps here
 
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, toRef } from 'vue';
 import { syncRef } from 'vuse-rx';
 
 export default defineComponent({
@@ -141,7 +143,7 @@ export default defineComponent({
       maxRef: ref(String(state.maxValue)),
 
       // update speedRef whenever the state.speed property changes
-      speedRef: syncRef(state, 'speed', String),
+      speedRef: syncRef(toRef(state, 'speed'), { to: String }),
 
       // override one of the actions to interpret empty string as NaN instead of 0
       setMaxValue: maxRef => actions.setMaxValue(maxRef === '' ? NaN : +maxRef),

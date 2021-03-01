@@ -31,38 +31,64 @@ count.value = 1;
 ## `syncRef`
 
 ```ts
-function syncRef<S extends Record<string, any>, K extends keyof S, R>(
-  state: S,
-  prop: K,
-  map: (value: S[K]) => R,
-  refValue?: Ref<R>
-): Ref<R>;
-
-function syncRef<S extends Record<string, any>, K extends keyof S>(
-  state: S,
-  prop: K,
-  refValue?: Ref<S[K]>
-): Ref<S[K]>;
+function syncRef<R1, R2 = R1>(
+  ref1: Ref<R1>,
+  map?: {
+    to: (value: R1) => R2,
+    from?: (value: R2) => R1,
+  },
+  ref2?: Ref<R2> | R2,
+): Ref<R2>;
 ```
 
-Creates a one-side bind between a ref and a value from a reactive state.\
-When the reactive state changes, the ref is updated, but not vice versa!
+Creates a binding between two refs.\
+The binding can be:
+- One-way if only the `to` mapper is defined.
+- Two-way if both `to` and `from` mappers are defined.
+
+The second (resulting) ref serves as an origin point for the binding,\
+values **from** the second ref and **to** the second ref are mapped onto it.
 
 Example:
 ```ts
-const state = reactive({
-  count: 0
-});
+const count = ref(0);
 
-const count = syncRef(state, 'count');
+// two-way binding
+// Once count changes - countStr changes too
+// and vice versa,
+// according to the rules in the map.
+const countStr = syncRef(count, { to: String, from: Number });
 
-// Ref is updated when state is changes
-state.count = 1;
+// one-way binding
+// Once count changes - countInputStr changes too,
+// according to the rules in the map.
+// But if countInputStr changes - count stays the same
+const countInputStr = syncRef(count, { to: String });
+```
+
+Every variable is exposed to `window`,\
+so feel free to open the console and play with them!
+
+<ClientOnly>
+  <SyncRef/>
+</ClientOnly>
+
+```ts
+count.value = 1;
+console.log('countStr:', countStr.value);
+//> 1
+console.log('countInputStr:', countInputStr.value);
+//> 1
+
+countStr.value = 2;
 console.log('count:', count.value);
-//> 1
+//> 2
+console.log('countInputStr:', countInputStr.value);
+//> 2
 
-// But not vice versa
-count.value = 2;
-console.log('state.count', state.count);
-//> 1
+countInputStr.value = 42;
+console.log('count:', count.value);
+//> 2
+console.log('countStr:', countStr.value);
+//> 2
 ```

@@ -1,8 +1,10 @@
 <script lang="ts">
-import { defineComponent, ref } from 'vue';
+import { defineComponent, ref, toRef } from 'vue';
 import { map, mapTo, switchMap } from 'rxjs/operators';
 import { of, interval } from 'rxjs';
 import { useRxState, syncRef } from 'vuse-rx';
+import { setToWindow } from '../set-window';
+import Console from '../console.vue';
 
 const createStopwatch = useRxState(() => ({
   count: false,
@@ -44,20 +46,27 @@ const useStopwatch = () => createStopwatch(
 );
 
 export default defineComponent({
+  components: { Console },
   setup() {
     const { actions, state } = useStopwatch()
       .subscribe(state => console.log('state updated: ', state));
 
-    return {
+    return setToWindow({
+      createStopwatch,
+      useStopwatch,
+      clampValue,
+      paused,
+      syncRef,
+      useRxState,
       ...actions,
       state,
       setToRef: ref(String(state.value)),
       maxRef: ref(String(state.maxValue)),
       stepRef: ref(String(state.step)),
-      speedRef: syncRef(state, 'speed', String),
+      speedRef: syncRef(toRef(state, 'speed'), { to: String }),
 
       setMaxValue: (maxRef: string) => actions.setMaxValue(maxRef === '' ? NaN : +maxRef),
-    };
+    });
   },
 });
 </script>
@@ -96,6 +105,7 @@ export default defineComponent({
       <button @click="setMaxValue(maxRef)">Set maximum</button>
     </div>
   </main>
+  <console/>
 </template>
 
 <style scoped>
