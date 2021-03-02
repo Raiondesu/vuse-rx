@@ -7,7 +7,7 @@ A simple example of a counter state with an increment reducer:
 
 The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/counter.vue).
 
-Every variable is exposed to `window`, so open the console and play with it!
+Every variable is exposed to `window`, so feel free to open the console and play with it!
 
 ```vue {2,12-15,17-20,29-31}
 <script lang="ts">

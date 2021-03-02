@@ -1,4 +1,4 @@
-import { isRef, ref, Ref, toRef, UnwrapRef, watch, WatchSource } from 'vue';
+import { computed, ref, Ref, UnwrapRef, watch, WatchSource, WritableComputedRef } from 'vue';
 import { tap } from 'rxjs/operators';
 import { identity, Observable, OperatorFunction } from 'rxjs';
 import { untilUnmounted } from './hooks/until';
@@ -116,85 +116,53 @@ type Mappers<R1, R2> = {
    * It will create a two-way bind between the refs
    */
   from?: Mapper<R2, R1>,
+} | {
+  /**
+   * A map from the first ref to the second
+   */
+  to?: Mapper<R1, R2>,
+
+  /**
+   * A map from the second ref to the first
+   *
+   * It will create a two-way bind between the refs
+   */
+  from: Mapper<R2, R1>,
 };
 
-/**
- * Defines a one-way binding from ref1 to ref2\
- * with an ability to convert value's type on-the-fly
- * @param ref1 the source of the binding
- * @param ref2 the destination of the binding
- * @param mapValue describes how to transform the value on ref1 update
- * @returns watch stop handle
- */
-export const bindRefs = <R1, R2>(ref1: Ref<R1>, ref2: Ref<R2>, mapValue: Mapper<R1, R2>) =>
-  watch(ref1, _ => ref2.value = mapValue(_));
-
-/**
- * Creates a two-way bind with a ref.
- *
- * When a passed ref changes, so does the resulting ref
- *
- * @param ref1 an existing ref to bind
- * @returns a new ref bound to the passed one
- */
-export function syncRef<R>(
-  ref1: Ref<R>,
-): Ref<R>;
-
-/**
- * Creates a binding between two refs.
- *
- * The binding can be:
- * - One-way if only the `to` mapper is defined.
- * - Two-way if both `to` and `from` mappers are defined
- *
- * The first ref serves as an origin point for the transformation,\
- * values **from** the second ref and **to** the second ref are mapped from it
- *
- * @param ref1 an origin point for the transformation,\
- * values **from** the second ref and **to** the second ref are mapped from it
- * @param map a transformer map from one ref to another
- * @param ref2 an existing ref to bind
- * @returns ref2
- */
 export function syncRef<R1, R2>(
   ref1: Ref<R1>,
-  map: Mappers<R1, R2>,
-  ref2: Ref<R2>,
-): Ref<R2>;
-
-/**
- * Creates a ref that is bound to the passed ref.
- *
- * The binding can be:
- * - One-way if only the `to` mapper is defined.
- * - Two-way if both `to` and `from` mappers are defined
- *
- * The ref serves as an origin point for the transformation,\
- * values **from** the second ref and **to** the second ref are mapped from it
- *
- * @param ref1 an origin point for the transformation,\
- * values **from** the second ref and **to** the second ref are mapped from it
- * @param map a transformer map from one ref to another
- * @param defaultValue for the new ref
- * @returns a new ref with defaultValue
- */
-export function syncRef<R1, R2>(
-  ref1: Ref<R1>,
-  map: Mappers<R1, UnwrapRef<R2>>,
+  { to, from }: Mappers<R1, UnwrapRef<R2>>,
   defaultValue?: R2,
 ): Ref<UnwrapRef<R2>>;
-export function syncRef<R1, R2 = R1>(
+export function syncRef<R1, R2>(
   ref1: Ref<R1>,
-  map?: Mappers<R1, R2>,
+  { to, from }: Mappers<R1, UnwrapRef<R2>>,
+): Ref<UnwrapRef<R2>>;
+export function syncRef<R1, R2>(
+  ref1: Ref<R1>,
+  { to, from }: Mappers<R1, R2>,
+  ref2: Ref<R2>,
+): Ref<R2>;
+export function syncRef<R1, R2>(
+  ref1: Ref<R1>,
+  { to, from }: Mappers<R1, R2>,
   _ref2?: Ref<R2> | R2,
 ): Ref<R2> {
-  const ref2 = <Ref<R2>> ref(_ref2 ?? map?.to?.(ref1.value) ?? ref1.value);
+  // Slight optimization if both mappers are defined
+  if (to && from) {
+    return computed({
+      get: () => to(ref1.value),
+      set: v => ref1.value = from(v),
+    });
+  }
 
-  bindRefs(ref1, ref2, map?.to ?? identity as Mapper<R1, R2>);
+  const ref2 = ref(_ref2 ?? ref1.value) as Ref<R2>;
 
-  if (!map || map?.from) {
-    bindRefs(ref2, ref1, map?.from ?? identity as Mapper<R2, R1>);
+  if (to) {
+    watch(ref1, v => ref2.value = to(v));
+  } else if (from) {
+    watch(ref2, v => ref1.value = from(v));
   }
 
   return ref2;

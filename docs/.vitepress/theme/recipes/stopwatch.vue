@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, ref, toRef } from 'vue';
+import { defineComponent, ref, toRef, watch } from 'vue';
 import { map, mapTo, switchMap } from 'rxjs/operators';
 import { of, interval } from 'rxjs';
 import { useRxState, syncRef } from 'vuse-rx';

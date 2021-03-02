@@ -1,6 +1,6 @@
-import { ref, watch } from 'vue';
+import { computed, ref, watch } from 'vue';
 import { tap } from 'rxjs/operators';
-import { identity, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import { untilUnmounted } from "./hooks/until.js";
 export const tapRefs = (observable, map, initialState) => {
     const ops = [];
@@ -28,12 +28,19 @@ export function fromRef(ref) {
     return untilUnmounted(new Observable(ctx => watch(ref, value => ctx.next(value))));
 }
 ;
-export const bindRefs = (ref1, ref2, mapValue) => watch(ref1, _ => ref2.value = mapValue(_));
-export function syncRef(ref1, map, _ref2) {
-    const ref2 = ref(_ref2 ?? map?.to?.(ref1.value) ?? ref1.value);
-    bindRefs(ref1, ref2, map?.to ?? identity);
-    if (!map || map?.from) {
-        bindRefs(ref2, ref1, map?.from ?? identity);
+export function syncRef(ref1, { to, from }, _ref2) {
+    if (to && from) {
+        return computed({
+            get: () => to(ref1.value),
+            set: v => ref1.value = from(v),
+        });
+    }
+    const ref2 = ref(_ref2 ?? ref1.value);
+    if (to) {
+        watch(ref1, v => ref2.value = to(v));
+    }
+    else if (from) {
+        watch(ref2, v => ref1.value = from(v));
     }
     return ref2;
 }

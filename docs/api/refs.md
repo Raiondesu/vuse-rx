@@ -33,7 +33,7 @@ count.value = 1;
 ```ts
 function syncRef<R1, R2 = R1>(
   ref1: Ref<R1>,
-  map?: {
+  map: {
     to: (value: R1) => R2,
     from?: (value: R2) => R1,
   },
@@ -43,10 +43,10 @@ function syncRef<R1, R2 = R1>(
 
 Creates a binding between two refs.\
 The binding can be:
-- One-way if only the `to` mapper is defined.
-- Two-way if both `to` and `from` mappers are defined.
+- One-way if only the one mapper is defined.
+- Two-way if both mappers (`to` and `from`) are defined.
 
-The second (resulting) ref serves as an origin point for the binding,\
+The second ref serves as an origin point for the binding,\
 values **from** the second ref and **to** the second ref are mapped onto it.
 
 Example:
@@ -57,13 +57,21 @@ const count = ref(0);
 // Once count changes - countStr changes too
 // and vice versa,
 // according to the rules in the map.
-const countStr = syncRef(count, { to: String, from: Number });
+const countStr = syncRef(
+  count, // ref to bind
+  {
+    // how to convert value when mapping to the resulting ref
+    to: String,
+    // how to convert value when mapping from the resulting ref
+    from: Number
+  }
+);
 
 // one-way binding
-// Once count changes - countInputStr changes too,
+// Once countInputStr changes - count changes too,
 // according to the rules in the map.
-// But if countInputStr changes - count stays the same
-const countInputStr = syncRef(count, { to: String });
+// But if count changes - countInputStr stays the same
+const countInputStr = syncRef(count, { from: Number }, '');
 ```
 
 Every variable is exposed to `window`,\
@@ -76,19 +84,19 @@ so feel free to open the console and play with them!
 ```ts
 count.value = 1;
 console.log('countStr:', countStr.value);
-//> 1
+//> countStr: 1
 console.log('countInputStr:', countInputStr.value);
-//> 1
+//> countInputStr: '0'
 
-countStr.value = 2;
+countStr.value = '2';
 console.log('count:', count.value);
-//> 2
+//> count: 2
 console.log('countInputStr:', countInputStr.value);
-//> 2
+//> countInputStr: '0'
 
-countInputStr.value = 42;
+countInputStr.value = '42';
 console.log('count:', count.value);
-//> 2
+//> count: 42
 console.log('countStr:', countStr.value);
-//> 2
+//> countStr: '42'
 ```

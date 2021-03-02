@@ -148,6 +148,7 @@ const maybeCall = <T, A extends any[]>(
  */
 export function useRxState<S extends Record<string, any>>(initialState: () => S): CreateRxState<S>;
 export function useRxState<S extends Record<string, any>>(initialState: S): CreateRxState<S>;
+export function useRxState<S extends Record<string, any>>(initialState: S | (() => S)): CreateRxState<S>;
 export function useRxState<T extends Record<string, any>>(initialState: T | (() => T)) {
   type S = UnwrapNestedRefs<T>;
 

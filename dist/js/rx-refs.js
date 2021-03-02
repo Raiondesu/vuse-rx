@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.syncRef = exports.bindRefs = exports.fromRef = exports.useRxRefs = exports.tapRefs = void 0;
+exports.syncRef = exports.fromRef = exports.useRxRefs = exports.tapRefs = void 0;
 const vue_1 = require("vue");
 const operators_1 = require("rxjs/operators");
 const rxjs_1 = require("rxjs");
@@ -34,14 +34,19 @@ function fromRef(ref) {
 }
 exports.fromRef = fromRef;
 ;
-const bindRefs = (ref1, ref2, mapValue) => vue_1.watch(ref1, _ => ref2.value = mapValue(_));
-exports.bindRefs = bindRefs;
-function syncRef(ref1, map, _ref2) {
-    var _a, _b, _c, _d;
-    const ref2 = vue_1.ref((_b = _ref2 !== null && _ref2 !== void 0 ? _ref2 : (_a = map === null || map === void 0 ? void 0 : map.to) === null || _a === void 0 ? void 0 : _a.call(map, ref1.value)) !== null && _b !== void 0 ? _b : ref1.value);
-    exports.bindRefs(ref1, ref2, (_c = map === null || map === void 0 ? void 0 : map.to) !== null && _c !== void 0 ? _c : rxjs_1.identity);
-    if (!map || (map === null || map === void 0 ? void 0 : map.from)) {
-        exports.bindRefs(ref2, ref1, (_d = map === null || map === void 0 ? void 0 : map.from) !== null && _d !== void 0 ? _d : rxjs_1.identity);
+function syncRef(ref1, { to, from }, _ref2) {
+    if (to && from) {
+        return vue_1.computed({
+            get: () => to(ref1.value),
+            set: v => ref1.value = from(v),
+        });
+    }
+    const ref2 = vue_1.ref(_ref2 !== null && _ref2 !== void 0 ? _ref2 : ref1.value);
+    if (to) {
+        vue_1.watch(ref1, v => ref2.value = to(v));
+    }
+    else if (from) {
+        vue_1.watch(ref2, v => ref1.value = from(v));
     }
     return ref2;
 }

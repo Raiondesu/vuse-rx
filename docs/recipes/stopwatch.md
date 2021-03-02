@@ -10,7 +10,7 @@ This is a simple stopwatch with configurable increment step, interval and maximu
 
 The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/stopwatch.vue).
 
-Every variable is exposed to `window`, so open the console and play with it!
+Every variable is exposed to `window`, so feel free to open the console and play with it!
 
 ## Step-by-step
 
@@ -121,11 +121,11 @@ let's define how it's displayed to the user.
 
 #### `setup` function
 
-```vue {5,9-12,21,22}
+```vue {5,9-12,26,27}
 <script>
 // paste the code from earlier steps here
 
-import { defineComponent, ref, toRef } from 'vue';
+import { defineComponent, ref, toRef, watch } from 'vue';
 import { syncRef } from 'vuse-rx';
 
 export default defineComponent({
@@ -138,8 +138,8 @@ export default defineComponent({
     return {
       ...actions,
       state,
+      setValRef: ref(String(state.value)),
       stepRef: ref(String(state.step)),
-      setToRef: ref(String(state.value)),
       maxRef: ref(String(state.maxValue)),
 
       // update speedRef whenever the state.speed property changes
@@ -174,7 +174,7 @@ export default defineComponent({
   </div>
   <div>
     <input v-model="setToRef"/>
-    <!-- Convert ref's value to string and set it as the counter's value -->
+    <!-- Convert ref's value to number and set it as the counter's value -->
     <!-- using the reducer that was defined earlier -->
     <button @click="setValue(+setToRef)">Set value</button>
   </div>
