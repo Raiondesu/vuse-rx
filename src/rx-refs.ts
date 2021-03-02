@@ -130,15 +130,44 @@ type Mappers<R1, R2> = {
   from: Mapper<R2, R1>,
 };
 
+/**
+ * Creates a binding between two refs.\
+ * The binding can be:
+ * - One-way if only the one mapper is defined.
+ * - Two-way if both mappers (`to` and `from`) are defined.
+ *
+ * The resulting ref serves as an origin point for the binding,\
+ * values **from** the resulting ref and **to** the resulting ref are mapped onto it.
+ */
 export function syncRef<R1, R2>(
   ref1: Ref<R1>,
   { to, from }: Mappers<R1, UnwrapRef<R2>>,
   defaultValue?: R2,
 ): Ref<UnwrapRef<R2>>;
+
+/**
+ * Creates a binding between two refs.\
+ * The binding can be:
+ * - One-way if only the one mapper is defined.
+ * - Two-way if both mappers (`to` and `from`) are defined.
+ *
+ * The resulting ref serves as an origin point for the binding,\
+ * values **from** the resulting ref and **to** the resulting ref are mapped onto it.
+ */
 export function syncRef<R1, R2>(
   ref1: Ref<R1>,
   { to, from }: Mappers<R1, UnwrapRef<R2>>,
 ): Ref<UnwrapRef<R2>>;
+
+/**
+ * Creates a binding between two refs.\
+ * The binding can be:
+ * - One-way if only the one mapper is defined.
+ * - Two-way if both mappers (`to` and `from`) are defined.
+ *
+ * The second ref serves as an origin point for the binding,\
+ * values **from** the second ref and **to** the second ref are mapped onto it.
+ */
 export function syncRef<R1, R2>(
   ref1: Ref<R1>,
   { to, from }: Mappers<R1, R2>,
