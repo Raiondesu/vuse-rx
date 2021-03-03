@@ -1,8 +1,9 @@
-const package = require('../../package.json');
+const { name, description } = require('../../package.json');
 
 module.exports = {
-  title: package.name,
-  description: package.description,
+  title: name,
+  description: description,
+  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo-small.svg' }]],
   themeConfig: {
     repo: 'raiondesu/vuse-rx',
     docsDir: 'docs',
