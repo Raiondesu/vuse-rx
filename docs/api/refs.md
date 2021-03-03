@@ -8,10 +8,10 @@ These are utilities that allow interoperability between rxjs' observables and vu
 
 ```ts
 // for vue refs
-function <R>(ref: WatchSource<R>): Observable<R>;
+function <R>(ref: WatchSource<R>, options?: WatchOptions): Observable<R>;
 
 // for reactive states
-function <R extends Record<string, any>>(reactiveState: R): Observable<R>;
+function <R extends Record<string, any>>(reactiveState: R, options?: WatchOptions): Observable<R>;
 ```
 
 Creates an observable from a vue ref.\

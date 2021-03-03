@@ -1,5 +1,5 @@
 import { Observable } from 'rxjs';
-import { watch, WatchSource } from 'vue';
+import { watch, WatchOptions, WatchSource } from 'vue';
 import { untilUnmounted } from '../hooks/until';
 
 /**
@@ -12,8 +12,17 @@ import { untilUnmounted } from '../hooks/until';
  * @param ref - a ref/reactive/factory to observe
  * @returns an observable that watches the ref
  */
-export function fromRef<R>(ref: WatchSource<R>): Observable<R>;
-export function fromRef<R extends Record<string, any>>(reactiveState: R): Observable<R>;
+export function fromRef<R>(ref: WatchSource<R>, options?: WatchOptions): Observable<R>;
+
+/**
+ * Creates an observable from a vue reactive state.
+ *
+ * Each time a state's value is changed - observable emits.
+ *
+ * @param ref - a reactive state to observe
+ * @returns an observable that watches the state
+ */
+export function fromRef<R extends Record<string, any>>(reactiveState: R, options?: WatchOptions): Observable<R>;
 export function fromRef<R extends Record<string, any> | WatchSource<any>>(ref: R): Observable<R> {
   return untilUnmounted(
     new Observable<R>(ctx => watch(ref, value => ctx.next(value)))
