@@ -52,7 +52,7 @@ export default defineComponent({
   }
 
   .lines {
-    height: 100px;
+    height: 200px;
     overflow-y: scroll;
     font-family: monospace;
     box-shadow: 0 4px 9px -10px black inset;
@@ -60,5 +60,16 @@ export default defineComponent({
 
   .lines * {
     margin: 0;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    .lines {
+      box-shadow: 0 4px 9px -10px var(--c-bg) inset;
+      background-color: var(--code-inline-bg-color);
+    }
+
+    .lines * {
+      color: var(--c-text);
+    }
   }
 </style>

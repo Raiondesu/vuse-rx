@@ -123,17 +123,19 @@ if default values for the refs are not given as a second parameter.
 Example:
 ```ts
 // Suppose we have some function that either returns a promise or rejects it:
-declare function login(username: string, password: string): Promise<{ token: string }>;
+declare function getPage(id: string): Promise<{ content: string }>;
 
 // Using `refsFrom` we can process both the success and error cases
 // without the need for try/then/catch!
 
-const { next: token, error } = refsFrom(
-  login('raiondesu', 'totally not my password')
-    // Extract token first
-    .then(obj => obj.token)
+const { next: content, error } = refsFrom(
+  getPage('raiondesu')
+    // Extract content first
+    .then(obj => obj.content)
 );
 
-watch(next, value => console.log('promise is resolved!', value));
+// Normally the results are displayed in a template,
+// so `watch` here is just to get the point across:
+watch(content, value => console.log('promise is resolved!', value));
 watch(error, value => console.log('promise is rejected!', value));
 ```
