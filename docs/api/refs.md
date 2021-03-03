@@ -54,6 +54,7 @@ The second ref serves as an origin point for the binding,\
 values **from** the second ref and **to** the second ref are mapped onto it.
 
 Example:
+
 ```ts
 const count = ref(0);
 
