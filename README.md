@@ -16,6 +16,11 @@
 Ever felt like combining flux architecture with rxjs? Or maybe in need of creating observables from Vue `ref`s or other Vue features?\
 Well, this library is exaclty for those types of cases.
 
+Other highlights are:
+- [`syncRef`](https://vuse-rx.raiondesu.rocks/api/refs.html#syncref) - synchronize two refs with either one-way or two-way binding;
+- [`fromRef`](https://vuse-rx.raiondesu.rocks/api/refs.html#fromref) - create an observable from any ref or watch source;
+- [`refFrom`](https://vuse-rx.raiondesu.rocks/api/refs.html#reffrom) - create a ref from a promise/observable/iterable/generator or anything else;
+
 ### See the [docs](https://vuse-rx.raiondesu.rocks) for more information
 
 ## Install

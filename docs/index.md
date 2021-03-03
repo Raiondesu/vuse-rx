@@ -8,11 +8,11 @@ actionText: Get Started
 actionLink: /guide/getting-started
 features:
 - title: Composable
-  details: Designed to work best with Vue 3's composition-api, allowing you to structure observables like never before
-- title: Lightweight
-  details: Only a small 2kb (1kb gzipped) layer above rxjs (11kb) making it a much lighter alternative to other rx-driven solutions for Vue 3
+  details: Designed to work best with Vue's composition-api, allowing full integration into the Vue ecosystem!
+- title: Compatible
+  details: "Full rxjs-vue interoperability: create observables from refs, refs from observables, promises, generators!"
 - title: Simple
-  details: The whole library only consists of simple, predictable pure functions, which are easy to use and understand
+  details: The whole library only consists of simple, predictable pure functions, which are easy to use and understand.
 ---
 
 

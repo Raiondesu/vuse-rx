@@ -1,13 +1,17 @@
-# Ref interaction
+# Observable X Reactive
+
+These are utilities that allow interoperability between rxjs' observables and vue's reactivity.
+
+[[toc]]
 
 ## `fromRef`
 
 ```ts
 // for vue refs
-function fromRef<R>(ref: WatchSource<R>): Observable<R>;
+function <R>(ref: WatchSource<R>): Observable<R>;
 
 // for reactive states
-function fromRef<R extends Record<string, any>>(reactiveState: R): Observable<R>;
+function <R extends Record<string, any>>(reactiveState: R): Observable<R>;
 ```
 
 Creates an observable from a vue ref.\
@@ -31,7 +35,7 @@ count.value = 1;
 ## `syncRef`
 
 ```ts
-function syncRef<R1, R2 = R1>(
+function <R1, R2 = R1>(
   ref1: Ref<R1>,
   map: {
     to: (value: R1) => R2,
@@ -81,22 +85,55 @@ so feel free to open the console and play with them!
   <SyncRef/>
 </ClientOnly>
 
+## `refFrom`
+
 ```ts
-count.value = 1;
-console.log('countStr:', countStr.value);
-//> countStr: 1
-console.log('countInputStr:', countInputStr.value);
-//> countInputStr: '0'
+function <R>(obserableInput: ObservableInput<R>, defaultValue?: R): Ref<UnwrapRef<R>>;
 
-countStr.value = '2';
-console.log('count:', count.value);
-//> count: 2
-console.log('countInputStr:', countInputStr.value);
-//> countInputStr: '0'
+function <R extends Record<any, any>, K extends keyof R>(state: R, key: K): Ref<UnwrapRef<R[K]>>;
+```
 
-countInputStr.value = '42';
-console.log('count:', count.value);
-//> count: 42
-console.log('countStr:', countStr.value);
-//> countStr: '42'
+Creates a ref from a couple of possible inputs.\
+These include:
+- `Promise`
+- `Generator`
+- `Iterable`
+- `Observable`
+- `Array`
+- Vue's `Reactive`
+
+Will also work as a simple `ref` function as a safeguard or a convenience, in case it is given an unrecognizable value.
+
+## `refsFrom`
+
+```ts
+function <R, E = unknown>(
+  input: ObservableInput<R>,
+  defaultValues: { next: R, from: E },
+): Refs<Subscribers<R, E>>;
+```
+
+Creates two refs from an observable input, same as [`refFrom`](#reffrom) (promise, iterable, observable and alike):
+- `next` - is set when the resulting observable resolves
+- `error` - is set when the resulting observable errors
+
+Until the observable emits, the refs will contain `undefined`,
+if default values for the refs are not given as a second parameter.
+
+Example:
+```ts
+// Suppose we have some function that either returns a promise or rejects it:
+declare function login(username: string, password: string): Promise<{ token: string }>;
+
+// Using `refsFrom` we can process both the success and error cases
+// without the need for try/then/catch!
+
+const { next: token, error } = refsFrom(
+  login('raiondesu', 'totally not my password')
+    // Extract token first
+    .then(obj => obj.token)
+);
+
+watch(next, value => console.log('promise is resolved!', value));
+watch(error, value => console.log('promise is rejected!', value));
 ```
