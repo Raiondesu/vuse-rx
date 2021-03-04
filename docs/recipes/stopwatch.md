@@ -121,7 +121,7 @@ let's define how it's displayed to the user.
 
 #### `setup` function
 
-```vue {5,9-12,26,27}
+```vue {5,9-12,21,22}
 <script>
 // paste the code from earlier steps here
 
