@@ -3,7 +3,7 @@ import { Ref, ref } from 'vue';
 
 type Subscribers<R, E> = { next: R; error: E; };
 
-type Refs<S extends Subscribers<any, any>> = {
+type Refs<S extends Subscribers<unknown, unknown>> = {
   [key in keyof S]: Ref<S[key]>;
 };
 
@@ -12,14 +12,13 @@ type Refs<S extends Subscribers<any, any>> = {
  * - `next` - is set when the resulting observable resolves
  * - `error` - is set when the resulting observable errors
  *
+ * Until the observable emits, the refs will contain `undefined`.
+ *
  * @param input
  * A value to create an observable from.\
  * This observable is then going to be listened to in order to set the refs.
- *
- * @param defaultValues
- * A map of default values for each ref.
  */
-export function refsFrom<R, E>(input: ObservableInput<R>, defaultValues: Subscribers<R, E>): Refs<Subscribers<R, E>>;
+export function refsFrom<R, E = unknown>(input: ObservableInput<R>): Refs<Subscribers<R | undefined, E | undefined>>;
 
 /**
  * Creates two refs from an observable input (promise, iterable, observable and alike):
@@ -40,17 +39,18 @@ export function refsFrom<R, E = unknown>(input: ObservableInput<R>, defaultValue
  * - `next` - is set when the resulting observable resolves
  * - `error` - is set when the resulting observable errors
  *
- * Until the observable emits, the refs will contain `undefined`.
- *
  * @param input
  * A value to create an observable from.\
  * This observable is then going to be listened to in order to set the refs.
+ *
+ * @param defaultValues
+ * A map of default values for each ref.
  */
-export function refsFrom<R, E = unknown>(input: ObservableInput<R>): Refs<Subscribers<R | undefined, E | undefined>>;
+export function refsFrom<R, E>(input: ObservableInput<R>, defaultValues: Subscribers<R, E>): Refs<Subscribers<R, E>>;
 
-export function refsFrom(input: ObservableInput<any>) {
-  const next = ref();
-  const error = ref();
+export function refsFrom(input: ObservableInput<any>, defaultValues?: Partial<Subscribers<any, any>>) {
+  const next = ref(defaultValues?.next);
+  const error = ref(defaultValues?.error);
 
   from(input).subscribe({
     next: v => next.value = v,
