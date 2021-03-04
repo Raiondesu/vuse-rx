@@ -4,7 +4,7 @@ import { onUnmounted, reactive } from 'vue';
 import { pipeUntil } from "./hooks/until.js";
 const updateKeys = (prev) => (curr) => {
     for (const key in curr) {
-        prev[key] = curr[key] ?? prev[key];
+        prev[key] = curr[key];
     }
     return prev;
 };

@@ -6,9 +6,8 @@ const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const until_1 = require("./hooks/until");
 const updateKeys = (prev) => (curr) => {
-    var _a;
     for (const key in curr) {
-        prev[key] = (_a = curr[key]) !== null && _a !== void 0 ? _a : prev[key];
+        prev[key] = curr[key];
     }
     return prev;
 };
