@@ -1,5 +1,5 @@
 import type { OperatorFunction } from 'rxjs/internal/types';
-import { isObservable, merge, Observable, of, Subject, identity } from 'rxjs';
+import { isObservable, merge, of, Subject, identity, Observable } from 'rxjs';
 import { map, mergeScan, scan } from 'rxjs/operators';
 import { onUnmounted, reactive, Ref, UnwrapRef } from 'vue';
 import { pipeUntil } from './hooks/until';
@@ -92,7 +92,7 @@ type CreateRxState<S> = {
 
 const updateKeys = <S>(prev: S) => (curr: Partial<S>) => {
   for (const key in curr) {
-    prev[key] = curr[key] ?? prev[key];
+    prev[key] = curr[key] as S[Extract<keyof S, string>];
   }
 
   return prev;

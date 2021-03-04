@@ -177,7 +177,7 @@ The function then returns a pretty complex object, with the first three properti
 ## [Basic example](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/counter.vue)
 
 <ClientOnly>
-  <CounterDemo/>
+  <CounterDemo simple/>
 </ClientOnly>
 
 ```js
@@ -211,7 +211,7 @@ const countRef = syncRef(state, 'count', String),
 
 ```vue
 <template>
-  <button @click="increment">increment {{ state.count }}</button>
+  <button @click="increment">increment to {{ state.count + 1 }}</button>
   <br>
   <input v-model="countRef"/>
   <button @click="setCount(countRef)">set count to {{ countRef }}</button>

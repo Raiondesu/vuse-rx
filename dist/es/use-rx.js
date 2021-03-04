@@ -3,9 +3,8 @@ import { map, mergeScan, scan } from 'rxjs/operators';
 import { onUnmounted, reactive } from 'vue';
 import { pipeUntil } from "./hooks/until.js";
 const updateKeys = (prev) => (curr) => {
-    var _a;
     for (const key in curr) {
-        prev[key] = (_a = curr[key]) !== null && _a !== void 0 ? _a : prev[key];
+        prev[key] = curr[key];
     }
     return prev;
 };

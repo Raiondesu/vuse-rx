@@ -6,8 +6,9 @@
 <p align="center" style="text-align: center">
   <a href="https://github.com/Raiondesu/vuse-rx/actions"><img src="https://img.shields.io/github/workflow/status/raiondesu/vuse-rx/CI?style=flat-square"/></a>
   <a href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/v/vuse-rx?style=flat-square"/></a>
-  <a href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/bundlephobia/minzip/vuse-rx?style=flat-square"/></a>
+  <a href="https://bundlephobia.com/result?p=vuse-rx"><img src="https://img.shields.io/bundlephobia/minzip/vuse-rx?style=flat-square"/></a>
   <a href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/dt/vuse-rx?style=flat-square"/></a>
+  <a href="https://github.com/Raiondesu/vuse-rx/actions"><img src="https://img.shields.io/coveralls/github/Raiondesu/vuse-rx?style=flat-square"/></a>
   <a href="https://vuse-rx.raiondesu.rocks"><img src="https://img.shields.io/badge/docs-up-blue?style=flat-square"/></a>
 </p>
 
