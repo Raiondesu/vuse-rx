@@ -1,21 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useRxState = exports.defaultMergeKeys = void 0;
+exports.useRxState = exports.deepMergeKeys = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const shared_1 = require("@vue/shared");
 const until_1 = require("./hooks/until");
-const defaultMergeKeys = (prev) => (curr) => {
+const deepMergeKeys = (prev) => (curr) => {
     for (const key in curr) {
         prev[key] = shared_1.isObject(curr[key]) && shared_1.isObject(prev[key])
-            ? exports.defaultMergeKeys(prev[key])(curr[key])
+            ? exports.deepMergeKeys(prev[key])(curr[key])
             : curr[key];
     }
     return prev;
 };
-exports.defaultMergeKeys = defaultMergeKeys;
-function useRxState(initialState, mergeKeys = exports.defaultMergeKeys) {
+exports.deepMergeKeys = deepMergeKeys;
+function useRxState(initialState, mergeKeys = exports.deepMergeKeys) {
     return function (reducers, map$) {
         var _a;
         const state = vue_1.reactive(maybeCall(initialState));
@@ -36,7 +36,7 @@ function useRxState(initialState, mergeKeys = exports.defaultMergeKeys) {
         return createRxResult({
             actions,
             state: vue_1.readonly(state),
-            state$: until_1.untilUnmounted((_a = map$ === null || map$ === void 0 ? void 0 : map$(merged$, reducers, state, actions$).pipe(operators_1.scan((acc, curr) => mergeKeys(acc)(curr), state))) !== null && _a !== void 0 ? _a : merged$),
+            state$: until_1.untilUnmounted((_a = map$ === null || map$ === void 0 ? void 0 : map$(merged$, reducers, state, actions$).pipe(mergeStates)) !== null && _a !== void 0 ? _a : merged$),
             actions$: actions$,
         });
     };

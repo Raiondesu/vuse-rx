@@ -1,17 +1,17 @@
 import { isObservable, merge, of, Subject } from 'rxjs';
-import { map, mergeScan, scan } from 'rxjs/operators';
+import { map, mergeScan } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { isObject } from '@vue/shared';
 import { untilUnmounted } from "./hooks/until.js";
-export const defaultMergeKeys = (prev) => (curr) => {
+export const deepMergeKeys = (prev) => (curr) => {
     for (const key in curr) {
         prev[key] = isObject(curr[key]) && isObject(prev[key])
-            ? defaultMergeKeys(prev[key])(curr[key])
+            ? deepMergeKeys(prev[key])(curr[key])
             : curr[key];
     }
     return prev;
 };
-export function useRxState(initialState, mergeKeys = defaultMergeKeys) {
+export function useRxState(initialState, mergeKeys = deepMergeKeys) {
     return function (reducers, map$) {
         const state = reactive(maybeCall(initialState));
         const mergeStates = mergeScan((prev, curr) => {
@@ -31,7 +31,7 @@ export function useRxState(initialState, mergeKeys = defaultMergeKeys) {
         return createRxResult({
             actions,
             state: readonly(state),
-            state$: untilUnmounted(map$?.(merged$, reducers, state, actions$).pipe(scan((acc, curr) => mergeKeys(acc)(curr), state)) ?? merged$),
+            state$: untilUnmounted(map$?.(merged$, reducers, state, actions$).pipe(mergeStates) ?? merged$),
             actions$: actions$,
         });
     };
