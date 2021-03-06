@@ -1,6 +1,9 @@
-import { isObservable, merge, of, Subject, Observable } from 'rxjs';
-import { map, mergeScan, scan } from 'rxjs/operators';
-import { DeepReadonly, reactive, readonly, Ref, UnwrapRef } from 'vue';
+import type { Observable } from 'rxjs';
+import type { DeepReadonly, Ref, UnwrapRef } from 'vue';
+
+import { isObservable, merge, of, Subject } from 'rxjs';
+import { map, mergeScan } from 'rxjs/operators';
+import { reactive, readonly } from 'vue';
 import { isObject } from '@vue/shared';
 import { untilUnmounted } from './hooks/until';
 
@@ -10,10 +13,14 @@ type MergeStrategy<S extends Record<PropertyKey, any>> = (
   currentState: DeepPartial<S>
 ) => S;
 
-export const defaultMergeKeys = <S extends Record<PropertyKey, any>>(prev: S) => (curr: DeepPartial<S>) => {
+export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
+  prev: S
+) => (
+  curr: DeepPartial<S>
+) => {
   for (const key in curr) {
     prev[key] = isObject(curr[key]) && isObject(prev[key])
-      ? defaultMergeKeys(prev[key])(curr[key])
+      ? deepMergeKeys(prev[key])(curr[key])
       : curr[key] as any;
   }
 
@@ -62,7 +69,10 @@ export function useRxState<S extends Record<string, any>>(
   mergeStrategy?: MergeStrategy<UnwrapNestedRefs<S>>
 ): CreateRxState<UnwrapNestedRefs<S>>;
 
-export function useRxState<T extends Record<string, any>>(initialState: T | (() => T), mergeKeys = defaultMergeKeys) {
+export function useRxState<T extends Record<string, any>>(
+  initialState: T | (() => T),
+  mergeKeys = deepMergeKeys
+) {
   type S = UnwrapNestedRefs<T>;
   type PS = DeepPartial<S>;
 
@@ -112,7 +122,7 @@ export function useRxState<T extends Record<string, any>>(initialState: T | (() 
           state,
           actions$,
         ).pipe(
-          scan((acc, curr) => mergeKeys(acc)(curr), state)
+          mergeStates
         ) ?? merged$
       ),
       actions$: actions$ as ReducerObservables<Actions, DeepReadonly<S>>,
@@ -120,7 +130,7 @@ export function useRxState<T extends Record<string, any>>(initialState: T | (() 
   };
 }
 
-const getAction$Name = <K extends string>(name: K): Action$<K> => `${name}$` as Action$<K>;
+const getAction$Name = <K extends string>(name: K): Action$<K> => `${name}$` as const;
 
 const createRxResult = <S, Actions>(result: {
   actions: Actions,
