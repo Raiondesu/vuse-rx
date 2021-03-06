@@ -1,17 +1,20 @@
 import { isObservable, merge, of, Subject, Observable } from 'rxjs';
 import { map, mergeScan, scan } from 'rxjs/operators';
 import { DeepReadonly, reactive, readonly, Ref, UnwrapRef } from 'vue';
+import { isObject } from '@vue/shared';
 import { untilUnmounted } from './hooks/until';
 
-type MergeStrategy<S extends Record<any, any>> = (previousState: S) => (currentState: DeepPartial<S>) => S;
+type MergeStrategy<S extends Record<PropertyKey, any>> = (
+  previousState: S
+) => (
+  currentState: DeepPartial<S>
+) => S;
 
-const deepUpdate = <S extends Record<any, any>>(prev: S) => (curr: DeepPartial<S>) => {
+const deepUpdate = <S extends Record<PropertyKey, any>>(prev: S) => (curr: DeepPartial<S>) => {
   for (const key in curr) {
-    prev[key] = (
-      typeof prev[key] === 'object'
-      && typeof curr[key] === 'object'
-      && curr != null
-    ) ? deepUpdate(prev[key])(curr[key]) : curr[key] as any;
+    prev[key] = isObject(curr[key]) && isObject(prev[key])
+      ? deepUpdate(prev[key])(curr[key])
+      : curr[key] as any;
   }
 
   return prev;
