@@ -4,7 +4,6 @@ import type { DeepReadonly, Ref, UnwrapRef } from 'vue';
 import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
-import { isObject } from '@vue/shared';
 import { untilUnmounted } from './hooks/until';
 
 type MergeStrategy<S extends Record<PropertyKey, any>> = (
@@ -19,8 +18,11 @@ export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
   curr: DeepPartial<S>
 ) => {
   for (const key in curr) {
-    prev[key] = isObject(curr[key]) && isObject(prev[key])
-      ? deepMergeKeys(prev[key])(curr[key])
+    prev[key] = (
+      typeof curr[key] === 'object'
+      && curr !== null
+      && typeof prev[key] === 'object'
+    ) ? deepMergeKeys(prev[key])(curr[key])
       : curr[key] as any;
   }
 
