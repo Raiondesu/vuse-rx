@@ -22,4 +22,10 @@ describe('fromHook', () => {
 
     expect(fn).toBeCalledTimes(2);
   });
+
+  it("doesn't fail outside vue components", () => {
+    const fn = jest.fn();
+    fromHook(onMounted).subscribe(fn);
+    expect(fn).toHaveBeenCalledTimes(0);
+  });
 });

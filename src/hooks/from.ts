@@ -15,5 +15,5 @@ export type VueHook = (hook: () => any, ...args: any[]) => any;
  * ---
  */
 export const fromHook = (hook: VueHook) => new Observable<void>(
-  ctx => { getCurrentInstance() && hook(() => ctx.next()); }
+  ctx => { getCurrentInstance() && hook(() => ctx.next()) }
 );
