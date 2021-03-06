@@ -36,7 +36,7 @@ export function useRxState(initialState, mergeKeys = deepUpdate) {
         });
     };
 }
-const getAction$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
+const getAction$Name = (name) => `${name}$`;
 const createRxResult = (result) => (Object.assign(Object.assign({}, result), { subscribe: (...args) => (Object.assign(Object.assign({}, result), { subscription: result.state$.subscribe(...args) })) }));
 const maybeCall = (fn, ...args) => (typeof fn === 'function'
     ? fn(...args)

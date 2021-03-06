@@ -35,7 +35,7 @@ export function useRxState(initialState, mergeKeys = deepUpdate) {
         });
     };
 }
-const getAction$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
+const getAction$Name = (name) => `${name}$`;
 const createRxResult = (result) => ({
     ...result,
     subscribe: (...args) => ({
