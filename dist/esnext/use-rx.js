@@ -3,15 +3,15 @@ import { map, mergeScan, scan } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { isObject } from '@vue/shared';
 import { untilUnmounted } from "./hooks/until.js";
-const deepUpdate = (prev) => (curr) => {
+export const defaultMergeKeys = (prev) => (curr) => {
     for (const key in curr) {
         prev[key] = isObject(curr[key]) && isObject(prev[key])
-            ? deepUpdate(prev[key])(curr[key])
+            ? defaultMergeKeys(prev[key])(curr[key])
             : curr[key];
     }
     return prev;
 };
-export function useRxState(initialState, mergeKeys = deepUpdate) {
+export function useRxState(initialState, mergeKeys = defaultMergeKeys) {
     return function (reducers, map$) {
         const state = reactive(maybeCall(initialState));
         const mergeStates = mergeScan((prev, curr) => {

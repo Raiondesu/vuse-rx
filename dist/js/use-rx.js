@@ -1,20 +1,21 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useRxState = void 0;
+exports.useRxState = exports.defaultMergeKeys = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const shared_1 = require("@vue/shared");
 const until_1 = require("./hooks/until");
-const deepUpdate = (prev) => (curr) => {
+const defaultMergeKeys = (prev) => (curr) => {
     for (const key in curr) {
         prev[key] = shared_1.isObject(curr[key]) && shared_1.isObject(prev[key])
-            ? deepUpdate(prev[key])(curr[key])
+            ? exports.defaultMergeKeys(prev[key])(curr[key])
             : curr[key];
     }
     return prev;
 };
-function useRxState(initialState, mergeKeys = deepUpdate) {
+exports.defaultMergeKeys = defaultMergeKeys;
+function useRxState(initialState, mergeKeys = exports.defaultMergeKeys) {
     return function (reducers, map$) {
         var _a;
         const state = vue_1.reactive(maybeCall(initialState));
