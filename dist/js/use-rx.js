@@ -4,12 +4,12 @@ exports.useRxState = exports.deepMergeKeys = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
-const shared_1 = require("@vue/shared");
 const until_1 = require("./hooks/until");
 const deepMergeKeys = (prev) => (curr) => {
     for (const key in curr) {
-        prev[key] = shared_1.isObject(curr[key]) && shared_1.isObject(prev[key])
-            ? exports.deepMergeKeys(prev[key])(curr[key])
+        prev[key] = (typeof curr[key] === 'object'
+            && curr !== null
+            && typeof prev[key] === 'object') ? exports.deepMergeKeys(prev[key])(curr[key])
             : curr[key];
     }
     return prev;
