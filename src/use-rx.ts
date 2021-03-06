@@ -10,10 +10,10 @@ type MergeStrategy<S extends Record<PropertyKey, any>> = (
   currentState: DeepPartial<S>
 ) => S;
 
-const deepUpdate = <S extends Record<PropertyKey, any>>(prev: S) => (curr: DeepPartial<S>) => {
+export const defaultMergeKeys = <S extends Record<PropertyKey, any>>(prev: S) => (curr: DeepPartial<S>) => {
   for (const key in curr) {
     prev[key] = isObject(curr[key]) && isObject(prev[key])
-      ? deepUpdate(prev[key])(curr[key])
+      ? defaultMergeKeys(prev[key])(curr[key])
       : curr[key] as any;
   }
 
@@ -62,7 +62,7 @@ export function useRxState<S extends Record<string, any>>(
   mergeStrategy?: MergeStrategy<UnwrapNestedRefs<S>>
 ): CreateRxState<UnwrapNestedRefs<S>>;
 
-export function useRxState<T extends Record<string, any>>(initialState: T | (() => T), mergeKeys = deepUpdate) {
+export function useRxState<T extends Record<string, any>>(initialState: T | (() => T), mergeKeys = defaultMergeKeys) {
   type S = UnwrapNestedRefs<T>;
   type PS = DeepPartial<S>;
 
