@@ -1,22 +1,17 @@
-import { isObservable, merge, of, Subject, identity } from 'rxjs';
+import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan } from 'rxjs/operators';
-import { onUnmounted, reactive, readonly } from 'vue';
-import { pipeUntil } from "./hooks/until.js";
+import { reactive, readonly } from 'vue';
+import { untilUnmounted } from "./hooks/until.js";
 const deepUpdate = (prev) => (curr) => {
     for (const key in curr) {
-        if (typeof prev[key] === 'object'
+        prev[key] = (typeof prev[key] === 'object'
             && typeof curr[key] === 'object'
-            && curr != null) {
-            prev[key] = deepUpdate(prev[key])(curr[key]);
-        }
-        else {
-            prev[key] = curr[key];
-        }
+            && curr != null) ? deepUpdate(prev[key])(curr[key]) : curr[key];
     }
     return prev;
 };
 export function useRxState(initialState, mergeKeys = deepUpdate) {
-    return function (reducers, map$ = identity) {
+    return function (reducers, map$) {
         const state = reactive(maybeCall(initialState));
         const mergeStates = mergeScan((prev, curr) => {
             const newState = maybeCall(curr, prev);
@@ -31,11 +26,11 @@ export function useRxState(initialState, mergeKeys = deepUpdate) {
             actions[key] = ((...args) => mutations$.next(reducers[key](...args)));
             actions$[getAction$Name(key)] = mutations$.pipe(mergeStates);
         }
-        const state$ = map$(merge(...Object.values(actions$)), reducers, state, actions$).pipe(scan((acc, curr) => deepUpdate(acc)(curr), state), pipeUntil(onUnmounted));
+        const merged$ = merge(...Object.values(actions$));
         return createRxResult({
             actions,
             state: readonly(state),
-            state$,
+            state$: untilUnmounted(map$?.(merged$, reducers, state, actions$).pipe(scan((acc, curr) => mergeKeys(acc)(curr), state)) ?? merged$),
             actions$: actions$,
         });
     };

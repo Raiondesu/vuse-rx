@@ -7,19 +7,15 @@ const vue_1 = require("vue");
 const until_1 = require("./hooks/until");
 const deepUpdate = (prev) => (curr) => {
     for (const key in curr) {
-        if (typeof prev[key] === 'object'
+        prev[key] = (typeof prev[key] === 'object'
             && typeof curr[key] === 'object'
-            && curr != null) {
-            prev[key] = deepUpdate(prev[key])(curr[key]);
-        }
-        else {
-            prev[key] = curr[key];
-        }
+            && curr != null) ? deepUpdate(prev[key])(curr[key]) : curr[key];
     }
     return prev;
 };
 function useRxState(initialState, mergeKeys = deepUpdate) {
-    return function (reducers, map$ = rxjs_1.identity) {
+    return function (reducers, map$) {
+        var _a;
         const state = vue_1.reactive(maybeCall(initialState));
         const mergeStates = operators_1.mergeScan((prev, curr) => {
             const newState = maybeCall(curr, prev);
@@ -34,11 +30,11 @@ function useRxState(initialState, mergeKeys = deepUpdate) {
             actions[key] = ((...args) => mutations$.next(reducers[key](...args)));
             actions$[getAction$Name(key)] = mutations$.pipe(mergeStates);
         }
-        const state$ = map$(rxjs_1.merge(...Object.values(actions$)), reducers, state, actions$).pipe(operators_1.scan((acc, curr) => deepUpdate(acc)(curr), state), until_1.pipeUntil(vue_1.onUnmounted));
+        const merged$ = rxjs_1.merge(...Object.values(actions$));
         return createRxResult({
             actions,
             state: vue_1.readonly(state),
-            state$,
+            state$: until_1.untilUnmounted((_a = map$ === null || map$ === void 0 ? void 0 : map$(merged$, reducers, state, actions$).pipe(operators_1.scan((acc, curr) => mergeKeys(acc)(curr), state))) !== null && _a !== void 0 ? _a : merged$),
             actions$: actions$,
         });
     };
