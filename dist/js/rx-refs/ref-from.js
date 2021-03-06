@@ -4,15 +4,14 @@ exports.refFrom = void 0;
 const rxjs_1 = require("rxjs");
 const vue_1 = require("vue");
 function refFrom(arg, subArg) {
-    const argIsProxy = vue_1.isProxy(arg);
-    if (typeof arg === 'object' && !argIsProxy)
+    if (typeof arg === 'object')
         try {
             const ref$ = vue_1.ref(subArg);
             rxjs_1.from(arg).subscribe(value => ref$.value = value);
             return ref$;
         }
         catch (_) { }
-    return argIsProxy
+    return vue_1.isProxy(arg)
         ? vue_1.toRef(arg, subArg)
         : vue_1.ref(arg);
 }
