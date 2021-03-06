@@ -9,9 +9,8 @@ export function refFrom(arg, subArg) {
             return ref$;
         }
         catch (_) { }
-    if (argIsProxy) {
-        return toRef(arg, subArg);
-    }
-    return ref(arg);
+    return argIsProxy
+        ? toRef(arg, subArg)
+        : ref(arg);
 }
 //# sourceMappingURL=ref-from.js.map

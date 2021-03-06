@@ -12,10 +12,9 @@ function refFrom(arg, subArg) {
             return ref$;
         }
         catch (_) { }
-    if (argIsProxy) {
-        return vue_1.toRef(arg, subArg);
-    }
-    return vue_1.ref(arg);
+    return argIsProxy
+        ? vue_1.toRef(arg, subArg)
+        : vue_1.ref(arg);
 }
 exports.refFrom = refFrom;
 //# sourceMappingURL=ref-from.js.map
