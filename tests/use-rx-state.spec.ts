@@ -1,4 +1,4 @@
-import { isObservable, of } from 'rxjs';
+import { BehaviorSubject, isObservable, noop, of } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 import { delay, tap } from 'rxjs/operators';
 import { isProxy } from 'vue';
@@ -119,12 +119,17 @@ describe('useRxState', () => {
   });
 
   it('creates a readonly state', () => {
+    // suppress vue warning
+    const warn = console.warn;
+    console.warn = noop;
+
     const counter = use().subscribe();
 
     //@ts-ignore
     counter.state.count = 1;
 
     expect(counter.state.count).toBe(0);
+    console.warn = warn;
   });
 
   it('doesn\'t break on empty reducers', () => {
@@ -137,5 +142,27 @@ describe('useRxState', () => {
     empty.actions['']();
 
     empty.actions$.$.subscribe();
+  });
+
+  it('catches exceptions', () => {
+    const error = 'I throw errors in reducers';
+    const fn = jest.fn(e => expect(e).toBe(error));
+
+    const wrong = useRxState({ value: 0 })({
+      setValue: (value: number) => (_, ctx) => {
+        if (value < 0) {
+          ctx.error(error);
+
+          // signify that no mutation happens
+          return {};
+        }
+
+        return { value };
+      }
+    }).subscribe({ error: fn });
+
+    wrong.actions.setValue(-1);
+
+    expect(fn).toHaveBeenCalledTimes(1);
   });
 });

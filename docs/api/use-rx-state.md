@@ -53,11 +53,59 @@ And returns a reactive state, actions, and some observables to make things easie
 
 `useRxState` automatically makes the state reactive for Vue, so you don't need to worry about applying `reactive` to it.
 
+### Options and fine-tuning
+
+`useRxState` allows to change some of its behaviour via the optional `options` parameter in the first function.
+
+Via options you can change how new mutations are applied to the state:
+
+```ts
+import {
+  useRxState,
+  // this is the default mutation merge strategy
+  deepMergeKeys,
+  // fast checker of whether we can mutate the state deeper
+  canMergeDeep
+} from 'vuse-rx';
+
+useRxState(initialState, {
+  mergeKeys: (
+    // A full base state to mutate
+    state,
+    // Current mutation strategy (this exact function)
+    mutate
+  ) => (
+    // Mutation to apply
+    mutation
+  ) => {
+    // Let's say, we also need to apply our mutations to symbols:
+    for (const key of Object.getOwnPropertySymbols(mutation)) {
+      // Check if we can go deeper
+      state[key] = canMergeDeep(state, mutation, key)
+        // If yes - mutate the state further using our function
+        ? mutate(state[key])(mutation[key])
+        // if no - just assign the value of our mutation
+        : mutation[key];
+    }
+
+    // Apply the default strategy once we're done
+    return deepMergeKeys(state)(mutation);
+    // or...
+
+    // if we need to restrict our mutations to symbols only
+    // we can just return the state
+    // without applying the default strategy
+    return state;
+  }
+});
+```
+
 ## Type Signature and overloads
 
 ```ts
 function <S extends Record<string, any>>(
-  initialState: S | (() => S)
+  initialState: S | (() => S),
+  options: RxStateOptions
 ) => <R extends StateReducers<S>>(
   reducers: R,
   map$?: (
@@ -85,19 +133,19 @@ This function is split into two parts:
 1. State-capturing function - determines the shape and contents of the state and returns the second part:
 2. Reducers-capturing function - sets the reducers
 
-### **State**
+### 1. **State**
 
 ```ts
-<S extends Record<string, any>>(initialState: S | (() => S)) => Function
+function <S extends Record<string, any>>(
+  initialState: S | (() => S),
+  options: RxStateOptions
+): Function
 ```
 
-Accepts either a state object or a state factory function.
+Accepts either a state object or a state factory function and an optional options object.\
+It remembers the state, applies the options, and then returns the second function.
 
-There's only one aspect to this function and only one purpose - to remember the initial state and infer (or set) its type.
-
-It then returns the second function.
-
-### **Reducers**
+### 2. **Reducers**
 
 ```ts
 <R extends StateReducers<S>>(

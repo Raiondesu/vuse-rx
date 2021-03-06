@@ -6,27 +6,48 @@ import { untilUnmounted } from './hooks/until';
 import type { Observable, PartialObserver, Subscription } from 'rxjs';
 import type { DeepReadonly, Ref, UnwrapRef } from 'vue';
 
-export interface MergeStrategy<S extends Record<PropertyKey, any>> {
-  (previousState: S): (
-    currentState: DeepPartial<S>
+export interface MutationStrategy<S extends Record<PropertyKey, any>> {
+  /**
+   * Creates a mutation applier
+   *
+   * @param state - a base state to mutate
+   * @param strategy - current mutation strategy
+   */
+  (state: S, strategy: MutationStrategy<S>): (
+    mutation: S | DeepPartial<S>
   ) => S;
 }
 
+export const canMergeDeep = <S extends Record<PropertyKey, any>>(
+  state: S,
+  mutation: S | DeepPartial<S>,
+  key: keyof S,
+) =>  (
+  typeof mutation[key] === 'object'
+  && mutation !== null
+  && typeof state[key] === 'object'
+);
+
 export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
-  prev: S
+  state: S
 ) => (
-  curr: DeepPartial<S>
+  mutation: DeepPartial<S>
 ) => {
-  for (const key in curr) {
-    prev[key] = (
-      typeof curr[key] === 'object'
-      && curr !== null
-      && typeof prev[key] === 'object'
-    ) ? deepMergeKeys(prev[key])(curr[key])
-      : curr[key] as any;
+  for (const key in mutation) {
+    state[key] = canMergeDeep(state, mutation, key)
+      ? deepMergeKeys(state[key])(mutation[key])
+      : mutation[key] as any;
   }
 
-  return prev;
+  return state;
+};
+
+export interface RxStateOptions<S> {
+  mutationStrategy: MutationStrategy<S>;
+}
+
+const defaultOptions: RxStateOptions<any> = {
+  mutationStrategy: deepMergeKeys,
 };
 
 /**
@@ -36,12 +57,16 @@ export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
  * then accepts a map of state reducers.
  *
  * @param initialState - a factory or initial value for the reactive state
- * @param mergeStrategy - a strategy of merging a mutation with an old state
+ * @param options - options to customize the behavior, for example - to apply a custom strategy of merging a mutation with an old state
  */
 export function useRxState<T extends Record<string, any>>(
   initialState: T | (() => T),
-  mergeKeys: MergeStrategy<UnwrapNestedRefs<T>> = deepMergeKeys
+  options: Partial<RxStateOptions<UnwrapNestedRefs<T>>> = defaultOptions
 ): CreateRxState<UnwrapNestedRefs<T>> {
+  const {
+    mutationStrategy: mergeKeys,
+  } = { ...defaultOptions, ...options };
+
   return function (reducers, map$?) {
     type S = UnwrapNestedRefs<T>;
     type ReducerResult = ReturnType<StateReducer<S>>;
@@ -63,10 +88,10 @@ export function useRxState<T extends Record<string, any>>(
       );
 
       actions$Arr.push(
-        actions$[getAction$Name(key)] = mergeScan((prev: S, curr: ReducerResult) => (
+        actions$[`${key}$` as const] = mergeScan((prev: S, curr: ReducerResult) => (
           curr = maybeCall(curr, prev, mutations$),
-          map(mergeKeys(prev))(
-            isObservable(curr) ? curr : of(curr)
+          map(mergeKeys(prev, mergeKeys))(
+            isObservable(curr) ? curr : of(curr || prev)
           )
         ), state)(mutations$)
       );
@@ -84,7 +109,7 @@ export function useRxState<T extends Record<string, any>>(
           state,
           actions$,
         ).pipe(
-          scan((prev, curr) => mergeKeys(prev)(curr), state)
+          scan((prev, curr) => (mergeKeys(prev, mergeKeys)(curr)), state)
         ) : merged$
       ),
       actions$: actions$ as ReducerObservables<Actions, DeepReadonly<S>>,
@@ -127,8 +152,6 @@ type CreateRxState<S> = {
     ) => Observable<DeepPartial<S>>
   ): SubscribableRxRes<ReducerActions<R>, S>;
 };
-
-const getAction$Name = <K extends string>(name: K): Action$<K> => `${name}$` as const;
 
 const createRxResult = <S, Actions>(result: {
   actions: Actions,
@@ -183,13 +206,20 @@ type ReducerContext = {
   complete(): void;
 }
 
+type ShallowReturn<S> =
+  // | void
+  // isn't useful,
+  // need to keep mutations explicit in what they do
+  | S
+  | DeepPartial<S>
+  | Observable<DeepPartial<S>>;
+
 /**
  * A reducer for the observable state
  */
 export type StateReducer<S, Args extends any[] = any[]> = (...args: Args) =>
-  | DeepPartial<S>
-  | Observable<DeepPartial<S>>
-  | ((state: S, ctx: ReducerContext) => DeepPartial<S> | Observable<DeepPartial<S>>)
+  | ShallowReturn<S>
+  | ((state: S, ctx: ReducerContext) => ShallowReturn<S>)
   ;
 
 /**
