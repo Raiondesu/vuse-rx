@@ -12,7 +12,7 @@ function refFrom(arg, subArg) {
             return ref$;
         }
         catch (_) { }
-    if (argIsProxy && typeof subArg === 'string') {
+    if (argIsProxy) {
         return vue_1.toRef(arg, subArg);
     }
     return vue_1.ref(arg);
