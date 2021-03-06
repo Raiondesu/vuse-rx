@@ -2,7 +2,7 @@
 
 `vuse-rx` is a bridge library:
 it connects vue's reactive states and refs with rxjs observables and subjects
-in a way that enforces separation of concerns and reduces boilerplate code.
+in a way that enforces separation of concerns and drastically reduces the amount of boilerplate code.
 
 The goal of `vuse-rx` is simply to make using rxjs in Vue 3 easier.\
 Thanks to the approach `vuse-rx` takes, it's very easy to structure reactive business logic while also separating it from views.\
