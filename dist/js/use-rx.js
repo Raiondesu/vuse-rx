@@ -6,16 +6,14 @@ const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const until_1 = require("./hooks/until");
 const deepUpdate = (prev) => (curr) => {
-    if (typeof curr !== 'object' || curr == null) {
-        return curr;
-    }
     for (const key in curr) {
-        const sKey = key;
-        if (typeof prev[sKey] === 'object') {
-            prev[sKey] = deepUpdate(prev[sKey])(curr[sKey]);
+        if (typeof prev[key] === 'object'
+            && typeof curr[key] === 'object'
+            && curr != null) {
+            prev[key] = deepUpdate(prev[key])(curr[key]);
         }
         else {
-            prev[sKey] = curr[sKey];
+            prev[key] = curr[key];
         }
     }
     return prev;

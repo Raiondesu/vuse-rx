@@ -3,16 +3,14 @@ import { map, mergeScan, scan } from 'rxjs/operators';
 import { onUnmounted, reactive, readonly } from 'vue';
 import { pipeUntil } from "./hooks/until.js";
 const deepUpdate = (prev) => (curr) => {
-    if (typeof curr !== 'object' || curr == null) {
-        return curr;
-    }
     for (const key in curr) {
-        const sKey = key;
-        if (typeof prev[sKey] === 'object') {
-            prev[sKey] = deepUpdate(prev[sKey])(curr[sKey]);
+        if (typeof prev[key] === 'object'
+            && typeof curr[key] === 'object'
+            && curr != null) {
+            prev[key] = deepUpdate(prev[key])(curr[key]);
         }
         else {
-            prev[sKey] = curr[sKey];
+            prev[key] = curr[key];
         }
     }
     return prev;
