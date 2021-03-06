@@ -3,9 +3,9 @@ import { map, mergeScan, scan } from 'rxjs/operators';
 import { DeepReadonly, reactive, readonly, Ref, UnwrapRef } from 'vue';
 import { untilUnmounted } from './hooks/until';
 
-type MergeStrategy<S extends Record<string, any>> = (previousState: S) => (currentState: DeepPartial<S>) => S;
+type MergeStrategy<S extends Record<any, any>> = (previousState: S) => (currentState: DeepPartial<S>) => S;
 
-const deepUpdate = <S extends Record<string, any>>(prev: S) => (curr: DeepPartial<S>) => {
+const deepUpdate = <S extends Record<any, any>>(prev: S) => (curr: DeepPartial<S>) => {
   for (const key in curr) {
     prev[key] = (
       typeof prev[key] === 'object'
@@ -117,7 +117,7 @@ export function useRxState<T extends Record<string, any>>(initialState: T | (() 
   };
 }
 
-const getAction$Name = <K extends string>(name: K): Action$<K> => `on${name[0].toUpperCase()}${name.slice(1)}` as Action$<K>;
+const getAction$Name = <K extends string>(name: K): Action$<K> => `${name}$` as Action$<K>;
 
 const createRxResult = <S, Actions>(result: {
   actions: Actions,
@@ -197,7 +197,7 @@ export type RxResult<H, S, R = DeepReadonly<S>> = {
   readonly state$: Observable<S>;
 };
 
-type Action$<Name extends string> = `on${Capitalize<Name>}`;
+type Action$<Name extends string> = `${Name}$`;
 
 type ReducerObservables<H, R> = {
   [key in Action$<Extract<keyof H, string>>]: Observable<R>;

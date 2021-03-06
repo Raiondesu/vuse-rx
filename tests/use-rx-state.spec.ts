@@ -126,4 +126,16 @@ describe('useRxState', () => {
 
     expect(counter.state.count).toBe(0);
   });
+
+  it('doesn\'t break on empty reducers', () => {
+    const empty = useRxState({
+      test: 0
+    })({
+      '': () => ({})
+    });
+
+    empty.actions['']();
+
+    empty.actions$.$.subscribe();
+  });
 });
