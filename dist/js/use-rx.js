@@ -4,12 +4,13 @@ exports.useRxState = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
+const shared_1 = require("@vue/shared");
 const until_1 = require("./hooks/until");
 const deepUpdate = (prev) => (curr) => {
     for (const key in curr) {
-        prev[key] = (typeof prev[key] === 'object'
-            && typeof curr[key] === 'object'
-            && curr != null) ? deepUpdate(prev[key])(curr[key]) : curr[key];
+        prev[key] = shared_1.isObject(curr[key]) && shared_1.isObject(prev[key])
+            ? deepUpdate(prev[key])(curr[key])
+            : curr[key];
     }
     return prev;
 };

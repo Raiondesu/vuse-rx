@@ -1,12 +1,13 @@
 import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
+import { isObject } from '@vue/shared';
 import { untilUnmounted } from "./hooks/until.js";
 const deepUpdate = (prev) => (curr) => {
     for (const key in curr) {
-        prev[key] = (typeof prev[key] === 'object'
-            && typeof curr[key] === 'object'
-            && curr != null) ? deepUpdate(prev[key])(curr[key]) : curr[key];
+        prev[key] = isObject(curr[key]) && isObject(prev[key])
+            ? deepUpdate(prev[key])(curr[key])
+            : curr[key];
     }
     return prev;
 };
