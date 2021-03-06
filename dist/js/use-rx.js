@@ -5,25 +5,29 @@ const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const until_1 = require("./hooks/until");
-const updateKeys = (prev) => (curr) => {
+const deepUpdate = (prev) => (curr) => {
+    if (typeof curr !== 'object' || curr == null) {
+        return curr;
+    }
     for (const key in curr) {
-        prev[key] = curr[key];
+        const sKey = key;
+        if (typeof prev[sKey] === 'object') {
+            prev[sKey] = deepUpdate(prev[sKey])(curr[sKey]);
+        }
+        else {
+            prev[sKey] = curr[sKey];
+        }
     }
     return prev;
 };
-const getAction$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
-const createRxResult = (result) => (Object.assign(Object.assign({}, result), { subscribe: (...args) => (Object.assign(Object.assign({}, result), { subscription: result.state$.subscribe(...args) })) }));
-const maybeCall = (fn, ...args) => (typeof fn === 'function'
-    ? fn(...args)
-    : fn);
-function useRxState(initialState) {
+function useRxState(initialState, mergeKeys = deepUpdate) {
     return function (reducers, map$ = rxjs_1.identity) {
         const state = vue_1.reactive(maybeCall(initialState));
         const mergeStates = operators_1.mergeScan((prev, curr) => {
             const newState = maybeCall(curr, prev);
             return (rxjs_1.isObservable(newState)
                 ? newState
-                : rxjs_1.of(newState)).pipe(operators_1.map(updateKeys(prev)));
+                : rxjs_1.of(newState)).pipe(operators_1.map(mergeKeys(prev)));
         }, state);
         const actions = {};
         const actions$ = {};
@@ -32,14 +36,19 @@ function useRxState(initialState) {
             actions[key] = ((...args) => mutations$.next(reducers[key](...args)));
             actions$[getAction$Name(key)] = mutations$.pipe(mergeStates);
         }
-        const state$ = map$(rxjs_1.merge(...Object.values(actions$)), reducers, state, actions$).pipe(operators_1.scan((acc, curr) => updateKeys(acc)(curr), state), until_1.pipeUntil(vue_1.onUnmounted));
+        const state$ = map$(rxjs_1.merge(...Object.values(actions$)), reducers, state, actions$).pipe(operators_1.scan((acc, curr) => deepUpdate(acc)(curr), state), until_1.pipeUntil(vue_1.onUnmounted));
         return createRxResult({
             actions,
-            state,
+            state: vue_1.readonly(state),
             state$,
-            actions$,
+            actions$: actions$,
         });
     };
 }
 exports.useRxState = useRxState;
+const getAction$Name = (name) => `on${name[0].toUpperCase()}${name.slice(1)}`;
+const createRxResult = (result) => (Object.assign(Object.assign({}, result), { subscribe: (...args) => (Object.assign(Object.assign({}, result), { subscription: result.state$.subscribe(...args) })) }));
+const maybeCall = (fn, ...args) => (typeof fn === 'function'
+    ? fn(...args)
+    : fn);
 //# sourceMappingURL=use-rx.js.map
