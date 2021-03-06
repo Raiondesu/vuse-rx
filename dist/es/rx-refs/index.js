@@ -1,5 +1,5 @@
-export * from "./from-ref.js";
-export * from "./ref-from.js";
-export * from "./refs-from.js";
-export * from "./sync-ref.js";
+export * from './from-ref';
+export * from './ref-from';
+export * from './refs-from';
+export * from './sync-ref';
 //# sourceMappingURL=index.js.map

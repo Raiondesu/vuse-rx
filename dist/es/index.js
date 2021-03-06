@@ -1,5 +1,5 @@
-export * from "./use-rx.js";
-export * from "./rx-refs/index.js";
-export * from "./hooks/from.js";
-export * from "./hooks/until.js";
+export * from './use-rx';
+export * from './rx-refs/index';
+export * from './hooks/from';
+export * from './hooks/until';
 //# sourceMappingURL=index.js.map

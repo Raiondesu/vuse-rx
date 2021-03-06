@@ -25,13 +25,7 @@
     "types": [
       "@types/jest",
       "@types/node"
-    ],
-    "plugins": [
-			{
-				"transform": "@zoltu/typescript-transformer-append-js-extension/output/index.js",
-				"after": true,
-			}
-		]
+    ]
   },
   "include": [
     "./src",

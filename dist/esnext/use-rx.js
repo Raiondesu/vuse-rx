@@ -1,7 +1,7 @@
 import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
-import { untilUnmounted } from "./hooks/until.js";
+import { untilUnmounted } from './hooks/until';
 export const deepMergeKeys = (prev) => (curr) => {
     for (const key in curr) {
         prev[key] = (typeof curr[key] === 'object'

@@ -5,7 +5,7 @@
   "description": "First-class rxjs support for Vue 3",
   "main": "dist/js",
   "module": "dist/es",
-  "unpkg": "dist/es",
+  "unpkg": "dist/esm",
   "typings": "src",
   "files": [
     "dist",
@@ -17,7 +17,7 @@
   "scripts": {
     "test": "jest -i --passWithNoTests",
     "build:js": "ttsc --outDir dist/js -t ES2015",
-    "build:es": "ttsc --outDir dist/es -t ES2015 --module esnext",
+    "build:es": "ttsc --outDir dist/es -t ES2015 --module ES2015",
     "build:next": "ttsc --outDir dist/esnext --module esnext",
     "build:umd": "bili",
     "build": "npm run checks && npm run build:js && npm run build:es && npm run build:next && npm run build:umd",
@@ -67,7 +67,6 @@
   "devDependencies": {
     "@types/jest": "^26.0.20",
     "@types/node": "^12.11.7",
-    "@zoltu/typescript-transformer-append-js-extension": "^1.0.1",
     "bili": "^5.0.5",
     "eslint": "^6.7.2",
     "eslint-plugin-import": "^2.20.2",
@@ -79,7 +78,6 @@
     "rollup-plugin-typescript2": "^0.29.0",
     "rxjs": "^6.6.3",
     "ts-jest": "^26.5.0",
-    "ttypescript": "^1.5.12",
     "typescript": "^4.1.3",
     "vitepress": "^0.12.2",
     "vue": "^3.0.5",

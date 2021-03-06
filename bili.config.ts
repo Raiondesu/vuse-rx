@@ -1,14 +1,20 @@
 import type { Config } from 'bili';
 
-export default {
+export default <Config> {
   input: 'src/index.ts',
   output: {
-    moduleName: 'vuse-rx',
-    fileName: 'umd.js',
+    moduleName: 'vuseRx',
     format: 'umd-min',
+    fileName: 'umd.js',
     target: 'browser',
+  },
+  globals: {
+    vue: 'Vue',
+    rxjs: 'rxjs',
+    'rxjs/operators': 'rxjs.operators',
   },
   plugins: {
     typescript2: true,
   },
-} as Config;
+  externals: ['vue', 'rxjs', 'rxjs/operators'],
+};
