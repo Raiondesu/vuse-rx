@@ -32,63 +32,21 @@ export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
 /**
  * Allows to bind reducers to a state and an observable.
  *
- * First accepts a state factory and a state merge strategy,
- * then accepts a map of state reducers.
- *
- * @param createState a factory for the reactive state
- * @param mergeStrategy a strategy of merging a mutation with an old state
- */
-export function useRxState<S extends Record<string, any>>(
-  createState: () => S,
-  mergeStrategy?: MergeStrategy<UnwrapNestedRefs<S>>
-): CreateRxState<UnwrapNestedRefs<S>>;
-
-/**
- * Allows to bind reducers to a state and an observable.
- *
  * First accepts state's default value and a state merge strategy,
  * then accepts a map of state reducers.
  *
- * @param initialState an initial value for the reactive state
- * @param mergeStrategy a strategy of merging a mutation with an old state
+ * @param initialState - a factory or initial value for the reactive state
+ * @param mergeStrategy - a strategy of merging a mutation with an old state
  */
-export function useRxState<S extends Record<string, any>>(
-  initialState: S,
-  mergeStrategy?: MergeStrategy<UnwrapNestedRefs<S>>
-): CreateRxState<UnwrapNestedRefs<S>>;
-
-/**
- * Allows to bind reducers to a state and an observable.
- *
- * First accepts state's default value and a state merge strategy,
- * then accepts a map of state reducers.
- *
- * @param initialState a factory or initial value for the reactive state
- * @param mergeStrategy a strategy of merging a mutation with an old state
- */
-export function useRxState<S extends Record<string, any>>(
-  initialState: S | (() => S),
-  mergeStrategy?: MergeStrategy<UnwrapNestedRefs<S>>
-): CreateRxState<UnwrapNestedRefs<S>>;
-
 export function useRxState<T extends Record<string, any>>(
   initialState: T | (() => T),
-  mergeKeys = deepMergeKeys
-) {
+  mergeKeys: MergeStrategy<UnwrapNestedRefs<T>> = deepMergeKeys
+): CreateRxState<UnwrapNestedRefs<T>> {
   type S = UnwrapNestedRefs<T>;
-  type PS = DeepPartial<S>;
 
-  return function <R extends StateReducers<S>>(
-    reducers: R,
-    map$?: (
-      state$: Observable<S>,
-      reducers: R,
-      state: S,
-      actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>
-    ) => Observable<PS>
-  ): SubscribableRxRes<ReducerActions<R>, S> {
+  return function (reducers, map$?) {
     type ReducerResult = ReturnType<StateReducer<S>>;
-    type Actions = ReducerActions<R>;
+    type Actions = ReducerActions<typeof reducers>;
 
     const state = reactive(maybeCall(initialState));
 
@@ -108,7 +66,10 @@ export function useRxState<T extends Record<string, any>>(
     for (const key in reducers) {
       const mutations$ = new Subject<ReducerResult>();
 
-      actions[key] = ((...args: any[]) => mutations$.next(reducers[key](...args))) as ReducerAction<R[keyof R]>;
+      actions[key] = <ReducerAction<typeof reducers[typeof key]>>(
+        (...args) => mutations$.next(reducers[key](...args))
+      );
+
       actions$[getAction$Name(key)] = mutations$.pipe(mergeStates);
     }
 
@@ -131,6 +92,42 @@ export function useRxState<T extends Record<string, any>>(
     });
   };
 }
+
+type CreateRxState<S> = {
+  /**
+   * Allows to bind reducers to a state and an observable.
+   *
+   * Accepts a map of state reducers.
+   *
+   * Each reducer can either return:
+   * * an updated part of the state:
+   *   ```
+   *   (v) => ({ value: v })
+   *   ```
+   * * an observable that emits an updated part of the state:
+   *   ```
+   *   (v) => new BehaviorSubject({ value: v })
+   *   ```
+   * * a function that accepts the old state and returns either of the previous types:
+   *   ```
+   *   (v) => (oldState) => ({
+   *       value: oldState.value > v ? oldState.value : v
+   *   })
+   *   ```
+   *
+   * @param initialState an initial value for the reactive state
+   * @param mergeStrategy a strategy of merging a mutation with an old state
+   */
+  <R extends StateReducers<S>>(
+    reducers: R,
+    map$?: (
+      state$: Observable<S>,
+      reducers: R,
+      state: S,
+      actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>
+    ) => Observable<DeepPartial<S>>
+  ): SubscribableRxRes<ReducerActions<R>, S>;
+};
 
 const getAction$Name = <K extends string>(name: K): Action$<K> => `${name}$` as const;
 
@@ -170,7 +167,7 @@ type Builtin =
   | undefined
   | null;
 
-type DeepPartial<T> = T extends Builtin
+export type DeepPartial<T> = T extends Builtin
   ? T
   : T extends Array<infer U>
   ? Array<DeepPartial<U>>
@@ -206,10 +203,14 @@ export type ResAction<A extends any[] = []> = (...args: A) => void;
  * * state - a reactive vue state
  * * state$ - an rxjs observable
  */
-export type RxResult<H, S, R = DeepReadonly<S>> = {
-  readonly actions: H;
-  readonly state: R;
-  readonly state$: Observable<S>;
+export type RxResult<
+  Actions,
+  State,
+  RState = DeepReadonly<State>
+> = {
+  readonly actions: Actions;
+  readonly state: RState;
+  readonly state$: Observable<State>;
 };
 
 type Action$<Name extends string> = `${Name}$`;
@@ -218,9 +219,13 @@ type ReducerObservables<H, R> = {
   [key in Action$<Extract<keyof H, string>>]: Observable<R>;
 };
 
-export type SubscribableRxRes<H, S, R = DeepReadonly<S>> = RxResult<H, S, R> & {
-  readonly actions$: ReducerObservables<H, R>;
-  readonly subscribe: PipeSubscribe<SubscribableRxRes<H, S, R>, S>;
+export type SubscribableRxRes<
+  Actions,
+  State,
+  RState = DeepReadonly<State>
+> = RxResult<Actions, State, RState> & {
+  readonly actions$: ReducerObservables<Actions, RState>;
+  readonly subscribe: PipeSubscribe<SubscribableRxRes<Actions, State, RState>, State>;
 };
 
 export type PipeSubscribe<Res extends SubscribableRxRes<any, any>, S> = {
@@ -234,39 +239,3 @@ type ReducerAction<R> = R extends StateReducer<any, infer Args>
   : never;
 
 type ReducerActions<R> = { [key in keyof R]: ReducerAction<R[key]> };
-
-type CreateRxState<S> = {
-  /**
-   * Allows to bind reducers to a state and an observable.
-   *
-   * Accepts a map of state reducers.
-   *
-   * Each reducer can either return:
-   * * an updated part of the state:
-   *   ```
-   *   (v) => ({ value: v })
-   *   ```
-   * * an observable that emits an updated part of the state:
-   *   ```
-   *   (v) => new BehaviorSubject({ value: v })
-   *   ```
-   * * a function that accepts the old state and returns either of the previous types:
-   *   ```
-   *   (v) => (oldState) => ({
-   *       value: oldState.value > v ? oldState.value : v
-   *   })
-   *   ```
-   *
-   * @param initialState an initial value for the reactive state
-   * @param mergeStrategy a strategy of merging a mutation with an old state
-   */
-  <R extends StateReducers<S>>(
-    reducers: R,
-    map$?: (
-      state$: Observable<S>,
-      reducers: R,
-      state: S,
-      actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>
-    ) => Observable<DeepPartial<S>>
-  ): SubscribableRxRes<ReducerActions<R>, S>;
-};
