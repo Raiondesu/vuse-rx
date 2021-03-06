@@ -76,4 +76,54 @@ describe('useRxState', () => {
     expect(actions.setFoo(undefined)).toBeUndefined();
     expect(state.foo).toBeUndefined();
   });
+
+  it('support deep nested states', () => {
+    const value1 = 'foobar';
+    const value2 = 'barfoo';
+    const newValue1 = 'new foobar';
+    const newValue2 = 'new barfoo';
+
+    const deep = useRxState({
+      deep: {
+        nested: {
+          value1,
+          value2,
+        } as {
+          value1?: string,
+          value2: string,
+        } | string,
+      },
+    })({
+      setValue1: (value1?: string) => ({ deep: { nested: { value1 } } }),
+      setValue2: (value2: string) => ({ deep: { nested: { value2 } } }),
+      setNested: (nested) => ({ deep: { nested } }),
+    }).subscribe();
+
+    deep.actions.setValue2(newValue2);
+
+    expect((deep.state.deep.nested as any).value2).toBe(newValue2);
+    expect((deep.state.deep.nested as any).value1).toBe(value1);
+
+    deep.actions.setValue1(newValue1);
+
+    expect((deep.state.deep.nested as any).value2).toBe(newValue2);
+    expect((deep.state.deep.nested as any).value1).toBe(newValue1);
+
+    deep.actions.setValue1(undefined);
+
+    expect((deep.state.deep.nested as any).value2).toBe(newValue2);
+    expect((deep.state.deep.nested as any).value1).toBeUndefined();
+
+    deep.actions.setNested(newValue1);
+    expect(deep.state.deep.nested).toBe(newValue1);
+  });
+
+  it('creates a readonly state', () => {
+    const counter = use();
+
+    //@ts-ignore
+    counter.state.count = 1;
+
+    expect(counter.state.count).toBe(0);
+  });
 });
