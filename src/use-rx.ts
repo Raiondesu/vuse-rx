@@ -1,16 +1,16 @@
-import type { Observable } from 'rxjs';
-import type { DeepReadonly, Ref, UnwrapRef } from 'vue';
-
 import { isObservable, merge, of, Subject } from 'rxjs';
-import { map, mergeScan } from 'rxjs/operators';
+import { map, mergeScan, scan } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from './hooks/until';
 
-type MergeStrategy<S extends Record<PropertyKey, any>> = (
-  previousState: S
-) => (
-  currentState: DeepPartial<S>
-) => S;
+import type { Observable, PartialObserver, Subscription } from 'rxjs';
+import type { DeepReadonly, Ref, UnwrapRef } from 'vue';
+
+export interface MergeStrategy<S extends Record<PropertyKey, any>> {
+  (previousState: S): (
+    currentState: DeepPartial<S>
+  ) => S;
+}
 
 export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
   prev: S
@@ -42,51 +42,50 @@ export function useRxState<T extends Record<string, any>>(
   initialState: T | (() => T),
   mergeKeys: MergeStrategy<UnwrapNestedRefs<T>> = deepMergeKeys
 ): CreateRxState<UnwrapNestedRefs<T>> {
-  type S = UnwrapNestedRefs<T>;
-
   return function (reducers, map$?) {
+    type S = UnwrapNestedRefs<T>;
     type ReducerResult = ReturnType<StateReducer<S>>;
     type Actions = ReducerActions<typeof reducers>;
 
     const state = reactive(maybeCall(initialState));
 
-    const mergeStates = mergeScan((prev: S, curr: ReducerResult) => {
-      const newState = maybeCall(curr, prev);
-
-      return (
-        isObservable<DeepPartial<S>>(newState)
-          ? newState
-          : of(newState)
-      ).pipe(map(mergeKeys(prev)));
-    }, state);
-
     const actions = <Actions> {};
     const actions$ = <ReducerObservables<Actions, S>> {};
+    const actions$Arr = <Observable<S>[]> [];
 
     for (const key in reducers) {
       const mutations$ = new Subject<ReducerResult>();
 
       actions[key] = <ReducerAction<typeof reducers[typeof key]>>(
-        (...args) => mutations$.next(reducers[key](...args))
+        (...args) => mutations$.next(
+          reducers[key].apply(reducers, args)
+        )
       );
 
-      actions$[getAction$Name(key)] = mutations$.pipe(mergeStates);
+      actions$Arr.push(
+        actions$[getAction$Name(key)] = mergeScan((prev: S, curr: ReducerResult) => (
+          curr = maybeCall(curr, prev, mutations$),
+          map(mergeKeys(prev))(
+            isObservable(curr) ? curr : of(curr)
+          )
+        ), state)(mutations$)
+      );
     }
 
-    const merged$ = merge(...Object.values(actions$ as Record<string, Observable<S>>));
+    const merged$ = merge(...actions$Arr);
 
     return createRxResult({
       actions,
       state: readonly(state as T),
       state$: untilUnmounted(
-        map$?.(
+        map$ ? map$(
           merged$,
           reducers,
           state,
           actions$,
         ).pipe(
-          mergeStates
-        ) ?? merged$
+          scan((prev, curr) => mergeKeys(prev)(curr), state)
+        ) : merged$
       ),
       actions$: actions$ as ReducerObservables<Actions, DeepReadonly<S>>,
     });
@@ -138,7 +137,7 @@ const createRxResult = <S, Actions>(result: {
   actions$: ReducerObservables<Actions, DeepReadonly<S>>
 }): SubscribableRxRes<Actions, S> => ({
   ...result,
-  subscribe: (...args: Parameters<Observable<S>['subscribe']>) => ({
+  subscribe: (...args) => ({
     ...result,
     subscription: result.state$.subscribe(...args),
   }),
@@ -179,12 +178,19 @@ export type DeepPartial<T> = T extends Builtin
 
 type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
 
+type ReducerContext = {
+  error(error: any): void;
+  complete(): void;
+}
+
 /**
  * A reducer for the observable state
  */
-export type StateReducer<S, Args extends any[] = any[]> =
-  | ((...args: Args) => DeepPartial<S> | Observable<DeepPartial<S>>)
-  | ((...args: Args) => (state: S) => DeepPartial<S> | Observable<DeepPartial<S>>);
+export type StateReducer<S, Args extends any[] = any[]> = (...args: Args) =>
+  | DeepPartial<S>
+  | Observable<DeepPartial<S>>
+  | ((state: S, ctx: ReducerContext) => DeepPartial<S> | Observable<DeepPartial<S>>)
+  ;
 
 /**
  * A named collection of state reducers
@@ -229,8 +235,11 @@ export type SubscribableRxRes<
 };
 
 export type PipeSubscribe<Res extends SubscribableRxRes<any, any>, S> = {
+  (observer?: PartialObserver<S>): Omit<Res, 'subscribe'> & {
+    readonly subscription: Subscription;
+  };
   (...args: Parameters<Observable<S>['subscribe']>): Omit<Res, 'subscribe'> & {
-    readonly subscription: ReturnType<Observable<S>['subscribe']>;
+    readonly subscription: Subscription;
   };
 };
 
