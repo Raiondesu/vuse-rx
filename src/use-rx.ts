@@ -1,21 +1,17 @@
-import { isObservable, merge, of, Subject, identity, Observable } from 'rxjs';
+import { isObservable, merge, of, Subject, Observable } from 'rxjs';
 import { map, mergeScan, scan } from 'rxjs/operators';
-import { DeepReadonly, onUnmounted, reactive, readonly, Ref, UnwrapRef } from 'vue';
-import { pipeUntil } from './hooks/until';
+import { DeepReadonly, reactive, readonly, Ref, UnwrapRef } from 'vue';
+import { untilUnmounted } from './hooks/until';
 
 type MergeStrategy<S extends Record<string, any>> = (previousState: S) => (currentState: DeepPartial<S>) => S;
 
 const deepUpdate = <S extends Record<string, any>>(prev: S) => (curr: DeepPartial<S>) => {
   for (const key in curr) {
-    if (
+    prev[key] = (
       typeof prev[key] === 'object'
       && typeof curr[key] === 'object'
       && curr != null
-    ) {
-      prev[key] = deepUpdate(prev[key])(curr[key]);
-    } else {
-      prev[key] = curr[key] as any;
-    }
+    ) ? deepUpdate(prev[key])(curr[key]) : curr[key] as any;
   }
 
   return prev;
@@ -30,7 +26,10 @@ const deepUpdate = <S extends Record<string, any>>(prev: S) => (curr: DeepPartia
  * @param createState a factory for the reactive state
  * @param mergeStrategy a strategy of merging a mutation with an old state
  */
-export function useRxState<S extends Record<string, any>>(createState: () => S, mergeStrategy?: MergeStrategy<S>): CreateRxState<S>;
+export function useRxState<S extends Record<string, any>>(
+  createState: () => S,
+  mergeStrategy?: MergeStrategy<UnwrapNestedRefs<S>>
+): CreateRxState<UnwrapNestedRefs<S>>;
 
 /**
  * Allows to bind reducers to a state and an observable.
@@ -41,7 +40,10 @@ export function useRxState<S extends Record<string, any>>(createState: () => S, 
  * @param initialState an initial value for the reactive state
  * @param mergeStrategy a strategy of merging a mutation with an old state
  */
-export function useRxState<S extends Record<string, any>>(initialState: S, mergeStrategy?: MergeStrategy<S>): CreateRxState<S>;
+export function useRxState<S extends Record<string, any>>(
+  initialState: S,
+  mergeStrategy?: MergeStrategy<UnwrapNestedRefs<S>>
+): CreateRxState<UnwrapNestedRefs<S>>;
 
 /**
  * Allows to bind reducers to a state and an observable.
@@ -52,19 +54,23 @@ export function useRxState<S extends Record<string, any>>(initialState: S, merge
  * @param initialState a factory or initial value for the reactive state
  * @param mergeStrategy a strategy of merging a mutation with an old state
  */
-export function useRxState<S extends Record<string, any>>(initialState: S | (() => S), mergeStrategy?: MergeStrategy<S>): CreateRxState<S>;
+export function useRxState<S extends Record<string, any>>(
+  initialState: S | (() => S),
+  mergeStrategy?: MergeStrategy<UnwrapNestedRefs<S>>
+): CreateRxState<UnwrapNestedRefs<S>>;
+
 export function useRxState<T extends Record<string, any>>(initialState: T | (() => T), mergeKeys = deepUpdate) {
   type S = UnwrapNestedRefs<T>;
   type PS = DeepPartial<S>;
 
   return function <R extends StateReducers<S>>(
     reducers: R,
-    map$: (
+    map$?: (
       state$: Observable<S>,
       reducers: R,
       state: S,
       actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>
-    ) => Observable<PS> = identity as any
+    ) => Observable<PS>
   ): SubscribableRxRes<ReducerActions<R>, S> {
     type ReducerResult = ReturnType<StateReducer<S>>;
     type Actions = ReducerActions<R>;
@@ -91,20 +97,21 @@ export function useRxState<T extends Record<string, any>>(initialState: T | (() 
       actions$[getAction$Name(key)] = mutations$.pipe(mergeStates);
     }
 
-    const state$ = map$(
-      merge(...Object.values(actions$ as Record<string, Observable<S>>)),
-      reducers,
-      state,
-      actions$,
-    ).pipe(
-      scan((acc, curr) => deepUpdate(acc)(curr), state),
-      pipeUntil(onUnmounted),
-    );
+    const merged$ = merge(...Object.values(actions$ as Record<string, Observable<S>>));
 
     return createRxResult({
       actions,
       state: readonly(state as T),
-      state$,
+      state$: untilUnmounted(
+        map$?.(
+          merged$,
+          reducers,
+          state,
+          actions$,
+        ).pipe(
+          scan((acc, curr) => mergeKeys(acc)(curr), state)
+        ) ?? merged$
+      ),
       actions$: actions$ as ReducerObservables<Actions, DeepReadonly<S>>,
     });
   };

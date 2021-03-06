@@ -1,28 +1,26 @@
-import { identity, isObservable, of } from 'rxjs';
+import { isObservable, of } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
-import { delay } from 'rxjs/operators';
+import { delay, tap } from 'rxjs/operators';
 import { isProxy } from 'vue';
 import { useRxState } from '../src/use-rx';
 
 type State = { count: number, foo?: string };
 
-const $increment: (s: State) => State = jest.fn(identity);
-const $setCount: (s: State) => State = jest.fn(identity);
-const $setCountAfter: (s: Observable<State>) => Observable<State> = jest.fn(identity);
-const $incrementAfter: (s: Observable<State>) => Observable<State> = jest.fn(identity);
+const fn = jest.fn();
 
 const defaultCount = 0;
 const step = 1;
 
 const use = () => useRxState<State>(() => ({ count: defaultCount }))({
-  increment: () => state => $increment({ count: state.count + step }),
-  setCount: (count: number) => $setCount({ count }),
-  setCountAfter: (count: number, timeout: number) => $setCountAfter(of({ count }).pipe(delay(timeout))),
+  increment: () => state => ({ count: state.count + step }),
+  setCount: (count: number) => ({ count }),
+  setCountAfter: (count: number, timeout: number) => of({ count }).pipe(delay(timeout)),
   incrementAfter(timeout: number) {
-    return (state): Observable<State> => $incrementAfter(this.setCountAfter(this.increment()(state).count, timeout));
+    return (state): Observable<State> =>
+      this.setCountAfter(this.increment()(state).count, timeout);
   },
   setFoo: (foo?: string) => ({ foo }),
-});
+}, state$ => state$.pipe(tap(fn)));
 
 const time = (timeout: number) => new Promise(res => setTimeout(() => res(undefined), timeout));
 
@@ -47,6 +45,8 @@ describe('useRxState', () => {
     expect(state.count).toBe(defaultCount);
 
     await time(timeout);
+
+    expect(fn).toHaveBeenCalled();
 
     expect(state.count).toBe(defaultCount + step);
     expect($subscription).toBeCalledTimes(1);
@@ -119,7 +119,7 @@ describe('useRxState', () => {
   });
 
   it('creates a readonly state', () => {
-    const counter = use();
+    const counter = use().subscribe();
 
     //@ts-ignore
     counter.state.count = 1;
