@@ -3,20 +3,18 @@ import { map, mergeScan, scan } from 'rxjs/operators';
 import { DeepReadonly, onUnmounted, reactive, readonly, Ref, UnwrapRef } from 'vue';
 import { pipeUntil } from './hooks/until';
 
-type MergeStrategy<S extends {}> = (previousState: S) => (currentState: DeepPartial<S>) => S;
+type MergeStrategy<S extends Record<string, any>> = (previousState: S) => (currentState: DeepPartial<S>) => S;
 
-const deepUpdate = <S extends {}>(prev: S) => (curr: DeepPartial<S>) => {
-  if (typeof curr !== 'object' || curr == null) {
-    return curr;
-  }
-
+const deepUpdate = <S extends Record<string, any>>(prev: S) => (curr: DeepPartial<S>) => {
   for (const key in curr) {
-    const sKey = key as string;
-
-    if (typeof prev[sKey] === 'object') {
-      prev[sKey] = deepUpdate(prev[sKey])(curr[sKey]);
+    if (
+      typeof prev[key] === 'object'
+      && typeof curr[key] === 'object'
+      && curr != null
+    ) {
+      prev[key] = deepUpdate(prev[key])(curr[key]);
     } else {
-      prev[sKey] = curr[sKey];
+      prev[key] = curr[key] as any;
     }
   }
 
