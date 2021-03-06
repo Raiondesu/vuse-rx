@@ -16,9 +16,9 @@
   ],
   "scripts": {
     "test": "jest -i --passWithNoTests",
-    "build:js": "ttsc --outDir dist/js -t ES2015",
-    "build:es": "ttsc --outDir dist/es -t ES2015 --module ES2015",
-    "build:next": "ttsc --outDir dist/esnext --module esnext",
+    "build:js": "tsc --outDir dist/js -t ES2015",
+    "build:es": "tsc --outDir dist/es -t ES2015 --module ES2015",
+    "build:next": "tsc --outDir dist/esnext --module esnext",
     "build:umd": "bili",
     "build": "npm run checks && npm run build:js && npm run build:es && npm run build:next && npm run build:umd",
     "dev": "tsc --noEmit -w",
