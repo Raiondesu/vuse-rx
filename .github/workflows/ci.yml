@@ -32,11 +32,11 @@ jobs:
 
   #   needs: prepare
   #   steps:
-    - run: npm run docs:build
-    - uses: EndBug/add-and-commit@v7.0.0
-      with:
-        add: '-A .'
-        message: Update docs
+    # - run: npm run docs:build
+    # - uses: EndBug/add-and-commit@v7.0.0
+    #   with:
+    #     add: '-A .'
+    #     message: Update docs
 
     - run: npm test
     - name: Coveralls
