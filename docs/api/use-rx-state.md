@@ -1,5 +1,5 @@
 # useRxState
-> Allows to bind reducers to a reactive state and an observable.
+> Allows to bind reducers to a reactive state and observables.
 
 [Source](https://github.com/Raiondesu/vuse-rx/blob/main/src/use-rx.ts)
 

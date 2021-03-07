@@ -1,3 +1,4 @@
+# Counter
 
 A simple example of a counter state with an increment reducer:
 
