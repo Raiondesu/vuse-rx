@@ -112,7 +112,7 @@ function <S extends Record<string, any>>(
     state$: Observable<Readonly<S>>,
     reducers: R,
     state: Readonly<S>,
-    actions$: Record<`on${Capitalize<keyof R>}`, Observable<S>>
+    actions$: Record<`${keyof R}$`, Observable<S>>
   ) => Observable<Partial<S>>
 ) => {
   actions: ReducerActions<R>;
@@ -148,13 +148,13 @@ It remembers the state, applies the options, and then returns the second functio
 ### 2. **Reducers**
 
 ```ts
-<R extends StateReducers<S>>(
+function <R extends StateReducers<S>>(
   reducers: R,
   map$?: (
     state$: Observable<Readonly<S>>,
     reducers: R,
     state: Readonly<S>,
-    actions$: Record<`on${Capitalize<Extract<keyof R, string>>}`, Observable<S>>
+    actions$: Record<`${keyof R}$`, Observable<S>>
   ) => Observable<Partial<S>>
 ) => SubscribableRxRes<ReducerActions<R>, S>
 ```
