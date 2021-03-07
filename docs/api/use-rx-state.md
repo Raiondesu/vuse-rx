@@ -105,7 +105,7 @@ useRxState(initialState, {
 ```ts
 function <S extends Record<string, any>>(
   initialState: S | (() => S),
-  options: RxStateOptions
+  options?: RxStateOptions
 ) => <R extends StateReducers<S>>(
   reducers: R,
   map$?: (
@@ -138,7 +138,7 @@ This function is split into two parts:
 ```ts
 function <S extends Record<string, any>>(
   initialState: S | (() => S),
-  options: RxStateOptions
+  options?: RxStateOptions
 ): Function
 ```
 
@@ -161,14 +161,13 @@ It remembers the state, applies the options, and then returns the second functio
 
 There's a lot to unpack. Let's go one parameter at-a-time.
 
-For a concrete usage examples with both parameters see the [`stopwatch` recipe](/recipes/stopwatch).
+For concrete usage examples with both parameters see the [`stopwatch` recipe](/recipes/stopwatch).
 
 #### Parameter 1: `reducers`
 
 This function's primary goal is to bind reducers to the state.
 
 The reducers are passed in as a first parameter in [the following format](https://github.com/Raiondesu/vuse-rx/blob/main/src/use-rx.ts#L31).
-
 Each **reducer** must **return** either **a part of the state** or **an observable** that emits a part of the state.
 
 A reducer can be either state**ful** or state**less**:
