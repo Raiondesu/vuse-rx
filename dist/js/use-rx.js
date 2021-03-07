@@ -1,48 +1,58 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useRxState = exports.deepMergeKeys = void 0;
+exports.useRxState = exports.deepMergeKeys = exports.canMergeDeep = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const until_1 = require("./hooks/until");
-const deepMergeKeys = (prev) => (curr) => {
-    for (const key in curr) {
-        prev[key] = (typeof curr[key] === 'object'
-            && curr !== null
-            && typeof prev[key] === 'object') ? exports.deepMergeKeys(prev[key])(curr[key])
-            : curr[key];
+const canMergeDeep = (state, mutation, key) => (typeof mutation[key] === 'object'
+    && mutation !== null
+    && typeof state[key] === 'object');
+exports.canMergeDeep = canMergeDeep;
+const deepMergeKeys = (state) => (mutation) => {
+    for (const key in mutation) {
+        state[key] = exports.canMergeDeep(state, mutation, key)
+            ? exports.deepMergeKeys(state[key])(mutation[key])
+            : mutation[key];
     }
-    return prev;
+    return state;
 };
 exports.deepMergeKeys = deepMergeKeys;
-function useRxState(initialState, mergeKeys = exports.deepMergeKeys) {
+const defaultOptions = {
+    mutationStrategy: exports.deepMergeKeys,
+};
+function useRxState(initialState, options = defaultOptions) {
+    const { mutationStrategy: mergeKeys, } = Object.assign(Object.assign({}, defaultOptions), options);
     return function (reducers, map$) {
-        var _a;
         const state = vue_1.reactive(maybeCall(initialState));
-        const mergeStates = operators_1.mergeScan((prev, curr) => {
-            const newState = maybeCall(curr, prev);
-            return (rxjs_1.isObservable(newState)
-                ? newState
-                : rxjs_1.of(newState)).pipe(operators_1.map(mergeKeys(prev)));
-        }, state);
         const actions = {};
         const actions$ = {};
+        const actions$Arr = [];
         for (const key in reducers) {
             const mutations$ = new rxjs_1.Subject();
-            actions[key] = ((...args) => mutations$.next(reducers[key](...args)));
-            actions$[getAction$Name(key)] = mutations$.pipe(mergeStates);
+            actions[key] = ((...args) => mutations$.next(reducers[key].apply(reducers, args)));
+            actions$Arr.push(actions$[`${key}$`] = (operators_1.mergeScan((prev, curr) => {
+                let complete = false;
+                let error = undefined;
+                curr = maybeCall(curr, prev, {
+                    error: e => { error = e; },
+                    complete: () => { complete = true; }
+                });
+                return (rxjs_1.isObservable(curr) ? curr : rxjs_1.of(curr)).pipe(operators_1.map(mergeKeys(prev, mergeKeys)), operators_1.tap(() => (complete
+                    ? mutations$.complete()
+                    : error && mutations$.error(error))));
+            }, state)(mutations$)));
         }
-        const merged$ = rxjs_1.merge(...Object.values(actions$));
+        const merged$ = rxjs_1.merge(...actions$Arr);
         return createRxResult({
             actions,
             state: vue_1.readonly(state),
-            state$: until_1.untilUnmounted((_a = map$ === null || map$ === void 0 ? void 0 : map$(merged$, reducers, state, actions$).pipe(mergeStates)) !== null && _a !== void 0 ? _a : merged$),
+            state$: until_1.untilUnmounted(map$ ? map$(merged$, reducers, state, actions$).pipe(operators_1.scan((prev, curr) => (mergeKeys(prev, mergeKeys)(curr)), state)) : merged$),
             actions$: actions$,
         });
     };
 }
 exports.useRxState = useRxState;
-const getAction$Name = (name) => `${name}$`;
 const createRxResult = (result) => (Object.assign(Object.assign({}, result), { subscribe: (...args) => (Object.assign(Object.assign({}, result), { subscription: result.state$.subscribe(...args) })) }));
 const maybeCall = (fn, ...args) => (typeof fn === 'function'
     ? fn(...args)
