@@ -39,7 +39,7 @@ A simple example of a counter state with an increment reducer:
 ```vue
 <script lang="ts">
 import { useRxState, syncRef } from 'vuse-rx';
-import { defineComponent } from 'vue';
+import { defineComponent, toRef } from 'vue';
 import { tap } from 'rxjs/operators';
 
 export default defineComponent({
@@ -52,8 +52,8 @@ export default defineComponent({
       state,
       state$ // state observable
     } = useRxState({ count: 0 })({
-      // stateful reducer
-      increment: () => state => ({
+      // stateful reducer with mutation context
+      increment: () => (state, mutation) => ({
         // automatic type inference for the state
         count: state.count + 1
       }),
@@ -74,7 +74,7 @@ export default defineComponent({
       state,
 
       // One-way data binding from reactive state (with type convertation)
-      countRef: syncRef(state, 'count', String),
+      countRef: syncRef(toRef(state, 'count'), { to: String }),
     };
   }
 });
