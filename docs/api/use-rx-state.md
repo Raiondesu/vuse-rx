@@ -175,8 +175,9 @@ A reducer can be either state**ful** or state**less**:
 - A state**ful** reducer uses a state object to compute the mutation:\
   For example, an add-reducer:
   ```ts
-  // Reducer returns a function that accepts a state and returns the final mutation
-  (addAmount) => (state) => ({ count: state.count + addAmount })
+  // Reducer returns a function that accepts a state and a mutation context
+  // and returns the final mutation
+  (addAmount) => (state, mutation) => ({ count: state.count + addAmount })
   ```
 
 - A state**less** reducer only uses its initial parameters to compute the mutation:\
@@ -187,6 +188,64 @@ A reducer can be either state**ful** or state**less**:
   ```
 
 The resulting mutation is then automatically merged with the state itself.
+
+Let's see a complete example:
+```ts
+useRxState({ count: 0 })({
+  // stateful
+  add: (addAmount) => (state, mutation) => ({ count: state.count + addAmount }),
+
+  // stateless
+  set: (newValue) => ({ count: newValue }),
+}).subscribe()
+```
+
+It's also possible to inform observables about errors or make them complete
+from within the reducers. The `mutation` context parameter is used for this.
+
+Let's rewrite our `add` reducer with this in mind:
+```ts
+const maximumValue = 10;
+
+const { actions, state } = useRxState({ count: 0 })({
+  add: (addAmount) => (state, mutation) => {
+    if (addAmount < 0) {
+      // Raise a mutation error
+      mutation.error('add amount cannot be negative!');
+
+      // Signify that no changes need to be made
+      return {};
+    }
+
+    const newValue = state.count + addAmount;
+
+    if (newValue >= maximumValue) {
+      // This mutation will never be called again
+      mutation.complete();
+    }
+
+    return { count: newValue };
+  }
+}).subscribe({
+  error: errorText => {
+    console.error('Oh no, an error:', errorText);
+  },
+  complete: () => {
+    console.log('Counter stopped at ', state.count);
+  }
+});
+
+actions.add(9);
+
+// 50%
+if (Math.random() > 0.5) {
+  actions.add(-1);
+  //> Oh no, an error: add amount cannot be negative!
+} else {
+  actions.add(1);
+  //> Counter stopped at 10
+}
+```
 
 #### Parameter 2: `map$`
 

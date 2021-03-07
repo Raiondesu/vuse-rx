@@ -1,5 +1,5 @@
 import { isObservable, merge, of, Subject } from 'rxjs';
-import { map, mergeScan, scan } from 'rxjs/operators';
+import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from './hooks/until';
 
@@ -88,12 +88,28 @@ export function useRxState<T extends Record<string, any>>(
       );
 
       actions$Arr.push(
-        actions$[`${key}$` as const] = mergeScan((prev: S, curr: ReducerResult) => (
-          curr = maybeCall(curr, prev, mutations$),
-          map(mergeKeys(prev, mergeKeys))(
-            isObservable(curr) ? curr : of(curr || prev)
-          )
-        ), state)(mutations$)
+        actions$[`${key}$` as const] = (
+          mergeScan((prev: S, curr: ReducerResult) => {
+            let complete = false;
+            let error: any = undefined;
+
+            curr = maybeCall(curr, prev, {
+              error: e => { error = e },
+              complete: () => { complete = true }
+            });
+
+            return (
+              isObservable(curr) ? curr : of(curr)
+            ).pipe(
+              map(mergeKeys(prev, mergeKeys)),
+              tap(() => (
+                complete
+                  ? mutations$.complete()
+                  : error && mutations$.error(error)
+              ))
+            )
+          }, state)(mutations$)
+        )
       );
     }
 
@@ -201,7 +217,7 @@ export type DeepPartial<T> = T extends Builtin
 
 type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
 
-type ReducerContext = {
+export type MutationContext = {
   error(error: any): void;
   complete(): void;
 }
@@ -219,7 +235,7 @@ type ShallowReturn<S> =
  */
 export type StateReducer<S, Args extends any[] = any[]> = (...args: Args) =>
   | ShallowReturn<S>
-  | ((state: S, ctx: ReducerContext) => ShallowReturn<S>)
+  | ((state: S, mutation: MutationContext) => ShallowReturn<S>)
   ;
 
 /**

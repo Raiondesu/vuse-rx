@@ -144,7 +144,7 @@ describe('useRxState', () => {
     empty.actions$.$.subscribe();
   });
 
-  it('catches exceptions', () => {
+  it('applies context', () => {
     const error = 'I throw errors in reducers';
     const fn = jest.fn(e => expect(e).toBe(error));
 
@@ -164,5 +164,23 @@ describe('useRxState', () => {
     wrong.actions.setValue(-1);
 
     expect(fn).toHaveBeenCalledTimes(1);
+
+    const complete = jest.fn();
+
+    const right = useRxState({ value: 0 })({
+      setValue: (value: number) => (_, ctx) => {
+        if (value === 42) {
+          ctx.complete();
+        }
+
+        return { value };
+      }
+    }).subscribe({ complete });
+
+    right.actions.setValue(42);
+
+    expect(right.state.value).toBe(42);
+
+    expect(complete).toHaveBeenCalledTimes(1);
   });
 });
