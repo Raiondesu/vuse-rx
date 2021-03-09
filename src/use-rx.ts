@@ -18,37 +18,9 @@ export interface MutationStrategy<S extends Record<PropertyKey, any>> {
   ) => S;
 }
 
-export const canMergeDeep = <S extends Record<PropertyKey, any>>(
-  state: S,
-  mutation: S | DeepPartial<S>,
-  key: keyof S,
-) =>  (
-  typeof mutation[key] === 'object'
-  && mutation !== null
-  && typeof state[key] === 'object'
-);
-
-export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
-  state: S
-) => (
-  mutation: DeepPartial<S>
-) => {
-  for (const key in mutation) {
-    state[key] = canMergeDeep(state, mutation, key)
-      ? deepMergeKeys(state[key])(mutation[key])
-      : mutation[key] as any;
-  }
-
-  return state;
-};
-
 export interface RxStateOptions<S> {
   mutationStrategy: MutationStrategy<S>;
 }
-
-const defaultOptions: RxStateOptions<any> = {
-  mutationStrategy: deepMergeKeys,
-};
 
 /**
  * Allows to bind reducers to a state and an observable.
@@ -169,6 +141,50 @@ type CreateRxState<S> = {
   ): SubscribableRxRes<ReducerActions<R>, S>;
 };
 
+/**
+ * Checks if it's possible to advance deeper
+ * into the sibling object structures,
+ * with one being partial
+ *
+ * @param state - the object source
+ * @param mutation - the main checking reference
+ * @param key - a key into which to advance
+ */
+export const canMergeDeep = <S extends Record<PropertyKey, any>>(
+  state: S,
+  mutation: S | DeepPartial<S>,
+  key: keyof S,
+) =>  (
+  typeof mutation[key] === 'object'
+  && mutation !== null
+  && typeof state[key] === 'object'
+);
+
+/**
+ * Default merge strategy for mutations
+ *
+ * Merges state and mutation recursively,
+ * by enumerable keys (`for..in`),
+ * so avoid recursive object links
+ */
+export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
+  state: S
+) => (
+  mutation: DeepPartial<S>
+) => {
+  for (const key in mutation) {
+    state[key] = canMergeDeep(state, mutation, key)
+      ? deepMergeKeys(state[key])(mutation[key])
+      : mutation[key] as any;
+  }
+
+  return state;
+};
+
+const defaultOptions: RxStateOptions<any> = {
+  mutationStrategy: deepMergeKeys,
+};
+
 const createRxResult = <S, Actions>(result: {
   actions: Actions,
   state: DeepReadonly<S>,
@@ -225,7 +241,7 @@ export type MutationContext = {
 export type Mutation<S> =
   // | void
   // isn't useful,
-  // need to keep mutations explicit in what they do
+  // need to keep reducers explicit in what they do
   | S
   | DeepPartial<S>
   | Observable<DeepPartial<S>>;

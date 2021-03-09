@@ -1,4 +1,4 @@
-import { BehaviorSubject, isObservable, noop, of } from 'rxjs';
+import { isObservable, noop, of } from 'rxjs';
 import { Observable } from 'rxjs/internal/Observable';
 import { delay, tap } from 'rxjs/operators';
 import { isProxy } from 'vue';
