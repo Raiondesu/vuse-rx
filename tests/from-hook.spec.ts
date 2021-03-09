@@ -4,23 +4,28 @@ import { fromHook } from '../src/hooks/from';
 
 describe('fromHook', () => {
   it('emits when vue hook fires', () => {
-    const fn = jest.fn();
+    const mounted = jest.fn();
+    const unmounted = jest.fn();
 
     const root = document.createElement('div');
     const app = createApp({
       setup() {
-        fromHook(onMounted).subscribe(fn);
-        fromHook(onUnmounted).subscribe(fn);
+        fromHook(onMounted).subscribe(mounted);
+        fromHook(onUnmounted).subscribe(unmounted);
 
         return () => h('div');
       }
-    }).mount(root);
+    });
 
-    expect(fn).toBeCalledTimes(1);
+    app.mount(root);
 
-    app.$.appContext.app.unmount(root);
+    expect(mounted).toBeCalledTimes(1);
+    expect(unmounted).toBeCalledTimes(0);
 
-    expect(fn).toBeCalledTimes(2);
+    app.unmount(root);
+
+    expect(mounted).toBeCalledTimes(1);
+    expect(unmounted).toBeCalledTimes(1);
   });
 
   it("doesn't fail outside vue components", () => {
