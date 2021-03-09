@@ -222,7 +222,7 @@ export type MutationContext = {
   complete(): void;
 }
 
-type ShallowReturn<S> =
+export type Mutation<S> =
   // | void
   // isn't useful,
   // need to keep mutations explicit in what they do
@@ -234,8 +234,8 @@ type ShallowReturn<S> =
  * A reducer for the observable state
  */
 export type StateReducer<S, Args extends any[] = any[]> = (...args: Args) =>
-  | ShallowReturn<S>
-  | ((state: S, mutation: MutationContext) => ShallowReturn<S>)
+  | Mutation<S>
+  | ((state: S, mutation: MutationContext) => Mutation<S>)
   ;
 
 /**
