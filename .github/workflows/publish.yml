@@ -1,5 +1,3 @@
-# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
-# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
 name: 'Publish @latest'
 
@@ -9,7 +7,7 @@ on:
     types: [ closed ]
 
 jobs:
-  publish:
+  next:
     runs-on: ubuntu-latest
 
     steps:
@@ -17,21 +15,45 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 14.x
+
     - run: npm ci
     - run: npm run docs:build
-    - uses: EndBug/add-and-commit@v7.0.0
+
+    - name: Commit docs
+      uses: EndBug/add-and-commit@v7.0.0
       with:
         add: '-A .'
         message: Update docs
 
-    - run: npm test
+    - name: Read SemVer
+      uses: actions-ecosystem/action-release-label@v1
+      id: release
+
+    - name: Read package.json
+      uses: martinbeentjes/npm-get-version-action@master
+      id: package
+
+    - name: Release
+      run: npm run ${{ steps.release.outputs.level }}
+
+    - name: Commit dist
+      uses: EndBug/add-and-commit@v7.0.0
+      with:
+        add: '-A .'
+        message: Update dist
+
+    - name: Publish
+      uses: JS-DevTools/npm-publish@v1
+      with:
+        token: ${{ secrets.NPM_TOKEN }}
+
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: actions-ecosystem/action-release-label@v1
-      id: release
-      if: ${{ github.event.pull_request.merged == true }}
-
-    - run: npm run ${{ steps.release.outputs.level }}
+    - name: Push
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: main
