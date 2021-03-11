@@ -1,5 +1,5 @@
 import { nextTick, ref } from 'vue';
-import { fromRef } from '../src/rx-refs/from-ref';
+import { fromRef } from '../../src/rx-refs/from-ref';
 
 describe('fromRef', () => {
   it('creates observable from ref', async () => {

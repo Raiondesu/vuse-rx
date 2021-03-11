@@ -1,5 +1,5 @@
 import { isRef, nextTick, reactive } from 'vue';
-import { refFrom } from '../src/rx-refs/ref-from';
+import { refFrom } from '../../src/rx-refs/ref-from';
 
 describe('refFrom', () => {
   it('processes observable input', async () => {

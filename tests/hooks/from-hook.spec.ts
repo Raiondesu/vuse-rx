@@ -1,5 +1,5 @@
 import { createApp, h, onMounted, onUnmounted } from 'vue';
-import { fromHook } from '../src/hooks/from';
+import { fromHook } from '../../src/hooks/from';
 
 
 describe('fromHook', () => {
