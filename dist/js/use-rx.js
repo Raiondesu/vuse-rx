@@ -1,26 +1,10 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useRxState = exports.deepMergeKeys = exports.canMergeDeep = void 0;
+exports.deepMergeKeys = exports.canMergeDeep = exports.useRxState = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const until_1 = require("./hooks/until");
-const canMergeDeep = (state, mutation, key) => (typeof mutation[key] === 'object'
-    && mutation !== null
-    && typeof state[key] === 'object');
-exports.canMergeDeep = canMergeDeep;
-const deepMergeKeys = (state) => (mutation) => {
-    for (const key in mutation) {
-        state[key] = exports.canMergeDeep(state, mutation, key)
-            ? exports.deepMergeKeys(state[key])(mutation[key])
-            : mutation[key];
-    }
-    return state;
-};
-exports.deepMergeKeys = deepMergeKeys;
-const defaultOptions = {
-    mutationStrategy: exports.deepMergeKeys,
-};
 function useRxState(initialState, options = defaultOptions) {
     const { mutationStrategy: mergeKeys, } = Object.assign(Object.assign({}, defaultOptions), options);
     return function (reducers, map$) {
@@ -53,6 +37,22 @@ function useRxState(initialState, options = defaultOptions) {
     };
 }
 exports.useRxState = useRxState;
+const canMergeDeep = (state, mutation, key) => (typeof mutation[key] === 'object'
+    && mutation !== null
+    && typeof state[key] === 'object');
+exports.canMergeDeep = canMergeDeep;
+const deepMergeKeys = (state) => (mutation) => {
+    for (const key in mutation) {
+        state[key] = exports.canMergeDeep(state, mutation, key)
+            ? exports.deepMergeKeys(state[key])(mutation[key])
+            : mutation[key];
+    }
+    return state;
+};
+exports.deepMergeKeys = deepMergeKeys;
+const defaultOptions = {
+    mutationStrategy: exports.deepMergeKeys,
+};
 const createRxResult = (result) => (Object.assign(Object.assign({}, result), { subscribe: (...args) => (Object.assign(Object.assign({}, result), { subscription: result.state$.subscribe(...args) })) }));
 const maybeCall = (fn, ...args) => (typeof fn === 'function'
     ? fn(...args)

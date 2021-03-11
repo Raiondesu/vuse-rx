@@ -2,20 +2,6 @@ import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from './hooks/until';
-export const canMergeDeep = (state, mutation, key) => (typeof mutation[key] === 'object'
-    && mutation !== null
-    && typeof state[key] === 'object');
-export const deepMergeKeys = (state) => (mutation) => {
-    for (const key in mutation) {
-        state[key] = canMergeDeep(state, mutation, key)
-            ? deepMergeKeys(state[key])(mutation[key])
-            : mutation[key];
-    }
-    return state;
-};
-const defaultOptions = {
-    mutationStrategy: deepMergeKeys,
-};
 export function useRxState(initialState, options = defaultOptions) {
     const { mutationStrategy: mergeKeys, } = Object.assign(Object.assign({}, defaultOptions), options);
     return function (reducers, map$) {
@@ -47,6 +33,20 @@ export function useRxState(initialState, options = defaultOptions) {
         });
     };
 }
+export const canMergeDeep = (state, mutation, key) => (typeof mutation[key] === 'object'
+    && mutation !== null
+    && typeof state[key] === 'object');
+export const deepMergeKeys = (state) => (mutation) => {
+    for (const key in mutation) {
+        state[key] = canMergeDeep(state, mutation, key)
+            ? deepMergeKeys(state[key])(mutation[key])
+            : mutation[key];
+    }
+    return state;
+};
+const defaultOptions = {
+    mutationStrategy: deepMergeKeys,
+};
 const createRxResult = (result) => (Object.assign(Object.assign({}, result), { subscribe: (...args) => (Object.assign(Object.assign({}, result), { subscription: result.state$.subscribe(...args) })) }));
 const maybeCall = (fn, ...args) => (typeof fn === 'function'
     ? fn(...args)
