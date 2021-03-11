@@ -41,6 +41,8 @@
     "rxjs",
     "vue3",
     "rx",
+    "simple",
+    "pure",
     "integration",
     "support",
     "composition-api",
