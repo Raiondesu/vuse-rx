@@ -1,11 +1,9 @@
 # This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
 # For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
 
-name: CI
+name: 'Publish @next'
 
 on:
-  push:
-    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -18,28 +16,30 @@ jobs:
     - uses: actions/setup-node@v1
       with:
         node-version: 14.x
+
     - run: npm ci
-
-  # build:
-  #   runs-on: ubuntu-latest
-
-  #   needs: prepare
-  #   steps:
     - run: npm run build
+    - run: npm run docs:build
 
-  # docs:
-  #   runs-on: ubuntu-latest
-
-  #   needs: prepare
-  #   steps:
-    # - run: npm run docs:build
-    # - uses: EndBug/add-and-commit@v7.0.0
-    #   with:
-    #     add: '-A .'
-    #     message: Update docs
+    - uses: EndBug/add-and-commit@v7.0.0
+      with:
+        add: '-A .'
+        message: Update docs
 
     - run: npm test
     - name: Coveralls
       uses: coverallsapp/github-action@master
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
+
+    - uses: actions-ecosystem/action-release-label@v1
+      id: release
+
+    - uses: martinbeentjes/npm-get-version-action@master
+      id: package
+
+    - run: npm run preversion
+      if: ${{ contains(steps.package.outputs.current-version, '.rc-') }}
+
+    - run: npm run pre${{ steps.release.outputs.level }}
+      if: ${{ !contains(steps.package.outputs.current-version, '.rc-') }}
