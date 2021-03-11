@@ -29,13 +29,8 @@ jobs:
       with:
         github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    - uses: actions-ecosystem/action-get-merged-pull-request@v1.0.1
-      id: pr-info
-
     - uses: actions-ecosystem/action-release-label@v1
       id: release
-      with:
-        labels: ${{ steps.pr-info.labels }}
 
     - uses: martinbeentjes/npm-get-version-action@master
       id: package
