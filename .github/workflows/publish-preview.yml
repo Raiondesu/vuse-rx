@@ -31,11 +31,11 @@ jobs:
       uses: martinbeentjes/npm-get-version-action@master
       id: package
 
-    - name: Pre-version
-      run: npm run preversion
+    - name: Pre existing release
+      run: npm run prerelease
       if: ${{ contains(steps.package.outputs.current-version, '-rc.') }}
 
-    - name: Pre-release
+    - name: Pre new release
       run: npm run pre-${{ steps.release.outputs.level }}
       if: ${{ !contains(steps.package.outputs.current-version, '-rc.') }}
 

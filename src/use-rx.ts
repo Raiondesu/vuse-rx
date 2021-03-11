@@ -54,7 +54,7 @@ export function useRxState<T extends Record<string, any>>(
       const mutations$ = new Subject<ReducerResult>();
 
       actions[key] = <ReducerAction<typeof reducers[typeof key]>>(
-        (...args) => mutations$.next(
+        (...args: any[]) => mutations$.next(
           reducers[key].apply(reducers, args)
         )
       );
@@ -192,7 +192,7 @@ const createRxResult = <S, Actions>(result: {
   actions$: ReducerObservables<Actions, DeepReadonly<S>>
 }): SubscribableRxRes<Actions, S> => ({
   ...result,
-  subscribe: (...args) => ({
+  subscribe: (...args: any[]) => ({
     ...result,
     subscription: result.state$.subscribe(...args),
   }),
