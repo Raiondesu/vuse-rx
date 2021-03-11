@@ -31,7 +31,7 @@ jobs:
     - run: npm run preversion
       if: ${{ contains(steps.package.outputs.current-version, '.rc-') }}
 
-    - run: npm run pre${{ steps.release.outputs.level }}
+    - run: npm run pre-${{ steps.release.outputs.level }}
       if: ${{ !contains(steps.package.outputs.current-version, '.rc-') }}
 
     - name: Coveralls
