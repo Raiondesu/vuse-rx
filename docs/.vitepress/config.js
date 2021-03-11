@@ -33,8 +33,9 @@ function getSidebar() {
     {
       text: 'API',
       children: [
-        { text: 'useRxState', link: '/api/use-rx-state' },
+        { text: 'State Management', link: '/api/use-rx-state' },
         { text: 'Observable X Reactive', link: '/api/refs' },
+        { text: 'Operators', link: '/api/operators' },
         { text: 'Hooks', link: '/api/hooks' },
       ]
     },

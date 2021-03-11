@@ -53,6 +53,18 @@ The binding can be:
 The second ref serves as an origin point for the binding,\
 values **from** the second ref and **to** the second ref are mapped onto it.
 
+It's also possible to set the `WatchOptions` for the newly created ref via `with` static method:
+
+```ts
+const customSyncRef = syncRef.with({
+  // Don't wait for `nextTick`
+  flush: 'sync',
+
+  // Do not set the value from the first ref immediately
+  immediate: false
+});
+```
+
 Example:
 
 ```ts
