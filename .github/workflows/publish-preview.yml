@@ -23,11 +23,6 @@ jobs:
         add: '-A .'
         message: Update docs
 
-    - name: Remove dist
-      uses: JesseTG/rm@v1.0.0
-      with:
-        path: ./dist
-
     - name: Read SemVer
       uses: actions-ecosystem/action-release-label@v1
       id: release
