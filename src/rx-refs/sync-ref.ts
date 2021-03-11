@@ -1,4 +1,4 @@
-import { Ref, UnwrapRef, computed, ref, watch } from 'vue';
+import { Ref, UnwrapRef, computed, ref, watch, WatchOptions } from 'vue';
 
 /**
  * Creates a binding between two refs.\
@@ -44,28 +44,26 @@ export function syncRef<R1, R2>(
   ref2: Ref<R2>,
 ): Ref<R2>;
 export function syncRef<R1, R2>(
+  this: WatchOptions,
   ref1: Ref<R1>,
   { to, from }: Mappers<R1, R2>,
   _ref2?: Ref<R2> | R2,
 ): Ref<R2> {
-  // Slight optimization if both mappers are defined
-  if (to && from) {
-    return computed({
-      get: () => to(ref1.value),
-      set: v => ref1.value = from(v),
-    });
-  }
-
   const ref2 = ref(_ref2 ?? ref1.value) as Ref<R2>;
 
   if (to) {
-    watch(ref1, v => ref2.value = to(v));
-  } else if (from) {
-    watch(ref2, v => ref1.value = from(v));
+    watch(ref1, v => ref2.value = to(v), this);
+  }
+  if (from) {
+    watch(ref2, v => ref1.value = from(v), this);
   }
 
   return ref2;
 }
+
+syncRef.with = <T extends Readonly<boolean> = false>(
+  options: WatchOptions<T>
+): typeof syncRef => syncRef.bind(options);
 
 type Mapper<F, T> = (value: F) => T;
 
