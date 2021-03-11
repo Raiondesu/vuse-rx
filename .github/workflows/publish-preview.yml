@@ -15,19 +15,12 @@ jobs:
         node-version: 14.x
 
     - run: npm ci
-    - run: npm run build
     - run: npm run docs:build
 
     - uses: EndBug/add-and-commit@v7.0.0
       with:
         add: '-A .'
         message: Update docs
-
-    - run: npm test
-    - name: Coveralls
-      uses: coverallsapp/github-action@master
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
 
     - uses: actions-ecosystem/action-release-label@v1
       id: release
@@ -40,3 +33,8 @@ jobs:
 
     - run: npm run pre${{ steps.release.outputs.level }}
       if: ${{ !contains(steps.package.outputs.current-version, '.rc-') }}
+
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
