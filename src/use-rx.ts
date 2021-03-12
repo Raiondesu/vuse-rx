@@ -1,7 +1,7 @@
 import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
-import { untilUnmounted } from './hooks/until';
+import { untilUnmounted } from './operators/until';
 
 import type { Observable, PartialObserver, Subscription } from 'rxjs';
 import type { DeepReadonly, Ref, UnwrapRef } from 'vue';
@@ -71,7 +71,9 @@ export function useRxState<T extends Record<string, any>>(
             });
 
             return (
-              isObservable(curr) ? curr : of(curr)
+              isObservable(curr)
+                ? curr
+                : of(curr)
             ).pipe(
               map(mergeKeys(prev, mergeKeys)),
               tap(() => (

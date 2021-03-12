@@ -1,6 +1,6 @@
 import { Observable } from 'rxjs';
 import { watch, WatchOptions, WatchSource } from 'vue';
-import { untilUnmounted } from '../hooks/until';
+import { untilUnmounted } from '../operators/until';
 
 /**
  * Creates an observable from a vue ref.

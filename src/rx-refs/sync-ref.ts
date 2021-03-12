@@ -1,4 +1,4 @@
-import { Ref, UnwrapRef, computed, ref, watch, WatchOptions } from 'vue';
+import { Ref, UnwrapRef, ref, watch, WatchOptions } from 'vue';
 
 /**
  * Creates a binding between two refs.\
@@ -54,6 +54,7 @@ export function syncRef<R1, R2>(
   if (to) {
     watch(ref1, v => ref2.value = to(v), this);
   }
+
   if (from) {
     watch(ref2, v => ref1.value = from(v), this);
   }
@@ -75,8 +76,6 @@ type Mappers<R1, R2> = {
 
   /**
    * A map from the second ref to the first
-   *
-   * It will create a two-way bind between the refs
    */
   from?: Mapper<R2, R1>,
 } | {
@@ -87,8 +86,6 @@ type Mappers<R1, R2> = {
 
   /**
    * A map from the second ref to the first
-   *
-   * It will create a two-way bind between the refs
    */
   from: Mapper<R2, R1>,
 };
