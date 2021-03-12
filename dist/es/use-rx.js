@@ -1,7 +1,7 @@
 import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
-import { untilUnmounted } from './hooks/until';
+import { untilUnmounted } from './operators/until';
 export function useRxState(initialState, options = defaultOptions) {
     const { mutationStrategy: mergeKeys, } = Object.assign(Object.assign({}, defaultOptions), options);
     return function (reducers, map$) {
@@ -19,7 +19,9 @@ export function useRxState(initialState, options = defaultOptions) {
                     error: e => { error = e; },
                     complete: () => { complete = true; }
                 });
-                return (isObservable(curr) ? curr : of(curr)).pipe(map(mergeKeys(prev, mergeKeys)), tap(() => (complete
+                return (isObservable(curr)
+                    ? curr
+                    : of(curr)).pipe(map(mergeKeys(prev, mergeKeys)), tap(() => (complete
                     ? mutations$.complete()
                     : error && mutations$.error(error))));
             }, state)(mutations$)));

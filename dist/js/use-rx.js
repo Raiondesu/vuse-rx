@@ -4,7 +4,7 @@ exports.deepMergeKeys = exports.canMergeDeep = exports.useRxState = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
-const until_1 = require("./hooks/until");
+const until_1 = require("./operators/until");
 function useRxState(initialState, options = defaultOptions) {
     const { mutationStrategy: mergeKeys, } = Object.assign(Object.assign({}, defaultOptions), options);
     return function (reducers, map$) {
@@ -22,7 +22,9 @@ function useRxState(initialState, options = defaultOptions) {
                     error: e => { error = e; },
                     complete: () => { complete = true; }
                 });
-                return (rxjs_1.isObservable(curr) ? curr : rxjs_1.of(curr)).pipe(operators_1.map(mergeKeys(prev, mergeKeys)), operators_1.tap(() => (complete
+                return (rxjs_1.isObservable(curr)
+                    ? curr
+                    : rxjs_1.of(curr)).pipe(operators_1.map(mergeKeys(prev, mergeKeys)), operators_1.tap(() => (complete
                     ? mutations$.complete()
                     : error && mutations$.error(error))));
             }, state)(mutations$)));
