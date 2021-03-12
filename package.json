@@ -5,7 +5,7 @@
   "description": "First-class rxjs support for Vue 3",
   "main": "dist/js",
   "module": "dist/es",
-  "unpkg": "dist/esm",
+  "unpkg": "dist/umd",
   "typings": "src",
   "files": [
     "dist",
@@ -80,7 +80,7 @@
     "rollup-plugin-typescript2": "^0.29.0",
     "rxjs": "^6.6.3",
     "ts-jest": "^26.5.0",
-    "typescript": "^4.1.3",
+    "typescript": "^4.2.3",
     "vitepress": "^0.12.2",
     "vue": "^3.0.5",
     "vuse-rx": "./"
