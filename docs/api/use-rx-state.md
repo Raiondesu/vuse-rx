@@ -69,7 +69,7 @@ import {
 } from 'vuse-rx';
 
 useRxState(initialState, {
-  mergeKeys: (
+  mutationStrategy: (
     // A full base state to mutate
     state,
     // Current mutation strategy (this exact function)
