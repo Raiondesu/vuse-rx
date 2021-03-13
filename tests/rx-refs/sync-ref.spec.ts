@@ -73,7 +73,8 @@ describe('syncRef', () => {
     expect(this).toBe(watchOptions);
 
     const newValue = 42;
-    const number = ref(0);
+    const oldValue = 0;
+    const number = ref(oldValue);
 
     const oneWay = syncRef(number, { to: String });
     const twoWay = syncRef(number, { to: String, from: Number });
@@ -83,8 +84,8 @@ describe('syncRef', () => {
 
     number.value = newValue;
 
-    expect(oneWay.value).toBe(0);
-    expect(twoWay.value).toBe(0);
+    expect(oneWay.value).toBe(String(oldValue));
+    expect(twoWay.value).toBe(String(oldValue));
 
     expect(oneWaySync.value).toBe(String(newValue));
     expect(twoWaySync.value).toBe(String(newValue));
