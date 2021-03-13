@@ -92,10 +92,17 @@ const bind = <R1, R2>(
   dir: keyof Mappers<R1, R2>,
   options: WatchOptions,
 ) => refDest[dir].bind = (
-  ref = refBase,
-  map = maps[dir] as Mapper<any, any>,
-  opts?: WatchOptions
+  bindOptions?: Partial<BindingOptions<R1, R2, keyof Mappers<R1, R2>>>
 ) => {
+  const {
+    ref, map, watch: opts
+  }: BindingOptions<any, R2, any> = {
+    ref: refBase,
+    map: maps[dir]!,
+    watch: options,
+    ...bindOptions,
+  };
+
   if (refDest[dir].stop) {
     refDest[dir].stop();
   }
@@ -154,15 +161,27 @@ type Binders<R1, R2, Keys extends PropertyKey> = {
       /**
        * Bind this direction to a new ref
        */
-      (ref: Ref<R1>): void;
+      (options?: BindingOptions<R1, R2, key>): void;
 
       /**
        * Bind this direction to a new ref with a new map
        */
-      <T>(ref: Ref<T>, map: key extends 'to' ? Mapper<T, R2> : Mapper<R2, T>, options?: WatchOptions): void;
+      <T>(options: CustomBindingOptions<T, R2, key>): void;
     };
   };
 };
+
+type BindingOptions<R1, R2, Key extends PropertyKey> = {
+  ref?: Ref<R1>;
+  map?: Key extends 'to' ? Mapper<R1, R2> : Mapper<R2, R1>;
+  watch?: WatchOptions;
+}
+
+type CustomBindingOptions<T, R2, Key extends PropertyKey> = {
+  ref: Ref<T>;
+  map: Key extends 'to' ? Mapper<T, R2> : Mapper<R2, T>;
+  watch?: WatchOptions;
+}
 
 type SyncedRef<
   R1,

@@ -111,12 +111,16 @@ describe('syncRef', () => {
     number.value = oldValue;
     expect(bound.value).toBe(String(newValue));
 
-    const mapToStr = (v: number) => `wow: ${v}`;
+    const toWow = (v: number) => `wow: ${v}`;
 
-    bound.to.bind(number, mapToStr);
+    bound.to.bind({
+      ref: number,
+      map: toWow
+    });
+
     expect(bound.value).toBe(String(newValue));
 
     number.value = newValue;
-    expect(bound.value).toBe(mapToStr(newValue));
+    expect(bound.value).toBe(toWow(newValue));
   });
 });
