@@ -97,9 +97,22 @@ const customSyncRef = syncRef.with({
   // Don't wait for `nextTick`
   flush: 'sync',
 
-  // Do not set the value from the first ref immediately
-  immediate: false
+  // Set the value from the first ref immediately
+  immediate: true
 });
+
+// Use `.with` again on custom syncRef to add or rewrite watcg options
+const deepSyncRef = customSyncRef.with({
+  deep: true
+});
+
+/** The whole options for deepSyncRef are
+ * {
+ *   flush: 'sync',
+ *   immediate: true,
+ *   deep: true
+ * }
+ */
 ```
 
 ### Change ref bindings
