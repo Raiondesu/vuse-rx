@@ -7,7 +7,7 @@ import { Ref, UnwrapRef, ref, watch, WatchOptions, WatchStopHandle } from 'vue';
  * - Two-way if both mappers (`to` and `from`) are defined.
  *
  * The resulting ref serves as an origin point for the binding,\
- * values **from** the resulting ref and **to** the resulting ref are mapped onto it.
+ * values **from** the resulting ref and **to** the resulting ref are mapped onto the first.
  */
 export function syncRef<R1, R2>(
   ref1: Ref<R1>,
@@ -32,7 +32,7 @@ export function syncRef<R1, R2>(
  * - Two-way if both mappers (`to` and `from`) are defined.
  *
  * The resulting ref serves as an origin point for the binding,\
- * values **from** the resulting ref and **to** the resulting ref are mapped onto it.
+ * values **from** the resulting ref and **to** the resulting ref are mapped onto the first.
  */
  export function syncRef<R1, R2, M extends Readonly<Mappers<R1, R2>> = Mappers<R1, R2>>(
   ref1: Ref<R1>,
@@ -47,7 +47,7 @@ export function syncRef<R1, R2>(
  * - Two-way if both mappers (`to` and `from`) are defined.
  *
  * The second ref serves as an origin point for the binding,\
- * values **from** the second ref and **to** the second ref are mapped onto it.
+ * values **from** the second ref and **to** the second ref are mapped onto the first.
  */
 export function syncRef<R1, R2, M extends Readonly<Mappers<R1, R2>> = Mappers<R1, R2>>(
   ref1: Ref<R1>,

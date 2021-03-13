@@ -53,7 +53,7 @@ The binding can be:
 - Two-way if both mappers (`to` and `from`) are defined.
 
 The second ref serves as an origin point for the binding,\
-values **from** the second ref and **to** the second ref are mapped onto it.
+values **from** the second ref and **to** the second ref are mapped onto the first.
 
 ### Simple example
 
