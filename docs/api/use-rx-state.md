@@ -167,7 +167,7 @@ For concrete usage examples with both parameters see the [`stopwatch` recipe](/r
 
 This function's primary goal is to bind reducers to the state.
 
-The reducers are passed in as a first parameter in [the following format](https://github.com/Raiondesu/vuse-rx/blob/main/src/use-rx.ts#L31).
+The reducers are passed in as a first parameter in [the following format](https://github.com/Raiondesu/vuse-rx/blob/main/src/use-rx.ts#L236).
 Each **reducer** must **return** either **a part of the state** or **an observable** that emits a part of the state.
 
 A reducer can be either state**ful** or state**less**:
