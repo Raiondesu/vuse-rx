@@ -15,7 +15,13 @@ syncRef.with = (...options) => {
     f.with = syncRef.with.bind(opts);
     return f;
 };
-const bind = (refBase, refDest, maps, dir, options) => refDest[dir].bind = (ref = refBase, map = maps[dir], opts) => {
+const bind = (refBase, refDest, maps, dir, options) => refDest[dir].bind = (bindOptions) => {
+    const { ref, map, watch: opts } = {
+        ref: refBase,
+        map: maps[dir],
+        watch: options,
+        ...bindOptions,
+    };
     if (refDest[dir].stop) {
         refDest[dir].stop();
     }
