@@ -40,7 +40,7 @@ count.value = 1;
 function <R1, R2 = R1>(
   ref1: Ref<R1>,
   map: {
-    to: (value: R1) => R2,
+    to?: (value: R1) => R2,
     from?: (value: R2) => R1,
   },
   ref2?: Ref<R2> | R2,
