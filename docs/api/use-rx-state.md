@@ -200,7 +200,10 @@ useRxState({ count: 0 })({
 ```
 
 It's also possible to inform observables about errors or make them complete
-from within the reducers. The `mutation` context parameter is used for this.
+from within the reducers. The `mutation` context parameter is used for this.\
+`mutation` is optional, however, so it is recommended to use the
+[optional chaining (`?.`) operator](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Operators/Optional_chaining)
+when accessing it.
 
 Let's rewrite our `add` reducer with this in mind:
 ```ts
@@ -210,7 +213,7 @@ const { actions, state } = useRxState({ count: 0 })({
   add: (addAmount) => (state, mutation) => {
     if (addAmount < 0) {
       // Raise a mutation error
-      mutation.error('add amount cannot be negative!');
+      mutation?.error('add amount cannot be negative!');
 
       // Signify that no changes need to be made
       return {};
@@ -220,7 +223,7 @@ const { actions, state } = useRxState({ count: 0 })({
 
     if (newValue >= maximumValue) {
       // This mutation will never be called again
-      mutation.complete();
+      mutation?.complete();
     }
 
     return { count: newValue };

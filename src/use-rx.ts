@@ -156,7 +156,7 @@ export const canMergeDeep = <S extends Record<PropertyKey, any>>(
   state: S,
   mutation: S | DeepPartial<S>,
   key: keyof S,
-) =>  (
+) => (
   typeof mutation[key] === 'object'
   && mutation !== null
   && typeof state[key] === 'object'
@@ -253,7 +253,7 @@ export type Mutation<S> =
  */
 export type StateReducer<S, Args extends any[] = any[]> = (...args: Args) =>
   | Mutation<S>
-  | ((state: S, mutation: MutationContext) => Mutation<S>)
+  | ((state: S, mutation?: MutationContext) => Mutation<S>)
   ;
 
 /**
