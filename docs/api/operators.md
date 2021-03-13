@@ -58,14 +58,34 @@ import { mapError, tapError } from 'vuse-rx';
 
 from(Promise.reject('42'))
   .pipe(
+    tapError(error => console.log('type of the error is', typeof error)),
     mapError(Number),
-    tapError(error => console.log('type of the error is', typeof error))
-    tapError(error => console.log('error value is', error))
+    tapError(error => console.log('type of the error is', typeof error)),
+    tapError(error => console.log('error value is', error)),
   )
   .subscribe({ error: e => console.log(e) });
 
 // After promise rejects:
+//> type of the error is string
 //> type of the error is number
 //> error value is 42
 //> 42
 ```
+
+## `pipeUntil`
+
+```ts
+<T>(hook: VueHook) => RxOperator<T>
+```
+
+Creates an operator that halts the observable when a Vue hook is activated.\
+Only works for the component it is called within.
+
+## `untilUnmounted`
+
+```ts
+<T>(obs: Observable<T>) => Observable<T>
+```
+
+Rx operator.
+Applies `pipeUntil` to an observable, shorthand for `obserable.pipe(pipeUntil(onUnmounted))`.
