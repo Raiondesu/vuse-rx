@@ -1,5 +1,5 @@
 import { from, Subject } from 'rxjs';
-import { nextTick, ref } from 'vue';
+import { ref } from 'vue';
 import { setRef } from '../../src/operators/set-ref';
 import { syncRef } from '../../src/rx-refs/sync-ref';
 
@@ -18,7 +18,7 @@ describe('setRef', () => {
 
     const result = ref('some string to display to the user');
     const promise = Promise.resolve(42);
-    const displayValue = value => `New value is: ${value}`;
+    const displayValue = (value: number) => `New value is: ${value}`;
 
     from(promise)
       // sets result of the promise to `result`

@@ -29,7 +29,7 @@ describe('refFrom', () => {
   });
 
   it('doesn\'t panic', async () => {
-    const initial = 'what is this';
+    const initial: any = 'what is this';
     const final = 'wow';
 
     const r = refFrom(initial);

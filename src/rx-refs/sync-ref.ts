@@ -1,4 +1,4 @@
-import { Ref, UnwrapRef, ref, watch, WatchOptions } from 'vue';
+import { Ref, UnwrapRef, ref, watch, WatchOptions, WatchStopHandle } from 'vue';
 
 /**
  * Creates a binding between two refs.\
@@ -11,9 +11,19 @@ import { Ref, UnwrapRef, ref, watch, WatchOptions } from 'vue';
  */
 export function syncRef<R1, R2>(
   ref1: Ref<R1>,
-  { to, from }: Mappers<R1, UnwrapRef<R2>>,
+  { to }: { to: Mapper<R1, UnwrapRef<R2>> },
+): SyncedRef<R1, 'to', UnwrapRef<R2>>;
+
+export function syncRef<R1, R2>(
+  ref1: Ref<R1>,
+  { from }: { from: Mapper<UnwrapRef<R2>, R1> },
   defaultValue?: R2,
-): Ref<UnwrapRef<R2>>;
+): SyncedRef<R1, 'from', UnwrapRef<R2>>;
+
+export function syncRef<R1, R2>(
+  ref1: Ref<R1>,
+  { to, from }: { to: Mapper<R1, UnwrapRef<R2>>, from: Mapper<UnwrapRef<R2>, R1> },
+): SyncedRef<R1, 'to' | 'from', UnwrapRef<R2>>;
 
 /**
  * Creates a binding between two refs.\
@@ -24,10 +34,11 @@ export function syncRef<R1, R2>(
  * The resulting ref serves as an origin point for the binding,\
  * values **from** the resulting ref and **to** the resulting ref are mapped onto it.
  */
-export function syncRef<R1, R2>(
+ export function syncRef<R1, R2, M extends Readonly<Mappers<R1, R2>> = Mappers<R1, R2>>(
   ref1: Ref<R1>,
-  { to, from }: Mappers<R1, UnwrapRef<R2>>,
-): Ref<UnwrapRef<R2>>;
+  { to, from }: M,
+  defaultValue?: R2,
+): SyncedRef<R1, keyof M, UnwrapRef<R2>>;
 
 /**
  * Creates a binding between two refs.\
@@ -38,33 +49,61 @@ export function syncRef<R1, R2>(
  * The second ref serves as an origin point for the binding,\
  * values **from** the second ref and **to** the second ref are mapped onto it.
  */
-export function syncRef<R1, R2>(
+export function syncRef<R1, R2, M extends Readonly<Mappers<R1, R2>> = Mappers<R1, R2>>(
   ref1: Ref<R1>,
-  { to, from }: Mappers<R1, R2>,
+  { to, from }: M,
   ref2: Ref<R2>,
-): Ref<R2>;
+): SyncedRef<R1, keyof M, R2>;
+
 export function syncRef<R1, R2>(
   this: WatchOptions,
   ref1: Ref<R1>,
-  { to, from }: Mappers<R1, R2>,
+  maps: Readonly<Mappers<R1, R2>>,
   _ref2?: Ref<R2> | R2,
-): Ref<R2> {
-  const ref2 = ref(_ref2 ?? ref1.value) as Ref<R2>;
+): _SyncedRef<R1, keyof Mappers<R1, R2>, R2> {
+  const ref2 = ref(
+    _ref2
+      ?? maps.to?.(ref1.value)
+      ?? ref1.value
+  ) as _SyncedRef<R1, keyof Mappers<R1, R2>, R2>;
 
-  if (to) {
-    watch(ref1, v => ref2.value = to(v), this);
-  }
+  for (const key in maps) {
+    ref2[key] = {};
 
-  if (from) {
-    watch(ref2, v => ref1.value = from(v), this);
+    bind(ref1, ref2, maps, key as any, this)();
   }
 
   return ref2;
 }
 
 syncRef.with = <T extends Readonly<boolean> = false>(
-  options: WatchOptions<T>
-): typeof syncRef => syncRef.bind(options);
+  ...options: WatchOptions<T>[]
+): typeof syncRef => {
+  const opts = Object.assign({}, ...options);
+  const f = syncRef.bind(opts);
+  f.with = syncRef.with.bind(opts);
+  return f;
+}
+
+const bind = <R1, R2>(
+  refBase: Ref<R1>,
+  refDest: Ref<R2>,
+  maps: Mappers<R1, R2>,
+  dir: keyof Mappers<R1, R2>,
+  options: WatchOptions,
+) => refDest[dir].bind = (
+  ref = refBase,
+  map = maps[dir] as Mapper<any, any>,
+  opts?: WatchOptions
+) => {
+  if (refDest[dir].stop) {
+    refDest[dir].stop();
+  }
+
+  refDest[dir].stop = dir === 'to'
+    ? watch(ref, v => refDest.value = map(v), Object.assign({}, options, opts))
+    : watch(refDest, v => ref.value = map(v), Object.assign({}, options, opts));
+};
 
 type Mapper<F, T> = (value: F) => T;
 
@@ -77,15 +116,62 @@ type Mappers<R1, R2> = {
   /**
    * A map from the second ref to the first
    */
-  from?: Mapper<R2, R1>,
+  from?: never,
 } | {
   /**
    * A map from the first ref to the second
    */
-  to?: Mapper<R1, R2>,
+  to?: never,
+
+  /**
+   * A map from the second ref to the first
+   */
+  from: Mapper<R2, R1>,
+} | {
+  /**
+   * A map from the first ref to the second
+   */
+  to: Mapper<R1, R2>,
 
   /**
    * A map from the second ref to the first
    */
   from: Mapper<R2, R1>,
 };
+
+type Binders<R1, R2, Keys extends PropertyKey> = {
+  [key in Keys]: {
+    /**
+     * Cut the binding in this direction
+     */
+    stop: WatchStopHandle;
+    bind: {
+      /**
+       * Reapply the binding in this direction
+       */
+      (): void;
+
+      /**
+       * Bind this direction to a new ref
+       */
+      (ref: Ref<R1>): void;
+
+      /**
+       * Bind this direction to a new ref with a new map
+       */
+      <T>(ref: Ref<T>, map: key extends 'to' ? Mapper<T, R2> : Mapper<R2, T>, options?: WatchOptions): void;
+    };
+  };
+};
+
+type SyncedRef<
+  R1,
+  Keys extends PropertyKey,
+  R2,
+> = Ref<R2> & Binders<R1, R2, Keys>;
+
+type _SyncedRef<
+  R1,
+  _Keys extends PropertyKey,
+  R2,
+> = Ref<R2> & Partial<Binders<R1, R2, keyof Mappers<R1, R2>>>;

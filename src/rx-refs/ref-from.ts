@@ -24,6 +24,15 @@ export function refFrom<R>(promise: Promise<R>): Ref<UnwrapRef<R> | undefined>;
 export function refFrom<R>(promise: Promise<R>, defaultValue: R): Ref<UnwrapRef<R>>;
 
 /**
+ * `refFrom` is not supposed to work for dynamic types and is recommended to use statically!
+ *
+ * But this overload is still allowed as a convenience.
+ *
+ * @param value a value to create the ref from
+ */
+export function refFrom<R>(arg: R): Ref<UnwrapRef<R>>;
+
+/**
  * Creates a ref from an observable input.
  *
  * Behaves exactly like `from` in rxjs and creates an observable from the input.

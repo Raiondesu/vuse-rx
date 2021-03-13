@@ -32,6 +32,8 @@ count.value = 1;
 // > count is 1
 ```
 
+---
+
 ## `syncRef`
 
 ```ts
@@ -42,7 +44,7 @@ function <R1, R2 = R1>(
     from?: (value: R2) => R1,
   },
   ref2?: Ref<R2> | R2,
-): Ref<R2>;
+): SyncedRef<R2>;
 ```
 
 Creates a binding between two refs.\
@@ -53,25 +55,13 @@ The binding can be:
 The second ref serves as an origin point for the binding,\
 values **from** the second ref and **to** the second ref are mapped onto it.
 
-It's also possible to set the `WatchOptions` for the newly created ref via `with` static method:
-
-```ts
-const customSyncRef = syncRef.with({
-  // Don't wait for `nextTick`
-  flush: 'sync',
-
-  // Do not set the value from the first ref immediately
-  immediate: false
-});
-```
-
-Example:
+### Simple example
 
 ```ts
 const count = ref(0);
 
 // two-way binding
-// Once count changes - countStr changes too
+// Once `count` changes - `countStr` changes too
 // and vice versa,
 // according to the rules in the map.
 const countStr = syncRef(
@@ -85,9 +75,9 @@ const countStr = syncRef(
 );
 
 // one-way binding
-// Once countInputStr changes - count changes too,
+// Once `countInputStr` changes - `count` changes too,
 // according to the rules in the map.
-// But if count changes - countInputStr stays the same
+// But if `count` changes - `countInputStr` stays the same
 const countInputStr = syncRef(count, { from: Number }, '');
 ```
 
@@ -97,6 +87,49 @@ so feel free to open the console and play with them!
 <ClientOnly>
   <SyncRef/>
 </ClientOnly>
+
+### Options - `.with`
+
+It's also possible to set the `WatchOptions` for `syncRef` using the `with` static method:
+
+```ts
+const customSyncRef = syncRef.with({
+  // Don't wait for `nextTick`
+  flush: 'sync',
+
+  // Do not set the value from the first ref immediately
+  immediate: false
+});
+```
+
+### Change ref bindings
+
+Value returned from `syncRef` is, however,
+different from your usual ref - it allows to control the bindings manually:
+
+```ts
+// Controls the incoming binding to this ref
+countStr.to
+// cuts the binding altogether
+countStr.to.stop();
+// Applies the binding to a new ref
+countStr.to.bind(count);
+// (may need to set a new map, if the ref type is different from before)
+countStr.to.bind(count, String, /* new watch options: */{ flush: 'sync' });
+
+// Controls the outcoming binding from this ref
+countStr.from
+// cuts the binding altogether
+countStr.from.stop();
+// Applies the binding to a new ref
+countStr.from.bind(count);
+// (may need to set a new map, if the ref type is different from before)
+countStr.from.bind(count, Number, /* new watch options: */{ immediate: true });
+```
+
+You can also play with this in the browser console using the example above.
+
+---
 
 ## `refFrom`
 
@@ -116,6 +149,8 @@ These include:
 - Vue's `Reactive`
 
 Will also work as a simple `ref` function as a safeguard or a convenience, in case it is given an unrecognizable value.
+
+---
 
 ## `refsFrom`
 

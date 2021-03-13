@@ -1,6 +1,6 @@
 <script lang="ts">
-import { defineComponent, onMounted, ref } from 'vue';
-import { syncRef } from 'vuse-rx';
+import { defineComponent, ref } from 'vue';
+import { syncRef } from '../../../../src';
 import { setToWindow } from '../set-window';
 
 export default defineComponent({
@@ -11,7 +11,7 @@ export default defineComponent({
     const countStr = syncRef(count, { to: String, from: Number });
 
     // one-way binding
-    const countInputStr = syncRef(count, { from: Number }, '0');
+    const countInputStr = syncRef(count, { from: Number }, '');
 
     return setToWindow({
       syncRef,
