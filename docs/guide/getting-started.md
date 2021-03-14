@@ -17,13 +17,13 @@ It's fully typed and therefore has **first-class TypeScript support**.
 
 `yarn add vuse-rx`
 
-### Native browser
+### UMD
 
 ```html
-<script type="module" src="https://unpkg.com/vuse-rx"></script>
-
-<!-- or a complete package with polyfills and etc. -->
-<script src="https://unpkg.com/vuse-rx/dist/umd.js"></script>
+<script src="https://unpkg.com/vuse-rx"></script>
+<script>
+  const { useRxState, syncRef } = vuseRx;
+</script>
 ```
 
 ## Use
