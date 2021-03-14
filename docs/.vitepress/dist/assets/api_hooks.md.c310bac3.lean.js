@@ -1,1 +1,0 @@
-import{o as n,c as s,a}from"./app.2a4a83f1.js";const t='{"title":"Vue Lifecycle Hooks","description":"","frontmatter":{},"headers":[{"level":2,"title":"fromHook","slug":"fromhook"}],"relativePath":"api/hooks.md","lastUpdated":1615725802898}',o={},p=a('',8);o.render=function(a,t,o,e,c,u){return n(),s("div",null,[p])};export default o;export{t as __pageData};
