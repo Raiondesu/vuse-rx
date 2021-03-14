@@ -179,7 +179,7 @@ export default defineComponent({
     <button @click="setValue(+setToRef)">Set value</button>
   </div>
   <div>
-    <!-- Convert speedRef value to string and set it as the counter's speed -->
+    <!-- Convert speedRef value to number and set it as the counter's speed -->
     <!-- using the reducer that was defined earlier -->
     <input v-model="speedRef" @blur.capture="setSpeed(+speedRef)"/>
 
