@@ -203,7 +203,7 @@ It's also possible to inform observables about errors or make them complete
 from within the reducers. The `mutation` context parameter is used for this.\
 `mutation` is optional, however, so it is recommended to use the
 [optional chaining (`?.`) operator](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Operators/Optional_chaining)
-when accessing it.
+when using it.
 
 Let's rewrite our `add` reducer with this in mind:
 ```ts
@@ -252,17 +252,24 @@ if (Math.random() > 0.5) {
 #### Parameter 2: `map$`
 
 It's also possible to modify the resulting observable using the second parameter, `map$`.\
-It accepts the resulting observable (fired on each action), a map of raw reducers (basically, the first parameter itself), the state, and a map of all observables that are fired on action calls:
+It accepts:
+- `state$` - the resulting observable (fired on each action)
+- `reducers` - a map of raw reducers (basically, the first parameter itself)
+- `state` - current reactive state
+- `actions$` - a map of all observables that are fired on action calls
+- `context` - a current mutation context, same as the one in the reducers,\
+  can be passed into the reducers to allow them to control the mutation too
 
 ```ts
 useRxState(state)(
   reducers,
   // add this parameter to any useRxState call to try
-  (state$, reducers, state, actions$) => {
+  (state$, reducers, state, actions$, context) => {
     console.log('This is logged only once');
-    console.log('These are all reducers defined above, unchanged', reducers);
-    console.log('This is an initial reactive state', state);
-    console.log('This is a map of all actions to their secific observables', actions$);
+    console.log('These are all reducers defined above, unchanged:', reducers);
+    console.log('This is an initial reactive state:', state);
+    console.log('This is a map of all actions to their secific observables:', actions$);
+    console.log('This context can be used to create an error or to complete the observable:', context);
 
     // By the way, state$ is just merged actions$,
     // so this

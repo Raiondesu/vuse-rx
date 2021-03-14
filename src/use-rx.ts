@@ -50,6 +50,14 @@ export function useRxState<T extends Record<string, any>>(
     const actions$ = <ReducerObservables<Actions, S>> {};
     const actions$Arr = <Observable<S>[]> [];
 
+    let complete = false;
+    let error: any = undefined;
+
+    const context: MutationContext = {
+      error: e => { error = e; },
+      complete: () => { complete = true; }
+    };
+
     for (const key in reducers) {
       const mutations$ = new Subject<ReducerResult>();
 
@@ -62,13 +70,7 @@ export function useRxState<T extends Record<string, any>>(
       actions$Arr.push(
         actions$[`${key}$` as const] = (
           mergeScan((prev: S, curr: ReducerResult) => {
-            let complete = false;
-            let error: any = undefined;
-
-            curr = maybeCall(curr, prev, {
-              error: e => { error = e },
-              complete: () => { complete = true }
-            });
+            curr = maybeCall(curr, prev, context);
 
             return (
               isObservable(curr)
@@ -76,11 +78,11 @@ export function useRxState<T extends Record<string, any>>(
                 : of(curr)
             ).pipe(
               map(mergeKeys(prev, mergeKeys)),
-              tap(() => (
-                complete
-                  ? mutations$.complete()
-                  : error && mutations$.error(error)
-              ))
+              tap(
+                () => error
+                  ? error = mutations$.error(error)
+                  : complete && mutations$.complete()
+              )
             )
           }, state)(mutations$)
         )
@@ -98,6 +100,7 @@ export function useRxState<T extends Record<string, any>>(
           reducers,
           state,
           actions$,
+          context,
         ).pipe(
           scan((prev, curr) => (mergeKeys(prev, mergeKeys)(curr)), state)
         ) : merged$
@@ -129,8 +132,8 @@ type CreateRxState<S> = {
    *   })
    *   ```
    *
-   * @param initialState an initial value for the reactive state
-   * @param mergeStrategy a strategy of merging a mutation with an old state
+   * @param reducers a map of reducers to mutate the state
+   * @param map$ a function to modify the resulting observable
    */
   <R extends StateReducers<S>>(
     reducers: R,
@@ -138,7 +141,8 @@ type CreateRxState<S> = {
       state$: Observable<S>,
       reducers: R,
       state: S,
-      actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>
+      actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>,
+      context: MutationContext
     ) => Observable<DeepPartial<S>>
   ): SubscribableRxRes<ReducerActions<R>, S>;
 };
@@ -248,13 +252,16 @@ export type Mutation<S> =
   | DeepPartial<S>
   | Observable<DeepPartial<S>>;
 
+export type StatefulMutation<S> = (state: S, mutation?: MutationContext) => Mutation<S>;
+
 /**
  * A reducer for the observable state
  */
-export type StateReducer<S, Args extends any[] = any[]> = (...args: Args) =>
-  | Mutation<S>
-  | ((state: S, mutation?: MutationContext) => Mutation<S>)
-  ;
+export type StateReducer<S, Args extends any[] = any[]> = (
+  (...args: Args) =>
+    | Mutation<S>
+    | StatefulMutation<S>
+);
 
 /**
  * A named collection of state reducers
