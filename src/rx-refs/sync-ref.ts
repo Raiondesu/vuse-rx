@@ -62,9 +62,11 @@ export function syncRef<R1, R2>(
   _ref2?: Ref<R2> | R2,
 ): _SyncedRef<R1, keyof Mappers<R1, R2>, R2> {
   const ref2 = ref(
-    _ref2
-      ?? maps.to?.(ref1.value)
-      ?? ref1.value
+    _ref2 == null
+      ? maps.to
+        ? maps.to(ref1.value)
+        : ref1.value
+      : _ref2
   ) as _SyncedRef<R1, keyof Mappers<R1, R2>, R2>;
 
   for (const key in maps) {

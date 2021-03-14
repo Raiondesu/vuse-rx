@@ -51,9 +51,9 @@ export function refsFrom<R, E = unknown>(input: ObservableInput<R>, defaultValue
  */
 export function refsFrom<R, E>(input: ObservableInput<R>, defaultValues: Subscribers<R, E>): Refs<R, E>;
 
-export function refsFrom(input: ObservableInput<any>, defaultValues?: Partial<Subscribers<any, any>>) {
-  const next = ref(defaultValues?.next);
-  const error = ref(defaultValues?.error);
+export function refsFrom(input: ObservableInput<any>, defaultValues: Partial<Subscribers<any, any>> = {}) {
+  const next = ref(defaultValues.next);
+  const error = ref(defaultValues.error);
   const value$ = from(input);
 
   return {
