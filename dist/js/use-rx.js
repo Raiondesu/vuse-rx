@@ -12,28 +12,29 @@ function useRxState(initialState, options = defaultOptions) {
         const actions = {};
         const actions$ = {};
         const actions$Arr = [];
+        let complete = false;
+        let error = undefined;
+        const context = {
+            error: e => { error = e; },
+            complete: () => { complete = true; }
+        };
         for (const key in reducers) {
             const mutations$ = new rxjs_1.Subject();
             actions[key] = ((...args) => mutations$.next(reducers[key].apply(reducers, args)));
             actions$Arr.push(actions$[`${key}$`] = (operators_1.mergeScan((prev, curr) => {
-                let complete = false;
-                let error = undefined;
-                curr = maybeCall(curr, prev, {
-                    error: e => { error = e; },
-                    complete: () => { complete = true; }
-                });
+                curr = maybeCall(curr, prev, context);
                 return (rxjs_1.isObservable(curr)
                     ? curr
-                    : rxjs_1.of(curr)).pipe(operators_1.map(mergeKeys(prev, mergeKeys)), operators_1.tap(() => (complete
-                    ? mutations$.complete()
-                    : error && mutations$.error(error))));
+                    : rxjs_1.of(curr)).pipe(operators_1.map(mergeKeys(prev, mergeKeys)), operators_1.tap(() => error
+                    ? error = mutations$.error(error)
+                    : complete && mutations$.complete()));
             }, state)(mutations$)));
         }
         const merged$ = rxjs_1.merge(...actions$Arr);
         return createRxResult({
             actions,
             state: vue_1.readonly(state),
-            state$: until_1.untilUnmounted(map$ ? map$(merged$, reducers, state, actions$).pipe(operators_1.scan((prev, curr) => (mergeKeys(prev, mergeKeys)(curr)), state)) : merged$),
+            state$: until_1.untilUnmounted(map$ ? map$(merged$, reducers, state, actions$, context).pipe(operators_1.scan((prev, curr) => (mergeKeys(prev, mergeKeys)(curr)), state)) : merged$),
             actions$: actions$,
         });
     };
