@@ -26,5 +26,5 @@ features:
   <a style="margin:0 4px" href="https://bundlephobia.com/result?p=vuse-rx"><img src="https://img.shields.io/bundlephobia/minzip/vuse-rx?style=flat-square"/></a>
   <a style="margin:0 4px" href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/dt/vuse-rx?style=flat-square"/></a>
   <a style="margin:0 4px" href="https://coveralls.io/github/Raiondesu/vuse-rx"><img src="https://img.shields.io/coveralls/github/Raiondesu/vuse-rx?style=flat-square"/></a>
-  <a style="margin:0 4px" href="https://vuse-rx.raiondesu.rocks"><img src="https://img.shields.io/badge/docs-up-blue?style=flat-square"/></a>
+  <a style="margin:0 4px" href="https://next.vuse-rx.raiondesu.rocks"><img src="https://img.shields.io/badge/docs-beta-green?style=flat-square"/></a>
 </div>
