@@ -144,7 +144,7 @@ type CreateRxState<S> = {
       actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>,
       context: MutationContext
     ) => Observable<DeepPartial<S>>
-  ): SubscribableRxRes<ReducerActions<R>, S>;
+  ): SubscribableRxResult<ReducerActions<R>, S>;
 };
 
 /**
@@ -196,7 +196,7 @@ const createRxResult = <S, Actions>(result: {
   state: DeepReadonly<S>,
   state$: Observable<S>,
   actions$: ReducerObservables<Actions, DeepReadonly<S>>
-}): SubscribableRxRes<Actions, S> => ({
+}): SubscribableRxResult<Actions, S> => ({
   ...result,
   subscribe: (...args: any[]) => ({
     ...result,
@@ -239,7 +239,7 @@ export type DeepPartial<T> = T extends Builtin
 
 type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
 
-export type MutationContext = {
+export interface MutationContext {
   error(error: any): void;
   complete(): void;
 }
@@ -273,6 +273,12 @@ export type StateReducers<S> = Record<string, StateReducer<S>>;
  */
 export type ResAction<A extends any[] = []> = (...args: A) => void;
 
+type Action$<Name extends string> = `${Name}$`;
+
+type ReducerObservables<H, R> = {
+  [key in Action$<Extract<keyof H, string>>]: Observable<R>;
+};
+
 /**
  * Resulting RX bindings:
  *
@@ -280,39 +286,23 @@ export type ResAction<A extends any[] = []> = (...args: A) => void;
  * * state - a reactive vue state
  * * state$ - an rxjs observable
  */
-export type RxResult<
-  Actions,
-  State,
-  RState = DeepReadonly<State>
-> = {
+export interface RxResult<Actions, State> {
   readonly actions: Actions;
-  readonly state: RState;
+  readonly state: DeepReadonly<State>;
   readonly state$: Observable<State>;
+  readonly actions$: ReducerObservables<Actions, DeepReadonly<State>>;
 };
 
-type Action$<Name extends string> = `${Name}$`;
-
-type ReducerObservables<H, R> = {
-  [key in Action$<Extract<keyof H, string>>]: Observable<R>;
-};
-
-export type SubscribableRxRes<
-  Actions,
-  State,
-  RState = DeepReadonly<State>
-> = RxResult<Actions, State, RState> & {
-  readonly actions$: ReducerObservables<Actions, RState>;
-  readonly subscribe: PipeSubscribe<SubscribableRxRes<Actions, State, RState>, State>;
-};
-
-export type PipeSubscribe<Res extends SubscribableRxRes<any, any>, S> = {
-  (observer?: PartialObserver<S>): Omit<Res, 'subscribe'> & {
-    readonly subscription: Subscription;
-  };
-  (...args: Parameters<Observable<S>['subscribe']>): Omit<Res, 'subscribe'> & {
-    readonly subscription: Subscription;
+export interface SubscribableRxResult<Actions, State> extends RxResult<Actions, State> {
+  readonly subscribe: {
+    (observer?: PartialObserver<State>): SubscriptionRxResult<Actions, State>;
+    (...args: Parameters<Observable<State>['subscribe']>): SubscriptionRxResult<Actions, State>;
   };
 };
+
+export interface SubscriptionRxResult<Actions, State> extends RxResult<Actions, State> {
+  readonly subscription: Subscription;
+}
 
 type ReducerAction<R> = R extends StateReducer<any, infer Args>
   ? ResAction<Args>
