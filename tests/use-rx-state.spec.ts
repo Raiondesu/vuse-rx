@@ -151,7 +151,7 @@ describe('useRxState', () => {
     const wrong = useRxState({ value: 0 })({
       setValue: (value: number) => (_, ctx) => {
         if (value < 0) {
-          ctx.error(error);
+          ctx?.error(error);
 
           // signify that no mutation happens
           return {};
@@ -170,7 +170,7 @@ describe('useRxState', () => {
     const right = useRxState({ value: 0 })({
       setValue: (value: number) => (_, ctx) => {
         if (value === 42) {
-          ctx.complete();
+          ctx?.complete();
         }
 
         return { value };
