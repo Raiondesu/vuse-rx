@@ -1,8 +1,10 @@
 import { ref, watch } from 'vue';
 export function syncRef(ref1, maps, _ref2) {
-    const ref2 = ref(_ref2
-        ?? maps.to?.(ref1.value)
-        ?? ref1.value);
+    const ref2 = ref(_ref2 == null
+        ? maps.to
+            ? maps.to(ref1.value)
+            : ref1.value
+        : _ref2);
     for (const key in maps) {
         ref2[key] = {};
         bind(ref1, ref2, maps, key, this)();

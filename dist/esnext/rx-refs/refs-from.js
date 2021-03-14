@@ -1,8 +1,8 @@
 import { from } from 'rxjs';
 import { ref } from 'vue';
-export function refsFrom(input, defaultValues) {
-    const next = ref(defaultValues?.next);
-    const error = ref(defaultValues?.error);
+export function refsFrom(input, defaultValues = {}) {
+    const next = ref(defaultValues.next);
+    const error = ref(defaultValues.error);
     const value$ = from(input);
     return {
         next,
