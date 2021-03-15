@@ -6,7 +6,7 @@ const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const until_1 = require("./operators/until");
 function useRxState(initialState, options = defaultOptions) {
-    const { mutationStrategy: mergeKeys, } = Object.assign(Object.assign({}, defaultOptions), options);
+    const { mutationStrategy: mergeKeys } = Object.assign(Object.assign({}, defaultOptions), options);
     return function (reducers, map$) {
         const state = vue_1.reactive(maybeCall(initialState));
         const actions = {};
@@ -25,9 +25,11 @@ function useRxState(initialState, options = defaultOptions) {
                 curr = maybeCall(curr, prev, context);
                 return (rxjs_1.isObservable(curr)
                     ? curr
-                    : rxjs_1.of(curr)).pipe(operators_1.map(mergeKeys(prev, mergeKeys)), operators_1.tap(() => error
-                    ? error = mutations$.error(error)
-                    : complete && mutations$.complete()));
+                    : rxjs_1.of(curr)).pipe(operators_1.map(mergeKeys(prev, mergeKeys)), operators_1.tap({
+                    next: () => error
+                        ? error = mutations$.error(error)
+                        : complete && mutations$.complete()
+                }));
             }, state)(mutations$)));
         }
         const merged$ = rxjs_1.merge(...actions$Arr);

@@ -3,7 +3,10 @@ import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from './operators/until';
 export function useRxState(initialState, options = defaultOptions) {
-    const { mutationStrategy: mergeKeys, } = { ...defaultOptions, ...options };
+    const { mutationStrategy: mergeKeys } = {
+        ...defaultOptions,
+        ...options
+    };
     return function (reducers, map$) {
         const state = reactive(maybeCall(initialState));
         const actions = {};
@@ -22,9 +25,11 @@ export function useRxState(initialState, options = defaultOptions) {
                 curr = maybeCall(curr, prev, context);
                 return (isObservable(curr)
                     ? curr
-                    : of(curr)).pipe(map(mergeKeys(prev, mergeKeys)), tap(() => error
-                    ? error = mutations$.error(error)
-                    : complete && mutations$.complete()));
+                    : of(curr)).pipe(map(mergeKeys(prev, mergeKeys)), tap({
+                    next: () => error
+                        ? error = mutations$.error(error)
+                        : complete && mutations$.complete()
+                }));
             }, state)(mutations$)));
         }
         const merged$ = merge(...actions$Arr);

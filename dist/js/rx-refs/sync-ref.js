@@ -8,10 +8,8 @@ function syncRef(ref1, maps, _ref2) {
             ? maps.to(ref1.value)
             : ref1.value
         : _ref2);
-    for (const key in maps) {
-        ref2[key] = bind(ref1, ref2, maps, key, this);
-        ref2[key].bind();
-    }
+    for (const key in maps)
+        (ref2[key] = bind(ref1, ref2, maps, key, this)).bind();
     return ref2;
 }
 exports.syncRef = syncRef;
