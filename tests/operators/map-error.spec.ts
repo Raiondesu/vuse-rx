@@ -3,7 +3,7 @@ import { mapError } from '../../src/operators/map-error';
 
 describe('mapError', () => {
   it('maps errors to new values', async () => {
-    const fn = jest.fn(mapper => e => mapper(e));
+    const fn = jest.fn(mapper => (e: any) => mapper(e));
     const sub = jest.fn();
 
     const promise = Promise.reject('42');
