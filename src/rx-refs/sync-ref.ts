@@ -70,9 +70,8 @@ export function syncRef<R1, R2>(
   ) as _SyncedRef<R1, keyof Mappers<R1, R2>, R2>;
 
   for (const key in maps) {
-    ref2[key] = {};
-
-    bind(ref1, ref2, maps, key as any, this)();
+    ref2[key] = bind(ref1, ref2, maps, key as any, this);
+    ref2[key].bind();
   }
 
   return ref2;
@@ -89,30 +88,29 @@ syncRef.with = <T extends Readonly<boolean> = false>(
 
 const bind = <R1, R2>(
   refBase: Ref<R1>,
-  refDest: Ref<R2>,
+  refDest: _SyncedRef<R1, keyof Mappers<R1, R2>, R2>,
   maps: Mappers<R1, R2>,
   dir: keyof Mappers<R1, R2>,
   options: WatchOptions,
-) => refDest[dir].bind = (
-  bindOptions?: Partial<BindingOptions<R1, R2, keyof Mappers<R1, R2>>>
-) => {
-  const {
-    ref, map, watch: opts
-  }: BindingOptions<any, R2, any> = {
-    ref: refBase,
-    map: maps[dir]!,
-    watch: options,
-    ...bindOptions,
-  };
+) => ({
+  bind: (bindOptions?: Partial<BindingOptions<R1, R2, keyof Mappers<R1, R2>>>) => {
+    const {
+      ref, map, watch: opts
+    }: BindingOptions<any, R2, any> = {
+      ref: refBase,
+      map: maps[dir]!,
+      watch: options,
+      ...bindOptions,
+    };
 
-  if (refDest[dir].stop) {
-    refDest[dir].stop();
-  }
+    refDest[dir]!.stop();
 
-  refDest[dir].stop = dir === 'to'
-    ? watch(ref, v => refDest.value = map(v), Object.assign({}, options, opts))
-    : watch(refDest, v => ref.value = map(v), Object.assign({}, options, opts));
-};
+    refDest[dir]!.stop = dir === 'to'
+      ? watch(ref, v => refDest.value = map(v), Object.assign({}, options, opts))
+      : watch(refDest, v => ref.value = map(v), Object.assign({}, options, opts));
+  },
+  stop: () => {}
+});
 
 type Mapper<F, T> = (value: F) => T;
 
