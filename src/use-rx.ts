@@ -35,12 +35,14 @@ export function useRxState<T extends Record<string, any>>(
   initialState: T | (() => T),
   options: Partial<RxStateOptions<UnwrapNestedRefs<T>>> = defaultOptions
 ): CreateRxState<UnwrapNestedRefs<T>> {
-  const {
-    mutationStrategy: mergeKeys,
-  } = { ...defaultOptions, ...options };
+  type S = UnwrapNestedRefs<T>;
+
+  const { mutationStrategy: mergeKeys } = {
+    ...defaultOptions as RxStateOptions<S>,
+    ...options
+  };
 
   return function (reducers, map$?) {
-    type S = UnwrapNestedRefs<T>;
     type ReducerResult = ReturnType<StateReducer<S>>;
     type Actions = ReducerActions<typeof reducers>;
 
@@ -78,11 +80,11 @@ export function useRxState<T extends Record<string, any>>(
                 : of(curr)
             ).pipe(
               map(mergeKeys(prev, mergeKeys)),
-              tap(
-                () => error
+              tap({
+                next: () => error
                   ? error = mutations$.error(error)
                   : complete && mutations$.complete()
-              )
+              })
             )
           }, state)(mutations$)
         )
@@ -176,10 +178,10 @@ export const canMergeDeep = <S extends Record<PropertyKey, any>>(
 export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
   state: S
 ) => (
-  mutation: DeepPartial<S>
+  mutation: S | DeepPartial<S>
 ) => {
   for (const key in mutation) {
-    state[key] = canMergeDeep(state, mutation, key)
+    state[key as keyof S] = canMergeDeep(state, mutation, key)
       ? deepMergeKeys(state[key])(mutation[key])
       : mutation[key] as any;
   }
@@ -187,7 +189,7 @@ export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
   return state;
 };
 
-const defaultOptions: RxStateOptions<any> = {
+const defaultOptions = {
   mutationStrategy: deepMergeKeys,
 };
 

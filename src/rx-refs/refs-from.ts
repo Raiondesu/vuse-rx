@@ -1,5 +1,6 @@
 import { ObservableInput, from, Subscription, Observable } from 'rxjs';
 import { Ref, ref } from 'vue';
+import { untilUnmounted } from '../operators/until';
 
 type Subscribers<R, E> = { next: R; error: E; };
 
@@ -54,7 +55,7 @@ export function refsFrom<R, E>(input: ObservableInput<R>, defaultValues: Subscri
 export function refsFrom(input: ObservableInput<any>, defaultValues: Partial<Subscribers<any, any>> = {}) {
   const next = ref(defaultValues.next);
   const error = ref(defaultValues.error);
-  const value$ = from(input);
+  const value$ = untilUnmounted(from(input));
 
   return {
     next,

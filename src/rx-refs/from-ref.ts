@@ -23,8 +23,8 @@ export function fromRef<R>(ref: WatchSource<R>, options?: WatchOptions): Observa
  * @returns an observable that watches the state
  */
 export function fromRef<R extends Record<string, any>>(reactiveState: R, options?: WatchOptions): Observable<R>;
-export function fromRef<R extends Record<string, any> | WatchSource<any>>(ref: R): Observable<R> {
+export function fromRef(ref: Record<string, unknown> | WatchSource<unknown>): Observable<unknown> {
   return untilUnmounted(
-    new Observable<R>(ctx => watch(ref, value => ctx.next(value)))
+    new Observable(ctx => watch(ref, value => ctx.next(value)))
   );
 };

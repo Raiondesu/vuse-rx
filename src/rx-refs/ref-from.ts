@@ -1,5 +1,6 @@
 import { from, ObservableInput } from 'rxjs';
 import { isProxy, Ref, ref, toRef, UnwrapRef } from 'vue';
+import { untilUnmounted } from '../operators/until';
 
 /**
  * Creates a ref from a promise.
@@ -90,7 +91,9 @@ export function refFrom(arg: unknown, subArg?: unknown) {
   if (typeof arg === 'object') try {
     const ref$ = ref(subArg);
 
-    from(arg as any).subscribe(value => ref$.value = value);
+    untilUnmounted(from(arg as any)).subscribe({
+      next: value => ref$.value = value
+    });
 
     return ref$;
   } catch (_) { /* Silence the error to try another ways */ }

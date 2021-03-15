@@ -58,7 +58,7 @@ export function syncRef<R1, R2, M extends Readonly<Mappers<R1, R2>> = Mappers<R1
 export function syncRef<R1, R2>(
   this: WatchOptions,
   ref1: Ref<R1>,
-  maps: Readonly<Mappers<R1, R2>>,
+  maps: Mappers<R1, R2>,
   _ref2?: Ref<R2> | R2,
 ): _SyncedRef<R1, keyof Mappers<R1, R2>, R2> {
   const ref2 = ref(
@@ -69,10 +69,9 @@ export function syncRef<R1, R2>(
       : _ref2
   ) as _SyncedRef<R1, keyof Mappers<R1, R2>, R2>;
 
-  for (const key in maps) {
-    ref2[key] = bind(ref1, ref2, maps, key as any, this);
-    ref2[key].bind();
-  }
+  for (const key in maps) (
+    ref2[key as keyof typeof maps] = bind(ref1, ref2, maps, key as any, this)
+  ).bind();
 
   return ref2;
 }
