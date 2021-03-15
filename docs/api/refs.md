@@ -126,18 +126,26 @@ countStr.to
 // cuts the binding altogether
 countStr.to.stop();
 // Applies the binding to a new ref
-countStr.to.bind(count);
+countStr.to.bind({ ref: count });
 // (may need to set a new map, if the ref type is different from before)
-countStr.to.bind(count, String, /* new watch options: */{ flush: 'sync' });
+countStr.to.bind({
+  ref: count,
+  map: String,
+  watch: { flush: 'sync' }
+});
 
 // Controls the outcoming binding from this ref
 countStr.from
 // cuts the binding altogether
 countStr.from.stop();
 // Applies the binding to a new ref
-countStr.from.bind(count);
+countStr.from.bind({ ref: count });
 // (may need to set a new map, if the ref type is different from before)
-countStr.from.bind(count, Number, /* new watch options: */{ immediate: true });
+countStr.from.bind({
+  ref: count,
+  map: Number,
+  watch: { immediate: true }
+});
 ```
 
 You can also play with this in the browser console using the example above.
