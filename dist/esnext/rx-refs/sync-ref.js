@@ -6,8 +6,8 @@ export function syncRef(ref1, maps, _ref2) {
             : ref1.value
         : _ref2);
     for (const key in maps) {
-        ref2[key] = {};
-        bind(ref1, ref2, maps, key, this)();
+        ref2[key] = bind(ref1, ref2, maps, key, this);
+        ref2[key].bind();
     }
     return ref2;
 }
@@ -17,18 +17,19 @@ syncRef.with = (...options) => {
     f.with = syncRef.with.bind(opts);
     return f;
 };
-const bind = (refBase, refDest, maps, dir, options) => refDest[dir].bind = (bindOptions) => {
-    const { ref, map, watch: opts } = {
-        ref: refBase,
-        map: maps[dir],
-        watch: options,
-        ...bindOptions,
-    };
-    if (refDest[dir].stop) {
+const bind = (refBase, refDest, maps, dir, options) => ({
+    bind: (bindOptions) => {
+        const { ref, map, watch: opts } = {
+            ref: refBase,
+            map: maps[dir],
+            watch: options,
+            ...bindOptions,
+        };
         refDest[dir].stop();
-    }
-    refDest[dir].stop = dir === 'to'
-        ? watch(ref, v => refDest.value = map(v), Object.assign({}, options, opts))
-        : watch(refDest, v => ref.value = map(v), Object.assign({}, options, opts));
-};
+        refDest[dir].stop = dir === 'to'
+            ? watch(ref, v => refDest.value = map(v), Object.assign({}, options, opts))
+            : watch(refDest, v => ref.value = map(v), Object.assign({}, options, opts));
+    },
+    stop: () => { }
+});
 //# sourceMappingURL=sync-ref.js.map
