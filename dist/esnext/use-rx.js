@@ -60,4 +60,6 @@ const createRxResult = (result) => ({
 const maybeCall = (fn, ...args) => (typeof fn === 'function'
     ? fn(...args)
     : fn);
+;
+;
 //# sourceMappingURL=use-rx.js.map

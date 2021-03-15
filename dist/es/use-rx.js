@@ -54,4 +54,6 @@ const createRxResult = (result) => (Object.assign(Object.assign({}, result), { s
 const maybeCall = (fn, ...args) => (typeof fn === 'function'
     ? fn(...args)
     : fn);
+;
+;
 //# sourceMappingURL=use-rx.js.map
