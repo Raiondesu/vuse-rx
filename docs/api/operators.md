@@ -7,7 +7,7 @@
 ## `setRef`
 
 ```ts
-<T>(ref: Ref<T>) => MonotypeOperatorFunction<T, T>
+<T>(ref: Ref<T>) => MonotypeOperatorFunction<T>
 ```
 
 Sets a ref's value to current observable value.
