@@ -9,7 +9,7 @@ describe('mapError', () => {
     const promise = Promise.reject('42');
 
     from(promise).pipe(
-      mapError(fn(Number))
+      mapError(fn(Number)),
     ).subscribe({
       error: e => {
         expect(typeof e).toBe('number');

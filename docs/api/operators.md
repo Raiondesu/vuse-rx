@@ -48,20 +48,21 @@ console.log(result.value);
 //> New value is 42
 ```
 
-## `mapError` and `tapError`
+## `mapError`
 
-Same as `map` and `tap` in rxjs, but these interact with the `error` value of an observable.\
-They both accept callbacks similar to those of regular `map` and `tap`.
+Same as `map` in rxjs, but interacts with the `error` value of an observable.\
+Accepts a callback similar to that of regular `map`.
 
 ```ts
-import { mapError, tapError } from 'vuse-rx';
+import { tap } from 'rxjs/operators';
+import { mapError } from 'vuse-rx';
 
 from(Promise.reject('42'))
   .pipe(
-    tapError(error => console.log('type of the error is', typeof error)),
+    tap({ error: error => console.log('type of the error is', typeof error) }),
     mapError(Number),
-    tapError(error => console.log('type of the error is', typeof error)),
-    tapError(error => console.log('error value is', error)),
+    tap({ error: error => console.log('type of the error is', typeof error) }),
+    tap({ error: error => console.log('error value is', error) }),
   )
   .subscribe({ error: e => console.log(e) });
 
