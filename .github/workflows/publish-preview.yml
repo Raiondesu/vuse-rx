@@ -28,47 +28,47 @@ jobs:
 
     - run: pnpm run docs:build
 
-    # - name: Commit docs
-    #   uses: EndBug/add-and-commit@v7.0.0
-    #   with:
-    #     add: '-A .'
-    #     message: Update docs
+    - name: Commit docs
+      uses: EndBug/add-and-commit@v7.0.0
+      with:
+        add: '-A .'
+        message: Update docs
 
-    # - name: Read SemVer
-    #   uses: actions-ecosystem/action-release-label@v1
-    #   id: release
+    - name: Read SemVer
+      uses: actions-ecosystem/action-release-label@v1
+      id: release
 
-    # - name: Read package.json
-    #   uses: martinbeentjes/npm-get-version-action@master
-    #   id: package
+    - name: Read package.json
+      uses: martinbeentjes/npm-get-version-action@master
+      id: package
 
-    # - name: Pre existing release
-    #   run: pnpm run prerelease
-    #   if: ${{ contains(steps.package.outputs.current-version, '-rc.') }}
+    - name: Pre existing release
+      run: pnpm run prerelease
+      if: ${{ contains(steps.package.outputs.current-version, '-rc.') }}
 
-    # - name: Pre new release
-    #   run: pnpm run pre-${{ steps.release.outputs.level }}
-    #   if: ${{ !contains(steps.package.outputs.current-version, '-rc.') }}
+    - name: Pre new release
+      run: pnpm run pre-${{ steps.release.outputs.level }}
+      if: ${{ !contains(steps.package.outputs.current-version, '-rc.') }}
 
-    # - name: Commit dist
-    #   uses: EndBug/add-and-commit@v7.0.0
-    #   with:
-    #     add: '-A .'
-    #     message: Update dist
+    - name: Commit dist
+      uses: EndBug/add-and-commit@v7.0.0
+      with:
+        add: '-A .'
+        message: Update dist
 
-    # - name: Publish
-    #   uses: JS-DevTools/npm-publish@v1
-    #   with:
-    #     token: ${{ secrets.NPM_TOKEN }}
-    #     tag: next
+    - name: Publish
+      uses: JS-DevTools/npm-publish@v1
+      with:
+        token: ${{ secrets.NPM_TOKEN }}
+        tag: next
 
-    # - name: Coveralls
-    #   uses: coverallsapp/github-action@master
-    #   with:
-    #     github-token: ${{ secrets.GITHUB_TOKEN }}
+    - name: Coveralls
+      uses: coverallsapp/github-action@master
+      with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
 
-    # - name: Push
-    #   uses: ad-m/github-push-action@v0.6.0
-    #   with:
-    #     github_token: ${{ secrets.GITHUB_TOKEN }}
-    #     branch: ${{ github.head_ref }}
+    - name: Push
+      uses: ad-m/github-push-action@v0.6.0
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: ${{ github.head_ref }}
