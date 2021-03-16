@@ -118,7 +118,20 @@ const deepSyncRef = customSyncRef.with({
 ### Change ref bindings
 
 Value returned from `syncRef` is, however,
-different from your usual ref - it allows to control the bindings manually:
+different from your usual ref - it allows to control the bindings manually.
+For each previously set direction (`from` or `to`), you can:
+- Cut the binding (stop the watcher)\
+  by `myRef.[direction].stop()`
+- Restore the binding to the original ref without changes\
+  by `myRef.[direction].bind()`
+- Set the binding to a new ref with the same type\
+  by `myRef.[direction].bind({ ref: newRef })`
+- Set the binding to a new ref with a completely new type\
+  by `myRef.[direction].bind({ ref: newTypeRef, map: mapperForNewType })`
+- Set individual watch options for the binding\
+  by `myRef.[direction].bind({ watch: { flush: 'sync' } })`
+
+Where `[direction]` is either `from` or `to`.
 
 ```ts
 // Controls the incoming binding to this ref
