@@ -18,7 +18,7 @@ export interface MutationStrategy<S extends Record<PropertyKey, any>> {
   ) => S;
 }
 
-export interface RxStateOptions<S> {
+export interface RxStateOptions<S extends Record<PropertyKey, any>> {
   mutationStrategy: MutationStrategy<S>;
 }
 
@@ -31,7 +31,7 @@ export interface RxStateOptions<S> {
  * @param initialState - a factory or initial value for the reactive state
  * @param options - options to customize the behavior, for example - to apply a custom strategy of merging a mutation with an old state
  */
-export function useRxState<T extends Record<string, any>>(
+export function useRxState<T extends Record<PropertyKey, any>>(
   initialState: T | (() => T),
   options: Partial<RxStateOptions<UnwrapNestedRefs<T>>> = defaultOptions
 ): CreateRxState<UnwrapNestedRefs<T>> {
