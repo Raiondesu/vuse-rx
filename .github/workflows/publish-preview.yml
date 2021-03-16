@@ -26,7 +26,7 @@ jobs:
     - name: pnpm Build
       run: pnpm install
 
-    - run: pnpm run docs:build
+    - run: npm run docs:build
 
     - name: Commit docs
       uses: EndBug/add-and-commit@v7.0.0
@@ -43,11 +43,11 @@ jobs:
       id: package
 
     - name: Pre existing release
-      run: pnpm run prerelease
+      run: npm run prerelease
       if: ${{ contains(steps.package.outputs.current-version, '-rc.') }}
 
     - name: Pre new release
-      run: pnpm run pre-${{ steps.release.outputs.level }}
+      run: npm run pre-${{ steps.release.outputs.level }}
       if: ${{ !contains(steps.package.outputs.current-version, '-rc.') }}
 
     - name: Commit dist
