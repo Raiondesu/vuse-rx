@@ -17,6 +17,10 @@ It's fully typed and therefore has **first-class TypeScript support**.
 
 `yarn add vuse-rx`
 
+```ts
+import * as UseRX from 'vuse-rx';
+```
+
 ### UMD
 
 ```html
