@@ -22,7 +22,7 @@ describe('fromHook', () => {
     expect(mounted).toBeCalledTimes(1);
     expect(unmounted).toBeCalledTimes(0);
 
-    app.unmount();
+    app.unmount(root);
 
     expect(mounted).toBeCalledTimes(1);
     expect(unmounted).toBeCalledTimes(1);
