@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.mapError = void 0;
-const error_utils_1 = require("./error-utils");
-exports.mapError = error_utils_1.createErrorOperator((e, $, cb) => cb(e, $));
+const operators_1 = require("rxjs/operators");
+const mapError = (cb) => (operators_1.catchError((e, $) => { throw cb(e, $); }));
+exports.mapError = mapError;
 //# sourceMappingURL=map-error.js.map

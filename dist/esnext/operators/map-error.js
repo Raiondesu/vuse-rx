@@ -1,3 +1,3 @@
-import { createErrorOperator } from './error-utils';
-export const mapError = createErrorOperator((e, $, cb) => cb(e, $));
+import { catchError } from 'rxjs/operators';
+export const mapError = (cb) => (catchError((e, $) => { throw cb(e, $); }));
 //# sourceMappingURL=map-error.js.map
