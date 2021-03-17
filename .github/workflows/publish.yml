@@ -29,10 +29,6 @@ jobs:
       uses: actions-ecosystem/action-release-label@v1
       id: release
 
-    - name: Read package.json
-      uses: martinbeentjes/npm-get-version-action@master
-      id: package
-
     - name: Release
       run: npm run ${{ steps.release.outputs.level }}
 
