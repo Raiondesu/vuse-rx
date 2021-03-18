@@ -112,7 +112,8 @@ function <S extends Record<string, any>>(
     state$: Observable<Readonly<S>>,
     reducers: R,
     state: Readonly<S>,
-    actions$: Record<`${keyof R}$`, Observable<S>>
+    actions$: Record<`${keyof R}$`, Observable<S>>,
+    context: MutationContext
   ) => Observable<Partial<S>>
 ) => {
   actions: ReducerActions<R>;
@@ -154,7 +155,8 @@ function <R extends StateReducers<S>>(
     state$: Observable<Readonly<S>>,
     reducers: R,
     state: Readonly<S>,
-    actions$: Record<`${keyof R}$`, Observable<S>>
+    actions$: Record<`${keyof R}$`, Observable<S>>,
+    context: MutationContext
   ) => Observable<Partial<S>>
 ) => SubscribableRxRes<ReducerActions<R>, S>
 ```
