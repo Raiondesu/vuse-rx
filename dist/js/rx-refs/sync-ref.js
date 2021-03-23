@@ -2,21 +2,31 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.syncRef = void 0;
 const vue_1 = require("vue");
-function syncRef(ref1, { to, from }, _ref2) {
-    if (to && from) {
-        return vue_1.computed({
-            get: () => to(ref1.value),
-            set: v => ref1.value = from(v),
-        });
-    }
-    const ref2 = vue_1.ref(_ref2 !== null && _ref2 !== void 0 ? _ref2 : ref1.value);
-    if (to) {
-        vue_1.watch(ref1, v => ref2.value = to(v));
-    }
-    else if (from) {
-        vue_1.watch(ref2, v => ref1.value = from(v));
-    }
+function syncRef(ref1, maps, _ref2) {
+    const ref2 = vue_1.ref(_ref2 == null
+        ? maps.to
+            ? maps.to(ref1.value)
+            : ref1.value
+        : _ref2);
+    for (const key in maps)
+        (ref2[key] = bind(ref1, ref2, maps, key, this)).bind();
     return ref2;
 }
 exports.syncRef = syncRef;
+syncRef.with = (...options) => {
+    const opts = Object.assign({}, ...options);
+    const f = syncRef.bind(opts);
+    f.with = syncRef.with.bind(opts);
+    return f;
+};
+const bind = (refBase, refDest, maps, dir, options) => ({
+    bind: (bindOptions) => {
+        const { ref, map, watch: opts } = Object.assign({ ref: refBase, map: maps[dir], watch: options }, bindOptions);
+        refDest[dir].stop();
+        refDest[dir].stop = dir === 'to'
+            ? vue_1.watch(ref, v => refDest.value = map(v), Object.assign({}, options, opts))
+            : vue_1.watch(refDest, v => ref.value = map(v), Object.assign({}, options, opts));
+    },
+    stop: () => { }
+});
 //# sourceMappingURL=sync-ref.js.map

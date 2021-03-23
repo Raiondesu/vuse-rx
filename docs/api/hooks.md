@@ -50,20 +50,3 @@ const component2 = {
   }
 }
 ```
-
-## `pipeUntil`
-
-```ts
-<T>(hook: VueHook) => RxOperator<T>
-```
-
-Creates an operator that halts the observable when a Vue hook is activated.\
-Only works for the component it is called within.
-
-## `untilUnmounted`
-
-```ts
-<T>(obs: Observable<T>) => Observable<T>
-```
-
-Applies `pipeUntil` to an observable, shorthand for `obserable.pipe(pipeUntil(onUnmounted))`.

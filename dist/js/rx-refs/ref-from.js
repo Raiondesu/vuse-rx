@@ -3,11 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.refFrom = void 0;
 const rxjs_1 = require("rxjs");
 const vue_1 = require("vue");
+const until_1 = require("../operators/until");
 function refFrom(arg, subArg) {
     if (typeof arg === 'object')
         try {
             const ref$ = vue_1.ref(subArg);
-            rxjs_1.from(arg).subscribe(value => ref$.value = value);
+            until_1.untilUnmounted(rxjs_1.from(arg)).subscribe({
+                next: value => ref$.value = value
+            });
             return ref$;
         }
         catch (_) { }

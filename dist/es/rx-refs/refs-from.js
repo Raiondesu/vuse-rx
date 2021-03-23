@@ -1,12 +1,18 @@
 import { from } from 'rxjs';
 import { ref } from 'vue';
-export function refsFrom(input, defaultValues) {
-    const next = ref(defaultValues === null || defaultValues === void 0 ? void 0 : defaultValues.next);
-    const error = ref(defaultValues === null || defaultValues === void 0 ? void 0 : defaultValues.error);
-    from(input).subscribe({
-        next: v => next.value = v,
-        error: v => error.value = v,
-    });
-    return { next, error };
+import { untilUnmounted } from '../operators/until';
+export function refsFrom(input, defaultValues = {}) {
+    const next = ref(defaultValues.next);
+    const error = ref(defaultValues.error);
+    const value$ = untilUnmounted(from(input));
+    return {
+        next,
+        error,
+        value$,
+        subscription: value$.subscribe({
+            next: v => next.value = v,
+            error: v => error.value = v,
+        })
+    };
 }
 //# sourceMappingURL=refs-from.js.map

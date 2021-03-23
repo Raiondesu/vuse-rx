@@ -1,10 +1,13 @@
 import { from } from 'rxjs';
 import { isProxy, ref, toRef } from 'vue';
+import { untilUnmounted } from '../operators/until';
 export function refFrom(arg, subArg) {
     if (typeof arg === 'object')
         try {
             const ref$ = ref(subArg);
-            from(arg).subscribe(value => ref$.value = value);
+            untilUnmounted(from(arg)).subscribe({
+                next: value => ref$.value = value
+            });
             return ref$;
         }
         catch (_) { }
