@@ -24,6 +24,8 @@ jobs:
       with:
         add: '-A .'
         message: Update docs
+        branch: main
+        push: false
 
     - name: Read SemVer
       uses: actions-ecosystem/action-release-label@v1
@@ -37,6 +39,8 @@ jobs:
       with:
         add: '-A .'
         message: Update dist
+        branch: main
+        push: false
 
     - name: Publish
       uses: JS-DevTools/npm-publish@v1
