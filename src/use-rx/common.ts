@@ -14,16 +14,6 @@ export type Builtin =
   | undefined
   | null;
 
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends Record<any, any>
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
-  : Partial<T>;
-
 export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
 
 export type MutationStrategy<S extends Record<PropertyKey, any>, M> = {
@@ -45,7 +35,7 @@ export type MutationStrategy<S extends Record<PropertyKey, any>, M> = {
  * @param mutation - the main checking reference
  * @param key - a key into which to advance
  */
- export const canMergeDeep = <S extends Record<PropertyKey, any>, Mutation extends Record<keyof S, any> = DeepPartial<S>>(
+ export const canMergeDeep = <S extends Record<PropertyKey, any>, Mutation extends Record<keyof S, any>>(
   state: S,
   mutation: Mutation,
   key: keyof S,
