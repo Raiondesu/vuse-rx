@@ -1,9 +1,5 @@
 import { Ref, UnwrapRef } from 'vue';
 
-export type Mutation<S> =
-  | Partial<S>
-  | DeepPartial<S>;
-
 export type Builtin =
   | Function
   | Date
@@ -30,15 +26,14 @@ export type DeepPartial<T> = T extends Builtin
 
 export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
 
-export type MutationStrategy<S extends Record<PropertyKey, any>> = {
+export type MutationStrategy<S extends Record<PropertyKey, any>, M> = {
   /**
    * Creates a mutation applier
    *
    * @param state - a base state to mutate
    * @param strategy - current mutation strategy
    */
-  (state: S, strategy: MutationStrategy<S>): (mutation: Mutation<S>) => S;
-  (state: S, strategy: MutationStrategy<S>): (mutation: Partial<S>) => S;
+  (state: S, strategy: MutationStrategy<S, M>): (mutation: M) => S;
 };
 
 /**
@@ -50,9 +45,9 @@ export type MutationStrategy<S extends Record<PropertyKey, any>> = {
  * @param mutation - the main checking reference
  * @param key - a key into which to advance
  */
- export const canMergeDeep = <S extends Record<PropertyKey, any>>(
+ export const canMergeDeep = <S extends Record<PropertyKey, any>, Mutation extends Record<keyof S, any> = DeepPartial<S>>(
   state: S,
-  mutation: S | Partial<S> | DeepPartial<S>,
+  mutation: Mutation,
   key: keyof S,
 ) => (
   typeof mutation[key] === 'object'

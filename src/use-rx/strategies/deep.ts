@@ -1,4 +1,28 @@
-import { canMergeDeep, DeepPartial } from '../common';
+import { canMergeDeep } from '../common';
+
+export type Builtin =
+  | Function
+  | Date
+  | Error
+  | RegExp
+  | Uint8Array
+  | string
+  | number
+  | boolean
+  | bigint
+  | symbol
+  | undefined
+  | null;
+
+export type DeepPartial<T> = T extends Builtin
+  ? T
+  : T extends Array<infer U>
+  ? Array<DeepPartial<U>>
+  : T extends ReadonlyArray<infer U>
+  ? ReadonlyArray<DeepPartial<U>>
+  : T extends Record<any, any>
+  ? { [K in keyof T]?: DeepPartial<T[K]> }
+  : Partial<T>;
 
 export type DeepMutation<S> = DeepPartial<S>;
 
@@ -12,7 +36,7 @@ export type DeepMutation<S> = DeepPartial<S>;
 export const deep = <S extends Record<PropertyKey, any>>(
   state: S
 ) => (
-  mutation: DeepPartial<S>
+  mutation: DeepMutation<S>
 ) => {
   for (const key in mutation) {
     state[key as keyof S] = canMergeDeep(state, mutation, key)

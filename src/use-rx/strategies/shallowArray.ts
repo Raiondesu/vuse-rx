@@ -20,7 +20,7 @@ export type ShallowArrayMutation<T> = T extends Builtin
  export const shallowArray = <S extends Record<PropertyKey, any>>(
   state: S
 ) => (
-  mutation: DeepPartial<S>
+  mutation: ShallowArrayMutation<S>
 ) => {
   for (const key in mutation) {
     const submutation = mutation[key];

@@ -5,13 +5,12 @@ import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from '../operators/until';
-import { DeepPartial, Mutation, MutationStrategy, UnwrapNestedRefs } from './common';
+import { DeepPartial, MutationStrategy, UnwrapNestedRefs } from './common';
 import { shallowArray } from './strategies/shallowArray';
-import { shallow } from './strategies/shallow';
 
 
-export interface RxStateOptions<S extends Record<PropertyKey, any>> {
-  mutationStrategy: MutationStrategy<S>;
+export interface RxStateOptions<S extends Record<PropertyKey, any>, Mutaiton> {
+  mutationStrategy: MutationStrategy<S, Mutaiton>;
 }
 
 const defaultOptions = {
@@ -27,18 +26,18 @@ const defaultOptions = {
  * @param initialState - a factory or initial value for the reactive state
  * @param options - options to customize the behavior, for example - to apply a custom strategy of merging a mutation with an old state
  */
-export function useRxState<T extends Record<PropertyKey, any>>(
+export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepPartial<UnwrapNestedRefs<T>>>(
   initialState: T | (() => T),
-  options?: Partial<RxStateOptions<UnwrapNestedRefs<T>>>
-): CreateRxState<UnwrapNestedRefs<T>> {
+  options?: Partial<RxStateOptions<UnwrapNestedRefs<T>, Mutation>>
+): CreateRxState<UnwrapNestedRefs<T>, Mutation> {
   const { mutationStrategy: mergeKeys } = {
-    ...defaultOptions as RxStateOptions<UnwrapNestedRefs<T>>,
+    ...defaultOptions as RxStateOptions<UnwrapNestedRefs<T>, Mutation>,
     ...options
   };
 
   return function (reducers, map$?) {
     type S = UnwrapNestedRefs<T>;
-    type ReducerResult = ReturnType<StateReducer<S>>;
+    type ReducerResult = ReturnType<StateReducer<S, Mutation>>;
     type Actions = ReducerActions<typeof reducers>;
 
     const state = reactive(maybeCall(initialState));
@@ -99,7 +98,7 @@ export function useRxState<T extends Record<PropertyKey, any>>(
           actions$,
           context,
         ).pipe(
-          scan((prev, curr) => (mergeKeys(prev, mergeKeys)(curr)), state)
+          scan((prev, curr) => (mergeKeys(prev, mergeKeys)(curr as Mutation)), state)
         ) : merged$
       ),
       actions$: actions$ as ReducerObservables<Actions, DeepReadonly<S>>,
@@ -107,7 +106,7 @@ export function useRxState<T extends Record<PropertyKey, any>>(
   };
 }
 
-type CreateRxState<S> = {
+type CreateRxState<S, Mutation> = {
   /**
    * Allows to bind reducers to a state and an observable.
    *
@@ -132,7 +131,7 @@ type CreateRxState<S> = {
    * @param reducers a map of reducers to mutate the state
    * @param map$ a function to modify the resulting observable
    */
-  <R extends StateReducers<S>>(
+  <R extends StateReducers<S, Mutation>>(
     reducers: R,
     map$?: (
       state$: Observable<S>,
@@ -171,22 +170,22 @@ export interface MutationContext {
   complete(): void;
 }
 
-export type StatefulMutation<S> = (state: S, mutation?: MutationContext) => Mutation<S> | Observable<Mutation<S>>;
+export type StatefulMutation<S, Mutation> = (state: S, mutation?: MutationContext) => Mutation | Observable<Mutation>;
 
 /**
  * A reducer for the observable state
  */
-export type StateReducer<S, Args extends any[] = any[]> = (
+export type StateReducer<S, Mutation, Args extends any[] = any[]> = (
   (...args: Args) =>
-    | Mutation<S>
-    | Observable<Mutation<S>>
-    | StatefulMutation<S>
+    | Mutation
+    | Observable<Mutation>
+    | StatefulMutation<S, Mutation>
 );
 
 /**
  * A named collection of state reducers
  */
-export type StateReducers<S> = Record<string, StateReducer<S>>;
+export type StateReducers<S, Mutation> = Record<string, StateReducer<S, Mutation>>;
 
 /**
  * A method action generated from a StateReducer
@@ -224,12 +223,8 @@ export interface SubscriptionRxResult<Actions, State> extends RxResult<Actions, 
   readonly subscription: Subscription;
 }
 
-type ReducerAction<R> = R extends StateReducer<any, infer Args>
+type ReducerAction<R> = R extends StateReducer<any, any, infer Args>
   ? ResAction<Args>
   : never;
 
 type ReducerActions<R> = { [key in keyof R]: ReducerAction<R[key]> };
-
-useRxState({ a: { b: 'c' } }, {
-  mutationStrategy: shallow
-})
