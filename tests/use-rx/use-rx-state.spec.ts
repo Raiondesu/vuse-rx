@@ -2,7 +2,7 @@ import type { Observable } from 'rxjs';
 import { from, isObservable, noop } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { isProxy } from 'vue';
-import { useRxState } from '../src/use-rx';
+import { useRxState } from '../../src/use-rx';
 
 type State = { count: number, foo?: string };
 
