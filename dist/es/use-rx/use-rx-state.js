@@ -2,9 +2,9 @@ import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from '../operators/until';
-import { shallowArray } from './strategies/shallowArray';
+import { deepReplaceArray } from './strategies/deepReplaceArray';
 const defaultOptions = {
-    mutationStrategy: shallowArray,
+    mutationStrategy: deepReplaceArray,
 };
 export function useRxState(initialState, options) {
     const { mutationStrategy: mergeKeys } = Object.assign(Object.assign({}, defaultOptions), options);

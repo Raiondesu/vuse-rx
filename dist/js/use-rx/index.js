@@ -13,5 +13,5 @@ Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./use-rx-state"), exports);
 __exportStar(require("./strategies/deep"), exports);
 __exportStar(require("./strategies/shallow"), exports);
-__exportStar(require("./strategies/shallowArray"), exports);
+__exportStar(require("./strategies/deepReplaceArray"), exports);
 //# sourceMappingURL=index.js.map

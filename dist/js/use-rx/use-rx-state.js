@@ -5,9 +5,9 @@ const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const until_1 = require("../operators/until");
-const shallowArray_1 = require("./strategies/shallowArray");
+const deepReplaceArray_1 = require("./strategies/deepReplaceArray");
 const defaultOptions = {
-    mutationStrategy: shallowArray_1.shallowArray,
+    mutationStrategy: deepReplaceArray_1.deepReplaceArray,
 };
 function useRxState(initialState, options) {
     const { mutationStrategy: mergeKeys } = Object.assign(Object.assign({}, defaultOptions), options);
