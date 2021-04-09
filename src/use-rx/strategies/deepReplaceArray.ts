@@ -1,28 +1,28 @@
 import { Builtin, canMergeDeep } from '../common';
 
-export type ShallowArrayMutation<T> = T extends Builtin | Array<any> | ReadonlyArray<any>
+export type DeepReplaceArrayMutation<T> = T extends Builtin | Array<any> | ReadonlyArray<any>
   ? T
   : T extends Record<any, any>
-  ? { [K in keyof Partial<T>]: ShallowArrayMutation<T[K]> }
+  ? { [K in keyof Partial<T>]: DeepReplaceArrayMutation<T[K]> }
   : Partial<T>;
 
 /**
  * Default merge strategy for mutations
  *
- * Deep-merges state and mutation recursively,
+ * Deep-merges state and mutation objects recursively,
  * by enumerable keys (`for..in`),
- * but replaces arrays
+ * but replaces arrays and primitives
  */
- export const shallowArray = <S extends Record<PropertyKey, any>>(
+ export const deepReplaceArray = <S extends Record<PropertyKey, any>>(
   state: S
 ) => (
-  mutation: ShallowArrayMutation<S>
+  mutation: DeepReplaceArrayMutation<S>
 ) => {
   for (const key in mutation) {
     const submutation = mutation[key];
 
     state[key as keyof S] = !Array.isArray(submutation) && canMergeDeep(state, mutation, key)
-      ? shallowArray(state[key])(submutation)
+      ? deepReplaceArray(state[key])(submutation)
       : submutation as S[keyof S];
   }
 

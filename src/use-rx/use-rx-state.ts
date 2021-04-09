@@ -6,7 +6,7 @@ import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from '../operators/until';
 import { MutationStrategy, UnwrapNestedRefs } from './common';
-import { shallowArray, ShallowArrayMutation } from './strategies/shallowArray';
+import { deepReplaceArray, DeepReplaceArrayMutation } from './strategies/deepReplaceArray';
 
 
 export interface RxStateOptions<S extends Record<PropertyKey, any>, Mutaiton> {
@@ -14,7 +14,7 @@ export interface RxStateOptions<S extends Record<PropertyKey, any>, Mutaiton> {
 }
 
 const defaultOptions = {
-  mutationStrategy: shallowArray,
+  mutationStrategy: deepReplaceArray,
 };
 
 /**
@@ -26,7 +26,7 @@ const defaultOptions = {
  * @param initialState - a factory or initial value for the reactive state
  * @param options - options to customize the behavior, for example - to apply a custom strategy of merging a mutation with an old state
  */
-export function useRxState<T extends Record<PropertyKey, any>, Mutation = ShallowArrayMutation<UnwrapNestedRefs<T>>>(
+export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepReplaceArrayMutation<UnwrapNestedRefs<T>>>(
   initialState: T | (() => T),
   options?: Partial<RxStateOptions<UnwrapNestedRefs<T>, Mutation>>
 ): CreateRxState<UnwrapNestedRefs<T>, Mutation> {

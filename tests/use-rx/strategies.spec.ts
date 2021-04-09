@@ -1,4 +1,4 @@
-import { deep, shallow, shallowArray, useRxState } from '../../src/use-rx';
+import { deep, shallow, deepReplaceArray, useRxState } from '../../src/use-rx';
 
 const initialState = { a: { b: 'c', d: [{ e: 'f'} as Record<string, string>] }, g: 'h' };
 
@@ -40,12 +40,12 @@ describe('use-rx-state strategies: deep', () => {
   });
 });
 
-describe('use-rx-state strategies: shallowArray', () => {
+describe('use-rx-state strategies: deepReplaceArray', () => {
   it('merges states correctly', () => {
     const initial = initialState.a.d.slice();
     const aMutation = { a: { d: [{ j: 'k' }] } };
 
-    const { state: s, actions: { changeA, mergeA } } = useRxState(initialState, { mutationStrategy: shallowArray })({
+    const { state: s, actions: { changeA, mergeA } } = useRxState(initialState, { mutationStrategy: deepReplaceArray })({
       changeA: () => aMutation,
       mergeA: () => state => ({ a: { d: [...state.a.d, ...aMutation.a.d] } }),
     }).subscribe();

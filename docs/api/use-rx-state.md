@@ -65,7 +65,7 @@ Via options you can change how new mutations are applied to the state:
 import {
   useRxState,
   // this is the default mutation merge strategy
-  shallowArray,
+  deepReplaceArray,
   // fast checker of whether we can mutate the state deeper
   canMergeDeep
 } from 'vuse-rx';
@@ -91,7 +91,7 @@ useRxState(initialState, {
     }
 
     // Apply the default strategy once we're done
-    return shallowArray(state)(mutation);
+    return deepReplaceArray(state)(mutation);
     // or...
 
     // if we need to restrict our mutations to symbols only
@@ -103,10 +103,10 @@ useRxState(initialState, {
 ```
 
 There are 3 mutation strategies provided out-of the box:
-- `deep` - recursively merges mutations with the state
 - `shallow` - surface-level merge, equivalent to an object spread\
   (`state = { ...state, ...mutation }`)
-- `shallowArray` - **DEFAULT** - same as `deep`, but does a simple shallow replacement for arrays
+- `deep` - recursively merges mutations with the state
+- `deepReplaceArray` - **DEFAULT** - same as `deep`, but does a simple shallow replacement for arrays
 
 Each mutation strategy sets its own mutation type, so a mutation for the `deep` strategy may be different from a mutation for the `shallow` strategy.
 
@@ -162,7 +162,7 @@ This function is split into two parts:
 ### 1. **State**
 
 ```ts
-function <S extends Record<string, any>, Mutation = ShallowArrayMutation>(
+function <S extends Record<string, any>, Mutation = deepReplaceArrayMutation>(
   initialState: S | (() => S),
   options?: RxStateOptions<S, Mutation>
 ): Function
