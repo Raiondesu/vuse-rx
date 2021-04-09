@@ -1,4 +1,3 @@
-
 export type ShallowMutation<S> = Partial<S>;
 
 /**

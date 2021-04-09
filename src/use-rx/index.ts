@@ -5,8 +5,8 @@ import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from '../operators/until';
-import { DeepPartial, MutationStrategy, UnwrapNestedRefs } from './common';
-import { shallowArray } from './strategies/shallowArray';
+import { MutationStrategy, UnwrapNestedRefs } from './common';
+import { shallowArray, ShallowArrayMutation } from './strategies/shallowArray';
 
 
 export interface RxStateOptions<S extends Record<PropertyKey, any>, Mutaiton> {
@@ -26,7 +26,7 @@ const defaultOptions = {
  * @param initialState - a factory or initial value for the reactive state
  * @param options - options to customize the behavior, for example - to apply a custom strategy of merging a mutation with an old state
  */
-export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepPartial<UnwrapNestedRefs<T>>>(
+export function useRxState<T extends Record<PropertyKey, any>, Mutation = ShallowArrayMutation<UnwrapNestedRefs<T>>>(
   initialState: T | (() => T),
   options?: Partial<RxStateOptions<UnwrapNestedRefs<T>, Mutation>>
 ): CreateRxState<UnwrapNestedRefs<T>, Mutation> {
@@ -139,7 +139,7 @@ type CreateRxState<S, Mutation> = {
       state: S,
       actions$: Record<Action$<Extract<keyof R, string>>, Observable<S>>,
       context: MutationContext
-    ) => Observable<DeepPartial<S>>
+    ) => Observable<Mutation>
   ): SubscribableRxResult<ReducerActions<R>, S>;
 };
 

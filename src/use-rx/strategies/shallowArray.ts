@@ -1,13 +1,9 @@
-import { Builtin, canMergeDeep, DeepPartial } from '../common';
+import { Builtin, canMergeDeep } from '../common';
 
-export type ShallowArrayMutation<T> = T extends Builtin
+export type ShallowArrayMutation<T> = T extends Builtin | Array<any> | ReadonlyArray<any>
   ? T
-  : T extends Array<infer U>
-  ? Array<U>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<U>
   : T extends Record<any, any>
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
+  ? { [K in keyof T]?: ShallowArrayMutation<T[K]> }
   : Partial<T>;
 
 /**
