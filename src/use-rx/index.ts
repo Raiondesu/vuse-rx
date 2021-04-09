@@ -1,26 +1,22 @@
+import type { Observable, PartialObserver, Subscription } from 'rxjs';
+import type { DeepReadonly } from 'vue';
+
 import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
-import { untilUnmounted } from './operators/until';
+import { untilUnmounted } from '../operators/until';
+import { DeepPartial, Mutation, MutationStrategy, UnwrapNestedRefs } from './common';
+import { shallowArray } from './strategies/shallowArray';
+import { shallow } from './strategies/shallow';
 
-import type { Observable, PartialObserver, Subscription } from 'rxjs';
-import type { DeepReadonly, Ref, UnwrapRef } from 'vue';
-
-export interface MutationStrategy<S extends Record<PropertyKey, any>> {
-  /**
-   * Creates a mutation applier
-   *
-   * @param state - a base state to mutate
-   * @param strategy - current mutation strategy
-   */
-  (state: S, strategy: MutationStrategy<S>): (
-    mutation: S | DeepPartial<S>
-  ) => S;
-}
 
 export interface RxStateOptions<S extends Record<PropertyKey, any>> {
   mutationStrategy: MutationStrategy<S>;
 }
+
+const defaultOptions = {
+  mutationStrategy: shallowArray,
+};
 
 /**
  * Allows to bind reducers to a state and an observable.
@@ -33,16 +29,15 @@ export interface RxStateOptions<S extends Record<PropertyKey, any>> {
  */
 export function useRxState<T extends Record<PropertyKey, any>>(
   initialState: T | (() => T),
-  options: Partial<RxStateOptions<UnwrapNestedRefs<T>>> = defaultOptions
+  options?: Partial<RxStateOptions<UnwrapNestedRefs<T>>>
 ): CreateRxState<UnwrapNestedRefs<T>> {
-  type S = UnwrapNestedRefs<T>;
-
   const { mutationStrategy: mergeKeys } = {
-    ...defaultOptions as RxStateOptions<S>,
+    ...defaultOptions as RxStateOptions<UnwrapNestedRefs<T>>,
     ...options
   };
 
   return function (reducers, map$?) {
+    type S = UnwrapNestedRefs<T>;
     type ReducerResult = ReturnType<StateReducer<S>>;
     type Actions = ReducerActions<typeof reducers>;
 
@@ -149,50 +144,6 @@ type CreateRxState<S> = {
   ): SubscribableRxResult<ReducerActions<R>, S>;
 };
 
-/**
- * Checks if it's possible to advance deeper
- * into the sibling object structures,
- * with one being partial
- *
- * @param state - the object source
- * @param mutation - the main checking reference
- * @param key - a key into which to advance
- */
-export const canMergeDeep = <S extends Record<PropertyKey, any>>(
-  state: S,
-  mutation: S | DeepPartial<S>,
-  key: keyof S,
-) => (
-  typeof mutation[key] === 'object'
-  && mutation !== null
-  && typeof state[key] === 'object'
-);
-
-/**
- * Default merge strategy for mutations
- *
- * Merges state and mutation recursively,
- * by enumerable keys (`for..in`),
- * so avoid recursive object links
- */
-export const deepMergeKeys = <S extends Record<PropertyKey, any>>(
-  state: S
-) => (
-  mutation: S | DeepPartial<S>
-) => {
-  for (const key in mutation) {
-    state[key as keyof S] = canMergeDeep(state, mutation, key)
-      ? deepMergeKeys(state[key])(mutation[key])
-      : mutation[key] as any;
-  }
-
-  return state;
-};
-
-const defaultOptions = {
-  mutationStrategy: deepMergeKeys,
-};
-
 const createRxResult = <S, Actions>(result: {
   actions: Actions,
   state: DeepReadonly<S>,
@@ -215,46 +166,12 @@ const maybeCall = <T, A extends any[]>(
     : fn
 );
 
-type Builtin =
-  | Function
-  | Date
-  | Error
-  | RegExp
-  | Uint8Array
-  | string
-  | number
-  | boolean
-  | bigint
-  | symbol
-  | undefined
-  | null;
-
-export type DeepPartial<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
-  ? Array<DeepPartial<U>>
-  : T extends ReadonlyArray<infer U>
-  ? ReadonlyArray<DeepPartial<U>>
-  : T extends Record<any, any>
-  ? { [K in keyof T]?: DeepPartial<T[K]> }
-  : Partial<T>;
-
-type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
-
 export interface MutationContext {
   error(error: any): void;
   complete(): void;
 }
 
-export type Mutation<S> =
-  // | void
-  // isn't useful,
-  // need to keep reducers explicit in what they do
-  | S
-  | DeepPartial<S>
-  | Observable<DeepPartial<S>>;
-
-export type StatefulMutation<S> = (state: S, mutation?: MutationContext) => Mutation<S>;
+export type StatefulMutation<S> = (state: S, mutation?: MutationContext) => Mutation<S> | Observable<Mutation<S>>;
 
 /**
  * A reducer for the observable state
@@ -262,6 +179,7 @@ export type StatefulMutation<S> = (state: S, mutation?: MutationContext) => Muta
 export type StateReducer<S, Args extends any[] = any[]> = (
   (...args: Args) =>
     | Mutation<S>
+    | Observable<Mutation<S>>
     | StatefulMutation<S>
 );
 
@@ -311,3 +229,7 @@ type ReducerAction<R> = R extends StateReducer<any, infer Args>
   : never;
 
 type ReducerActions<R> = { [key in keyof R]: ReducerAction<R[key]> };
+
+useRxState({ a: { b: 'c' } }, {
+  mutationStrategy: shallow
+})
