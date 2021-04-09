@@ -21,7 +21,7 @@ export type DeepMutation<T> = T extends Builtin
   : T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepMutation<U>>
   : T extends Record<any, any>
-  ? { [K in keyof T]?: DeepMutation<T[K]> }
+  ? { [K in keyof Partial<T>]: DeepMutation<T[K]> }
   : Partial<T>;
 
 /**

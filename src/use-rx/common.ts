@@ -37,10 +37,10 @@ export type MutationStrategy<S extends Record<PropertyKey, any>, M> = {
  */
  export const canMergeDeep = <S extends Record<PropertyKey, any>, Mutation extends Record<keyof S, any>>(
   state: S,
-  mutation: Mutation,
+  mutation: Mutation | null | undefined,
   key: keyof S,
 ) => (
-  typeof mutation[key] === 'object'
-  && mutation !== null
+  mutation != null
+  && typeof mutation[key] === 'object'
   && typeof state[key] === 'object'
 );

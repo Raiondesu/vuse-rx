@@ -3,7 +3,7 @@ import { Builtin, canMergeDeep } from '../common';
 export type ShallowArrayMutation<T> = T extends Builtin | Array<any> | ReadonlyArray<any>
   ? T
   : T extends Record<any, any>
-  ? { [K in keyof T]?: ShallowArrayMutation<T[K]> }
+  ? { [K in keyof Partial<T>]: ShallowArrayMutation<T[K]> }
   : Partial<T>;
 
 /**

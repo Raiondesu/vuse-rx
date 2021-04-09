@@ -1,4 +1,7 @@
-export type ShallowMutation<S> = Partial<S>;
+export type ShallowMutation<S> = {
+  // Hack to avoid double `undefined` in `[key]?: value | undefined`
+  [K in keyof Partial<S>]: S[K];
+};
 
 /**
  * A merge strategy for mutations
@@ -9,5 +12,11 @@ export type ShallowMutation<S> = Partial<S>;
  export const shallow = <S extends Record<PropertyKey, any>>(
   state: S
 ) => (
-  mutation: Partial<S>
-) => ({ ...state, ...mutation });
+  mutation: ShallowMutation<S>
+) => {
+  for (const key in mutation) {
+    state[key] = mutation[key];
+  }
+
+  return state;
+};
