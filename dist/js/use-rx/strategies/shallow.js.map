@@ -1,0 +1,1 @@
+{"version":3,"file":"shallow.js","sourceRoot":"","sources":["../../../../src/use-rx/strategies/shallow.ts"],"names":[],"mappings":";;;AAWQ,MAAM,OAAO,GAAG,CACtB,KAAQ,EACR,EAAE,CAAC,CACH,QAA4B,EAC5B,EAAE;IACF,KAAK,MAAM,GAAG,IAAI,QAAQ,EAAE;QAC1B,KAAK,CAAC,GAAG,CAAC,GAAG,QAAQ,CAAC,GAAG,CAAC,CAAC;KAC5B;IAED,OAAO,KAAK,CAAC;AACf,CAAC,CAAC;AAVY,QAAA,OAAO,WAUnB"}

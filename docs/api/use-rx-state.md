@@ -57,13 +57,15 @@ And returns a reactive state, actions, and some observables to make things easie
 
 `useRxState` allows to change some of its behaviour via the optional `options` parameter in the first function.
 
+#### Mutation strategy
+
 Via options you can change how new mutations are applied to the state:
 
 ```ts
 import {
   useRxState,
   // this is the default mutation merge strategy
-  deepMergeKeys,
+  deepReplaceArray,
   // fast checker of whether we can mutate the state deeper
   canMergeDeep
 } from 'vuse-rx';
@@ -89,7 +91,7 @@ useRxState(initialState, {
     }
 
     // Apply the default strategy once we're done
-    return deepMergeKeys(state)(mutation);
+    return deepReplaceArray(state)(mutation);
     // or...
 
     // if we need to restrict our mutations to symbols only
@@ -100,10 +102,33 @@ useRxState(initialState, {
 });
 ```
 
+There are 3 mutation strategies provided out-of the box:
+- `shallow` - surface-level merge, equivalent to an object spread\
+  (`state = { ...state, ...mutation }`)
+- `deep` - recursively merges mutations with the state
+- `deepReplaceArray` - **DEFAULT** - same as `deep`, but does a simple shallow replacement for arrays
+
+Each mutation strategy sets its own mutation type, so a mutation for the `deep` strategy may be different from a mutation for the `shallow` strategy.
+
+However, mutation type is not restricted to a product of the initial state or an object even!\
+You can even pass a string if you want to:
+
+```ts
+useRxState({ count: 0 }, {
+  // This is not advised, of course, but for the sake of example...
+  mutationStrategy: state => (mutation: 'increment' | 'decrement') => ({
+    count: mutation === 'increment' ? state.count + 1 : state.count - 1
+  }),
+})({
+  increment: () => 'increment',
+  decrement: () => 'decrement',
+});
+```
+
 ## Type Signature and overloads
 
 ```ts
-function <S extends Record<string, any>>(
+function <S extends Record<string, any>, Mutation>(
   initialState: S | (() => S),
   options?: RxStateOptions
 ) => <R extends StateReducers<S>>(
@@ -114,7 +139,7 @@ function <S extends Record<string, any>>(
     state: Readonly<S>,
     actions$: Record<`${keyof R}$`, Observable<S>>,
     context: MutationContext
-  ) => Observable<Partial<S>>
+  ) => Observable<Mutation>
 ) => {
   actions: ReducerActions<R>;
   state: S;
@@ -137,9 +162,9 @@ This function is split into two parts:
 ### 1. **State**
 
 ```ts
-function <S extends Record<string, any>>(
+function <S extends Record<string, any>, Mutation = deepReplaceArrayMutation>(
   initialState: S | (() => S),
-  options?: RxStateOptions
+  options?: RxStateOptions<S, Mutation>
 ): Function
 ```
 
@@ -157,7 +182,7 @@ function <R extends StateReducers<S>>(
     state: Readonly<S>,
     actions$: Record<`${keyof R}$`, Observable<S>>,
     context: MutationContext
-  ) => Observable<Partial<S>>
+  ) => Observable<Mutation>
 ) => SubscribableRxRes<ReducerActions<R>, S>
 ```
 
