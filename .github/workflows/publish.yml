@@ -1,5 +1,5 @@
 
-name: 'Publish @latest'
+name: publish
 
 on:
   pull_request:
