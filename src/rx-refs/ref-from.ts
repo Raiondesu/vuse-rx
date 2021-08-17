@@ -96,7 +96,7 @@ export function refFrom(arg: unknown, subArg?: unknown) {
     });
 
     return ref$;
-  } catch (_) { /* Silence the error to try another ways */ }
+  } catch (_) { /* Silence the error to try other ways */ }
 
   return isProxy(arg)
     ? toRef(arg as Record<any, any>, subArg)
