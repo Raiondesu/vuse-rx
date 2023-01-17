@@ -20,7 +20,7 @@ export default defineComponent({
       increment: () => state => ({ count: state.count + 1 }),
 
       setCount: (count: string) => ({
-        count: isNaN(count) ? 0 : +count
+        count: isNaN(Number(count)) ? 0 : +count
       }),
 
       setCountAfter(count: string, timeout: number) {
