@@ -2,7 +2,7 @@
 
 [[toc]]
 
-This is a simple stopwatch with configurable increment step, interval and maximum value limit.
+This is a simple stopwatch with configurable increment step, speed, interval and maximum value limit.
 
 <ClientOnly>
   <StopwatchDemo/>
@@ -43,7 +43,7 @@ const createStopwatch = useRxState(() => ({
 }));
 ```
 
-And some "business-rules":
+And some "business-logic":
 
 ```js
 // A small utility to calculate the delay between increments
@@ -184,8 +184,8 @@ export default defineComponent({
     <input v-model="speedRef" @blur.capture="setSpeed(+speedRef)"/>
 
     <!-- Shorthand buttons to increment or decrement speed -->
-    <button @click="setSpeed(+speedRef - 1)">-</button>
-    <button @click="setSpeed(+speedRef + 1)">+</button>
+    <button @click="setSpeed(+speedRef - 1)">Speed -</button>
+    <button @click="setSpeed(+speedRef + 1)">Speed +</button>
     <!-- We don't need to assign the new speed to the ref -->
     <!-- because out speedRef is automatically synced to the reactive state.speed property! -->
   </div>

@@ -89,8 +89,8 @@ export default defineComponent({
     </div>
     <div class="flex justify center mt-2">
       <input v-model="speedRef" @blur.capture="setSpeed(+speedRef)"/>
-      <button @click="setSpeed(+speedRef - 1)">-</button>
-      <button @click="setSpeed(+speedRef + 1)">+</button>
+      <button @click="setSpeed(+speedRef - 1)">Speed -</button>
+      <button @click="setSpeed(+speedRef + 1)">Speed +</button>
     </div>
     <div class="flex justify center mt-2">
       <input v-model="stepRef"/>
@@ -129,7 +129,7 @@ input {
   flex-grow: 1;
 }
 
-div {
+.flex {
   display: flex;
   flex-wrap: nowrap;
 }
