@@ -38,7 +38,7 @@ const useStopwatch = () => createStopwatch(
       paused(state)
         ? of(state)
         : interval(1000 / state.speed).pipe(
-            mapTo(state),
+            map(() => state),
             map(increment()),
           )
     ),

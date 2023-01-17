@@ -105,7 +105,7 @@ const useStopwatch = () => createStopwatch(
         ? of(state)
         // otherwise - create a timer
         : interval(calcDelay(state)).pipe(
-            mapTo(state),
+            map(() => state),
             // that increments the state on each tick
             map(increment()),
           )
