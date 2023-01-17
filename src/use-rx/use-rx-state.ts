@@ -1,11 +1,11 @@
 import type { Observable, PartialObserver, Subscription } from 'rxjs';
-import type { DeepReadonly } from 'vue';
+import type { DeepReadonly, UnwrapNestedRefs } from 'vue';
 
 import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from '../operators/until';
-import { MutationStrategy, UnwrapNestedRefs } from './common';
+import { MutationStrategy } from './common';
 import { deepReplaceArray, DeepReplaceArrayMutation } from './strategies/deepReplaceArray';
 
 

@@ -1,5 +1,3 @@
-import { Ref, UnwrapRef } from 'vue';
-
 export type Builtin =
   | Function
   | Date
@@ -13,8 +11,6 @@ export type Builtin =
   | symbol
   | undefined
   | null;
-
-export type UnwrapNestedRefs<T> = T extends Ref ? T : UnwrapRef<T>;
 
 export type MutationStrategy<S extends Record<PropertyKey, any>, M> = {
   /**
