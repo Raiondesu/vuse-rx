@@ -21,7 +21,7 @@ features:
 </div>
 
 <div align="center" style="text-align:center;margin:0 auto">
-  <a style="margin:0 4px" href="https://github.com/Raiondesu/vuse-rx/actions"><img src="https://img.shields.io/github/workflow/status/raiondesu/vuse-rx/CI?style=flat-square"/></a>
+  <a style="margin:0 4px" href="https://github.com/Raiondesu/vuse-rx/actions"><img src="https://img.shields.io/github/actions/workflow/status/raiondesu/vuse-rx/publish.yml?style=flat-square"/></a>
   <a style="margin:0 4px" href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/v/vuse-rx?style=flat-square"/></a>
   <a style="margin:0 4px" href="https://bundlephobia.com/result?p=vuse-rx"><img src="https://img.shields.io/bundlephobia/minzip/vuse-rx?style=flat-square"/></a>
   <a style="margin:0 4px" href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/dt/vuse-rx?style=flat-square"/></a>
