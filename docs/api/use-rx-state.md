@@ -159,6 +159,8 @@ This function is split into two parts:
 1. State-capturing function - determines the shape and contents of the state and returns the second part:
 2. Reducers-capturing function - sets the reducers
 
+This is done in order to enable [full type inference in reducers](https://github.com/microsoft/TypeScript/issues/14400#issuecomment-507638537).
+
 ### 1. **State**
 
 ```ts
@@ -213,7 +215,7 @@ A reducer can be either state**ful** or state**less**:
   (newValue) => ({ count: newValue })
   ```
 
-The resulting mutation is then automatically merged with the state itself.
+The resulting mutation is then automatically merged with the current state.
 
 Let's see a complete example:
 ```ts
@@ -279,13 +281,14 @@ if (Math.random() > 0.5) {
 #### Parameter 2: `map$`
 
 It's also possible to modify the resulting observable using the second parameter, `map$`.\
-It accepts:
+It accepts a function with the following parameters:
 - `state$` - the resulting observable (fired on each action)
 - `reducers` - a map of raw reducers (basically, the first parameter itself)
 - `state` - current reactive state
 - `actions$` - a map of all observables that are fired on action calls
 - `context` - a current mutation context, same as the one in the reducers,\
   can be passed into the reducers to allow them to control the mutation too
+and expects a state observable to be returned from it.
 
 ```ts
 useRxState(state)(
