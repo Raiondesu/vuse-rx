@@ -40,7 +40,7 @@ export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepRe
     type ReducerResult = ReturnType<StateReducer<S, Mutation>>;
     type Actions = ReducerActions<typeof reducers>;
 
-    const state = reactive(maybeCall(initialState));
+    const state = reactive(callMeMaybe(initialState));
 
     const actions = <Actions> {};
     const actions$ = <ReducerObservables<Actions, S>> {};
@@ -66,7 +66,7 @@ export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepRe
       actions$Arr.push(
         actions$[`${key}$` as const] = (
           mergeScan((prev: S, curr: ReducerResult) => {
-            curr = maybeCall(curr, prev, context);
+            curr = callMeMaybe(curr, prev, context);
 
             return (
               isObservable(curr)
@@ -156,7 +156,7 @@ const createRxResult = <S, Actions>(result: {
   }),
 })
 
-const maybeCall = <T, A extends any[]>(
+const callMeMaybe = <T, A extends any[]>(
   fn: T | ((...args: A) => T),
   ...args: A
 ) => (
