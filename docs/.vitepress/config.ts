@@ -1,5 +1,6 @@
 import { defineConfig } from 'vitepress'
 import { SitemapStream } from 'sitemap';
+import { SearchPlugin } from 'vitepress-plugin-search';
 import { resolve } from 'node:path';
 import { createWriteStream } from 'node:fs';
 import { name, description } from '../../package.json';
@@ -10,14 +11,23 @@ export default defineConfig({
   title: name,
   description: description,
   head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo-small.svg' }]],
-
   lastUpdated: true,
-
-  mpa: true,
 
   cleanUrls: 'without-subfolders',
 
+  mpa: true,
   useWebFonts: true,
+
+  vite: {
+    plugins: [SearchPlugin({
+      cache: true,
+      encode: false,
+      tokenize: 'full',
+      previewLength: 62,
+      buttonLabel: 'Search',
+      placeholder: 'Search docs',
+    })]
+  },
 
   themeConfig: {
     siteTitle: false,
@@ -25,7 +35,6 @@ export default defineConfig({
       src: '/logo-g.svg',
       alt: 'vuse-rx'
     },
-    lastUpdatedText: 'Last Updated',
 
     nav: [
       {
@@ -34,6 +43,7 @@ export default defineConfig({
       }
     ],
 
+    lastUpdatedText: 'Last Updated',
     socialLinks: [
       { icon: 'github', link: 'https://github.com/raiondesu/vuse-rx' },
     ],
@@ -91,4 +101,6 @@ export default defineConfig({
     return new Promise((r) => writeStream.on('finish', r));
   }
   //
+
+
 });
