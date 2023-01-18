@@ -3,7 +3,7 @@ import { defineComponent, nextTick, onMounted, reactive, ref } from 'vue';
 
 export default defineComponent({
   setup() {
-    const lines = reactive<{ text: string, type: string, arg: object }[][]>([]);
+    const lines = reactive<{ type: string, arg: object | string }[][]>([]);
     const refLines = ref<HTMLDivElement>();
 
     const log = console.log.bind(console);
@@ -11,9 +11,8 @@ export default defineComponent({
     onMounted(() => {
       console.log = (...args: any[]): void => {
         lines.push(args.map(arg => ({
-          text: typeof arg === 'object' ? JSON.stringify(arg, undefined, 2) : String(arg),
           type: typeof arg,
-          arg: typeof arg === 'object' ? { ...arg } : {}
+          arg: typeof arg === 'object' ? { ...arg } : String(arg)
         })));
 
         log(...args);
@@ -45,11 +44,16 @@ export default defineComponent({
     <p class="title">Console:</p>
     <div class="lines" ref="refLines">
       <p class="line" v-for="line in lines">
-        <span v-for="arg in line">
-          <span v-if="arg.type === 'object'">
-            { <span v-for="value, key in arg.arg">"{{ key }}": <span :style="{ color: spanColors[typeof value] }">{{ value }}</span>, </span> }
+        <span v-for="{ type, arg } in line">
+          <span v-if="type === 'object'">
+            {
+              <span v-for="value, key, index in arg">
+                <span v-if="index > 0">, </span>
+                "{{ key }}": <span :style="{ color: spanColors[typeof value] }">{{ value }}</span>
+              </span>
+            }
           </span>
-          <span v-else :style="{ color: spanColors[arg.type] }">{{ arg.text + ' ' }}</span>
+          <span v-else :style="{ color: spanColors[type] }">{{ arg + ' ' }}</span>
         </span>
       </p>
     </div>
