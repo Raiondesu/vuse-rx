@@ -49,7 +49,7 @@ export default defineComponent({
           <span v-if="arg.type === 'object'">
             { <span v-for="value, key in arg.arg">"{{ key }}": <span :style="{ color: spanColors[typeof value] }">{{ value }}</span>, </span> }
           </span>
-          <span v-else :style="{ color: spanColors[arg.type] }">{{ arg.text }}</span>
+          <span v-else :style="{ color: spanColors[arg.type] }">{{ arg.text + ' ' }}</span>
         </span>
       </p>
     </div>
