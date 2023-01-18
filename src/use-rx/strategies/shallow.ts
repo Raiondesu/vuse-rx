@@ -9,7 +9,7 @@ export type ShallowMutation<S> = {
  * Shallow-merges state and mutation recursively,
  * by enumerable keys (`for..in`)
  */
- export const shallow = <S extends Record<PropertyKey, any>>(
+export const shallow = <S extends Record<PropertyKey, any>>(
   state: S
 ) => (
   mutation: ShallowMutation<S>

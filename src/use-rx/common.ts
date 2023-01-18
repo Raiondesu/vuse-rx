@@ -31,7 +31,7 @@ export type MutationStrategy<S extends Record<PropertyKey, any>, M> = {
  * @param mutation - the main checking reference
  * @param key - a key into which to advance
  */
- export const canMergeDeep = <S extends Record<PropertyKey, any>, Mutation extends Record<keyof S, any>>(
+export const canMergeDeep = <S extends Record<PropertyKey, any>, Mutation extends Record<keyof S, any>>(
   state: S,
   mutation: Mutation | null | undefined,
   key: keyof S,

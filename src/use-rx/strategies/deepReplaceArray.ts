@@ -13,7 +13,7 @@ export type DeepReplaceArrayMutation<T> = T extends Builtin | Array<any> | Reado
  * by enumerable keys (`for..in`),
  * but replaces arrays and primitives
  */
- export const deepReplaceArray = <S extends Record<PropertyKey, any>>(
+export const deepReplaceArray = <S extends Record<PropertyKey, any>>(
   state: S
 ) => (
   mutation: DeepReplaceArrayMutation<S>
