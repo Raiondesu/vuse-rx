@@ -1,6 +1,6 @@
 {
   "name": "vuse-rx",
-  "version": "0.14.0-rc.0",
+  "version": "0.14.0-rc.1",
   "sideEffects": false,
   "description": "First-class rxjs support for Vue 3",
   "main": "dist/js",
