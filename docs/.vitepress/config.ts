@@ -10,8 +10,17 @@ export default defineConfig({
   title: name,
   description: description,
   head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo-small.svg' }]],
+
   lastUpdated: true,
+
+  mpa: true,
+
+  cleanUrls: 'without-subfolders',
+
+  useWebFonts: true,
+
   themeConfig: {
+    siteTitle: false,
     logo: {
       src: '/logo-g.svg',
       alt: 'vuse-rx'
