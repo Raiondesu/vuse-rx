@@ -18,16 +18,16 @@ export default defineConfig({
   mpa: true,
   useWebFonts: true,
 
-  vite: {
-    plugins: [SearchPlugin({
-      cache: true,
-      encode: false,
-      tokenize: 'full',
-      previewLength: 62,
-      buttonLabel: 'Search',
-      placeholder: 'Search docs',
-    })]
-  },
+  // vite: {
+  //   plugins: [SearchPlugin({
+  //     cache: true,
+  //     encode: false,
+  //     tokenize: 'full',
+  //     previewLength: 62,
+  //     buttonLabel: 'Search',
+  //     placeholder: 'Search docs',
+  //   })]
+  // },
 
   themeConfig: {
     siteTitle: false,
