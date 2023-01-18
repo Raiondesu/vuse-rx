@@ -7,16 +7,16 @@ const until_1 = require("../operators/until");
 function refFrom(arg, subArg) {
     if (typeof arg === 'object')
         try {
-            const ref$ = vue_1.ref(subArg);
-            until_1.untilUnmounted(rxjs_1.from(arg)).subscribe({
+            const ref$ = (0, vue_1.ref)(subArg);
+            (0, until_1.untilUnmounted)((0, rxjs_1.from)(arg)).subscribe({
                 next: value => ref$.value = value
             });
             return ref$;
         }
         catch (_) { }
-    return vue_1.isProxy(arg)
-        ? vue_1.toRef(arg, subArg)
-        : vue_1.ref(arg);
+    return (0, vue_1.isProxy)(arg)
+        ? (0, vue_1.toRef)(arg, subArg)
+        : (0, vue_1.ref)(arg);
 }
 exports.refFrom = refFrom;
 //# sourceMappingURL=ref-from.js.map

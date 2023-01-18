@@ -19,8 +19,8 @@
     "build:js": "tsc --outDir dist/js -t ES2015",
     "build:es": "tsc --outDir dist/es -t ES2015 --module ES2015",
     "build:next": "tsc --outDir dist/esnext --module esnext",
-    "build:umd": "bili",
-    "build": "npm run checks && npm run build:js && npm run build:es && npm run build:next && npm run build:umd",
+    "build:umd": "vite build",
+    "build": "npm run checks && npm run build:umd && npm run build:js && npm run build:es && npm run build:next",
     "dev": "tsc --noEmit -w",
     "checks": "madge --circular --extensions ts src/index.ts",
     "commit-build": "(git diff --quiet && git diff --staged --quiet) || (git commit -am \"Update dist\")",
@@ -70,7 +70,6 @@
   "devDependencies": {
     "@types/jest": "^29.2.5",
     "@types/node": "^18.11.18",
-    "bili": "^5.0.5",
     "eslint": "^8.32.0",
     "eslint-plugin-import": "^2.27.5",
     "eslint-plugin-node": "^11.1.0",
@@ -83,6 +82,7 @@
     "sitemap-ts": "^1.2.2",
     "ts-jest": "^29.0.5",
     "typescript": "^4.9.4",
+    "vite": "^4.0.4",
     "vitepress": "^1.0.0-alpha.38",
     "vue": "^3.2.45",
     "vuse-rx": "./"

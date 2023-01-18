@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.syncRef = void 0;
 const vue_1 = require("vue");
 function syncRef(ref1, maps, _ref2) {
-    const ref2 = vue_1.ref(_ref2 == null
+    const ref2 = (0, vue_1.ref)(_ref2 == null
         ? maps.to
             ? maps.to(ref1.value)
             : ref1.value
@@ -24,8 +24,8 @@ const bind = (refBase, refDest, maps, dir, options) => ({
         const { ref, map, watch: opts } = Object.assign({ ref: refBase, map: maps[dir], watch: options }, bindOptions);
         refDest[dir].stop();
         refDest[dir].stop = dir === 'to'
-            ? vue_1.watch(ref, v => refDest.value = map(v), Object.assign({}, options, opts))
-            : vue_1.watch(refDest, v => ref.value = map(v), Object.assign({}, options, opts));
+            ? (0, vue_1.watch)(ref, v => refDest.value = map(v), Object.assign({}, options, opts))
+            : (0, vue_1.watch)(refDest, v => ref.value = map(v), Object.assign({}, options, opts));
     },
     stop: () => { }
 });
