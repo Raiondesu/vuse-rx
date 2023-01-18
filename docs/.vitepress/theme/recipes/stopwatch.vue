@@ -1,6 +1,6 @@
 <script lang="ts">
-import { defineComponent, ref, toRef, watch } from 'vue';
-import { map, mapTo, switchMap } from 'rxjs/operators';
+import { defineComponent, ref, toRef } from 'vue';
+import { map, takeWhile, switchMap } from 'rxjs/operators';
 import { of, interval } from 'rxjs';
 import { useRxState, syncRef } from 'vuse-rx';
 import { setToWindow } from '../set-window';
@@ -14,9 +14,11 @@ const createStopwatch = useRxState(() => ({
   step: 1,
 }));
 
-const paused = state => !state.count || state.step === 0 || (
-  state.step > 0 && state.value >= state.maxValue
+const valueIsBelowMax = state => isNaN(state.maxValue) || (
+  state.value < state.maxValue
 );
+
+const paused = state => !state.count || state.step === 0 || !valueIsBelowMax(state);
 
 const clampValue = (maxValue: number, value: number) => ({
   maxValue,
@@ -40,6 +42,7 @@ const useStopwatch = () => createStopwatch(
         : interval(1000 / state.speed).pipe(
             map(() => state),
             map(increment()),
+            takeWhile(valueIsBelowMax, true),
           )
     ),
   )

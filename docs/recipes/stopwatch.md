@@ -29,7 +29,7 @@ const createStopwatch = useRxState(() => ({
   count: false,
 
   // The smaller the speed,
-  // the bigger the interval between increments
+  // the bigger the delay between increments
   speed: 5,
 
   // Actual stopwatch counter
@@ -50,9 +50,11 @@ And some "business-logic":
 const calcDelay = state => 1000 / state.speed;
 
 // Stopwatch is paused if it's not counting,
-const paused = state => !state.count || state.step === 0 || (
-  // or if the value has reached the maximum limit
-  state.step > 0 && state.value >= state.maxValue
+const paused = state => !state.count || state.step === 0 || !valueIsBelowMax(state);
+
+// or if the value has reached the maximum limit
+const valueIsBelowMax = state => isNaN(state.maxValue) || (
+  state.value < state.maxValue
 );
 
 // Value must be capped by the maxValue
@@ -108,6 +110,8 @@ const useStopwatch = () => createStopwatch(
             map(() => state),
             // that increments the state on each tick
             map(increment()),
+            // until the value reaches set maximum
+            takeWhile(valueIsBelowMax, true)
           )
     ),
   )
