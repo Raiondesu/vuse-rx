@@ -1,6 +1,6 @@
 <script lang="ts">
-import { defineComponent, ref, toRef, watch } from 'vue';
-import { map, mapTo, switchMap } from 'rxjs/operators';
+import { defineComponent, ref, toRef } from 'vue';
+import { map, takeWhile, switchMap } from 'rxjs/operators';
 import { of, interval } from 'rxjs';
 import { useRxState, syncRef } from 'vuse-rx';
 import { setToWindow } from '../set-window';
@@ -14,9 +14,11 @@ const createStopwatch = useRxState(() => ({
   step: 1,
 }));
 
-const paused = state => !state.count || state.step === 0 || (
-  state.step > 0 && state.value >= state.maxValue
+const valueIsBelowMax = state => isNaN(state.maxValue) || (
+  state.value < state.maxValue
 );
+
+const paused = state => !state.count || state.step === 0 || !valueIsBelowMax(state);
 
 const clampValue = (maxValue: number, value: number) => ({
   maxValue,
@@ -38,8 +40,9 @@ const useStopwatch = () => createStopwatch(
       paused(state)
         ? of(state)
         : interval(1000 / state.speed).pipe(
-            mapTo(state),
+            map(() => state),
             map(increment()),
+            takeWhile(valueIsBelowMax, true),
           )
     ),
   )
@@ -89,8 +92,8 @@ export default defineComponent({
     </div>
     <div class="flex justify center mt-2">
       <input v-model="speedRef" @blur.capture="setSpeed(+speedRef)"/>
-      <button @click="setSpeed(+speedRef - 1)">-</button>
-      <button @click="setSpeed(+speedRef + 1)">+</button>
+      <button @click="setSpeed(+speedRef - 1)">Speed -</button>
+      <button @click="setSpeed(+speedRef + 1)">Speed +</button>
     </div>
     <div class="flex justify center mt-2">
       <input v-model="stepRef"/>
@@ -129,7 +132,7 @@ input {
   flex-grow: 1;
 }
 
-div {
+.flex {
   display: flex;
   flex-wrap: nowrap;
 }

@@ -28,7 +28,7 @@ export default defineComponent({
     <div class="count">
       <pre class="hug"><code>count</code></pre>
       <p class="hug">(original)</p>
-      <button @click="count--">+</button> {{ count }} <button @click="count++">+</button>
+      <button @click="count--">-</button> {{ count }} <button @click="count++">+</button>
     </div>
     <div class="count-str">
       <pre class="hug"><code>countStr</code></pre>

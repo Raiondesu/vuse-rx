@@ -2,7 +2,7 @@
 
 [[toc]]
 
-This is a simple stopwatch with configurable increment step, interval and maximum value limit.
+This is a simple stopwatch with configurable increment step, speed, interval and maximum value limit.
 
 <ClientOnly>
   <StopwatchDemo/>
@@ -29,7 +29,7 @@ const createStopwatch = useRxState(() => ({
   count: false,
 
   // The smaller the speed,
-  // the bigger the interval between increments
+  // the bigger the delay between increments
   speed: 5,
 
   // Actual stopwatch counter
@@ -43,16 +43,18 @@ const createStopwatch = useRxState(() => ({
 }));
 ```
 
-And some "business-rules":
+And some "business-logic":
 
 ```js
 // A small utility to calculate the delay between increments
 const calcDelay = state => 1000 / state.speed;
 
 // Stopwatch is paused if it's not counting,
-const paused = state => !state.count || state.step === 0 || (
-  // or if the value has reached the maximum limit
-  state.step > 0 && state.value >= state.maxValue
+const paused = state => !state.count || state.step === 0 || !valueIsBelowMax(state);
+
+// or if the value has reached the maximum limit
+const valueIsBelowMax = state => isNaN(state.maxValue) || (
+  state.value < state.maxValue
 );
 
 // Value must be capped by the maxValue
@@ -105,9 +107,11 @@ const useStopwatch = () => createStopwatch(
         ? of(state)
         // otherwise - create a timer
         : interval(calcDelay(state)).pipe(
-            mapTo(state),
+            map(() => state),
             // that increments the state on each tick
             map(increment()),
+            // until the value reaches set maximum
+            takeWhile(valueIsBelowMax, true)
           )
     ),
   )
@@ -184,8 +188,8 @@ export default defineComponent({
     <input v-model="speedRef" @blur.capture="setSpeed(+speedRef)"/>
 
     <!-- Shorthand buttons to increment or decrement speed -->
-    <button @click="setSpeed(+speedRef - 1)">-</button>
-    <button @click="setSpeed(+speedRef + 1)">+</button>
+    <button @click="setSpeed(+speedRef - 1)">Speed -</button>
+    <button @click="setSpeed(+speedRef + 1)">Speed +</button>
     <!-- We don't need to assign the new speed to the ref -->
     <!-- because out speedRef is automatically synced to the reactive state.speed property! -->
   </div>

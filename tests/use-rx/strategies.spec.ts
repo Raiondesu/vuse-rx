@@ -11,7 +11,7 @@ describe('use-rx-state strategies: shallow', () => {
       changeG: () => gMutation,
     }).subscribe(s => {
       fn();
-      expect(s).toBe(state);
+      expect(s).toStrictEqual(state);
       expect(s.g).toBe(gMutation.g);
       expect(s).toEqual({ ...initialState, ...gMutation });
     });

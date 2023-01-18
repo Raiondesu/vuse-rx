@@ -32,4 +32,4 @@ import * as UseRX from 'vuse-rx';
 
 ## Use
 
-See [recipes](/recipes/counter) or [api](api/use-rx-state) for detailed usage instructions.
+See [recipes](/recipes/counter) or [api](/api/use-rx-state) for detailed usage instructions.
