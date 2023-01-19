@@ -49,11 +49,12 @@ function <R1, R2 = R1>(
 
 Creates a binding between two refs.\
 The binding can be:
-- One-way if only the one mapper is defined.
+- One-way if only one mapper is defined.
 - Two-way if both mappers (`to` and `from`) are defined.
 
-The second ref serves as an origin point for the binding,\
-values **from** the second ref and **to** the second ref are mapped onto the first.
+If specified, the second ref (`ref2`) serves as an origin point for the binding,\
+i.e. values ***from*** `ref2` are mapped onto `ref1`\
+and mapped from `ref1` ***to*** `ref2`.
 
 ### Simple example
 

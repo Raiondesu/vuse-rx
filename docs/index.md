@@ -16,8 +16,11 @@ hero:
       text: Get Started
       link: /guide/getting-started
     - theme: alt
-      text: Contribute
+      text: Contribute on GitHub
       link: https://github.com/raiondesu/vuse-rx
+    - theme: alt
+      text: Why?
+      link: /guide/#why
 
 features:
 - title: Composable

@@ -191,7 +191,7 @@ export default defineComponent({
     <button @click="setSpeed(+speedRef - 1)">Speed -</button>
     <button @click="setSpeed(+speedRef + 1)">Speed +</button>
     <!-- We don't need to assign the new speed to the ref -->
-    <!-- because out speedRef is automatically synced to the reactive state.speed property! -->
+    <!-- because speedRef is automatically synced to the reactive state.speed property! -->
   </div>
   <div>
     <input v-model="stepRef"/>
