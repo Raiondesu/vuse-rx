@@ -2,11 +2,11 @@
 layout: home
 
 title: vuse-rx
-titleTemplate: Vue 3 + rxjs = ❤
+titleTemplate: Vue 3 + RxJS = ❤
 
 hero:
   name: vuse-rx
-  text: Vue 3 + rxjs = ❤
+  text: Vue 3 + RxJS = ❤
   tagline: First-class RxJS v7 support for Vue 3
   # image:
   #   src: /logo-small.svg
@@ -26,7 +26,7 @@ features:
 - title: Composable
   details: Designed to work best with Vue's composition-api, allowing full integration into the Vue ecosystem!
 - title: Compatible
-  details: "Full rxjs-vue interoperability: create observables from refs, refs from observables, promises, generators!"
+  details: "Full RxJS-Vue interoperability: create observables from refs, refs from observables, promises, generators!"
 - title: Simple
   details: The whole library only consists of simple, predictable pure functions, which are easy to use and understand.
 - title: Tiny

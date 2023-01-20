@@ -1,5 +1,6 @@
 # useRxState
-> Allows to bind reducers to a reactive state and observables.
+
+Allows to bind reducers to a reactive state and observables.
 
 [Source](https://github.com/Raiondesu/vuse-rx/blob/main/src/use-rx/use-rx-state.ts)
 
@@ -7,7 +8,7 @@
 
 ## Description
 
-Implements a light flux pattern using rxjs' Observables.
+Implements a light flux pattern using rxjs' [Observables](https://rxjs.dev/guide/observable).
 
 Even though state management is not the primary concern of `vuse-rx`,
 it still allows for a basic flux-like state management with observables using `useRxState`.

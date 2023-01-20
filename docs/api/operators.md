@@ -1,6 +1,6 @@
 # Operators
 
-`vuse-rx` also includes some operators that may come in handy when working with Vue.
+`vuse-rx` also includes some [operators](https://rxjs.dev/guide/operators) that may come in handy when working with Vue.
 
 [[toc]]
 

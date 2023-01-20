@@ -1,6 +1,6 @@
 # Observable X Reactive
 
-These are utilities that allow interoperability between rxjs' observables and vue's reactivity.
+These are utilities that allow interoperability between RxJS' [observables](https://rxjs.dev/guide/observable) and Vue's [reactivity](https://vuejs.org/guide/essentials/reactivity-fundamentals.html).
 
 [[toc]]
 

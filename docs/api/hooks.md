@@ -1,6 +1,8 @@
 # Vue Lifecycle Hooks
 
-> These are some utilities that ease interactions between Vue's lifecycle hooks and rxjs Observables
+These are some utilities that ease interactions between Vue's [lifecycle hooks](https://vuejs.org/guide/essentials/lifecycle.html) and RxJS [Observables](https://rxjs.dev/guide/observable).
+
+[[toc]]
 
 ## `fromHook`
 
