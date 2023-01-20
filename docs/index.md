@@ -29,6 +29,8 @@ features:
   details: "Full rxjs-vue interoperability: create observables from refs, refs from observables, promises, generators!"
 - title: Simple
   details: The whole library only consists of simple, predictable pure functions, which are easy to use and understand.
+- title: Tiny
+  details: Import small, atomic, tree-shakeable functions without worrying about bloat. Less than 300 bytes per-import on average!
 ---
 
 <div style="display:flex;justify-content:center;margin:32px auto 32px">
