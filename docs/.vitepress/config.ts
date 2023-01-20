@@ -32,8 +32,8 @@ export default defineConfig({
       {
         text: version,
         items: [
-          { text: 'next', link: 'https://next.vuse-rx.raiondesu.dev' },
-          { text: 'stable', link: 'https://vuse-rx.raiondesu.dev' },
+          { text: 'next', link: 'https://next.vuse-rx.raiondesu.dev', activeMatch: version.includes('rc') ? '.' : '' },
+          { text: 'stable', link: 'https://vuse-rx.raiondesu.dev', activeMatch: version.includes('rc') ? '' : '.' },
         ]
       }
     ],
