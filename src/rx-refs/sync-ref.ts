@@ -170,19 +170,19 @@ type Binders<R1, R2, Keys extends PropertyKey> = {
   };
 };
 
-type BindingOptions<R1, R2, Key extends PropertyKey> = {
+export type BindingOptions<R1, R2, Key extends PropertyKey> = {
   ref?: Ref<R1>;
   map?: Key extends 'to' ? Mapper<R1, R2> : Mapper<R2, R1>;
   watch?: WatchOptions;
 }
 
-type CustomBindingOptions<T, R2, Key extends PropertyKey> = {
+export type CustomBindingOptions<T, R2, Key extends PropertyKey> = {
   ref: Ref<T>;
   map: Key extends 'to' ? Mapper<T, R2> : Mapper<R2, T>;
   watch?: WatchOptions;
 }
 
-type SyncedRef<
+export type SyncedRef<
   R1,
   Keys extends PropertyKey,
   R2,

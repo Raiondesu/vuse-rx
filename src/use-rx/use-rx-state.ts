@@ -13,7 +13,7 @@ export interface RxStateOptions<S extends Record<PropertyKey, any>, Mutaiton> {
   mutationStrategy: MutationStrategy<S, Mutaiton>;
 }
 
-const defaultOptions = {
+export const defaultOptions = {
   mutationStrategy: deepReplaceArray,
 };
 
