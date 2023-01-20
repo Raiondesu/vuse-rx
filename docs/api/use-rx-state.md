@@ -161,7 +161,7 @@ This function is split into two parts:
 
 This is done in order to enable [full type inference in reducers](https://github.com/microsoft/TypeScript/issues/14400#issuecomment-507638537).
 
-### 1. **State**
+### 1. **State**-capturing function
 
 ```ts
 function <S extends Record<string, any>, Mutation = deepReplaceArrayMutation>(
@@ -173,7 +173,7 @@ function <S extends Record<string, any>, Mutation = deepReplaceArrayMutation>(
 Accepts either a state object or a state factory function and an optional options object.\
 It remembers the state, applies the options, and then returns the second function.
 
-### 2. **Reducers**
+### 2. **Reducers**-capturing function
 
 ```ts
 function <R extends StateReducers<S>>(
@@ -190,7 +190,7 @@ function <R extends StateReducers<S>>(
 
 There's a lot to unpack. Let's go one parameter at-a-time.
 
-For concrete usage examples with both parameters see the [`stopwatch` recipe](/recipes/stopwatch).
+For a detailed usage examples with both parameters see the [`stopwatch` recipe](/recipes/stopwatch).
 
 #### Parameter 1: `reducers`
 
@@ -318,7 +318,7 @@ The function then returns a pretty complex object, with the first three properti
 - `actions` - transformed reducers, they accept the defined parameters, but mutate the state, instead of just returning its parts.
 - `state$` - an observable that emits a new state each time there's an update.
 - `actions$` - a map of individual observables per each action, useful for tracking individual action calls.
-- `subscribe` - a shorthand for calling `subscribe` on the `state$`, returns the same object with rxjs [`Subscription`](https://rxjs-dev.firebaseapp.com/guide/subscription) mixed-in.
+- `subscribe` - a shorthand for calling `subscribe` on the `state$`, returns the same object with rxjs [`Subscription`](https://rxjs.dev/guide/subscription) mixed-in.
 
 ## [Basic example](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/counter.vue)
 
