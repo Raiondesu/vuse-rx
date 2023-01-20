@@ -13,7 +13,7 @@ export default defineConfig({
 
   lastUpdated: true,
 
-  cleanUrls: 'without-subfolders',
+  cleanUrls: 'with-subfolders',
 
   useWebFonts: true,
 
