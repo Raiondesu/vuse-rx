@@ -50,3 +50,16 @@ const component2 = {
   }
 }
 ```
+
+---
+
+## `useSubscription`
+
+```ts
+(subscription: Unsubscribable) => void
+```
+
+Allows to not worry about an observable not being resolved after a component unloads.\
+For this, just pass an RxJS [`Subscription`](https://rxjs.dev/guide/subscription) to this hook.
+
+If it's awkward to pass a subscription, consider using [`untilUnmounted`](operators#untilunmounted) operator.

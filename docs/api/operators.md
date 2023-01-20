@@ -48,9 +48,11 @@ console.log(result.value);
 //> New value is 42
 ```
 
+---
+
 ## `mapError`
 
-Same as `map` in rxjs, but interacts with the `error` value of an observable.\
+Same as [`map`](https://rxjs.dev/api/index/function/map) in RxJS, but interacts with the `error` value of an observable.\
 Accepts a callback similar to that of regular `map`.
 
 ```ts
@@ -73,6 +75,8 @@ from(Promise.reject('42'))
 //> 42
 ```
 
+---
+
 ## `pipeUntil`
 
 ```ts
@@ -82,11 +86,16 @@ from(Promise.reject('42'))
 Creates an operator that halts the observable when a Vue hook is activated.\
 Only works for the component it is called within.
 
+---
+
 ## `untilUnmounted`
 
 ```ts
 <T>(obs: Observable<T>) => Observable<T>
 ```
 
-Rx operator.
-Applies `pipeUntil` to an observable, shorthand for `obserable.pipe(pipeUntil(onUnmounted))`.
+An RxJS [operator](https://rxjs.dev/guide/operators).
+Applies `pipeUntil` to an observable to dispose of it automatically when the component unmounts,\
+shorthand for `obserable.pipe(pipeUntil(onUnmounted))`.
+
+If it's awkward to apply an operator for this purpose, consider using [`useSubscription`](hooks#usesubscription) hook.
