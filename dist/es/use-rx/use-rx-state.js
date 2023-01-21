@@ -3,7 +3,7 @@ import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from '../operators/until';
 import { deepReplaceArray } from './strategies/deepReplaceArray';
-const defaultOptions = {
+export const defaultOptions = {
     mutationStrategy: deepReplaceArray,
 };
 export function useRxState(initialState, options) {
