@@ -15,7 +15,7 @@ Every variable is exposed to `window`, so feel free to open the console and play
 ::: code-group
 ```vue [counter.vue]
 <script setup lang="ts">
-import { defineComponent, toRef } from 'vue';
+import { toRef } from 'vue';
 import { of } from 'rxjs';
 import { delay } from 'rxjs/operators';
 

@@ -64,10 +64,8 @@ to a specific value from the `<input>` using [`syncRef`](/api/refs#syncref).
 
 ::: code-group
 
-```vue {4,9,11-13,16,18,25-30} [Counter1.vue]
+```vue {0} [Counter1.vue]
 <script setup lang="ts">
-import { defineComponent } from 'vue';
-
 import { useSharedState, delayReduce, CounterState } from './state';
 
 const { actions, state, state$ } = useSharedState({
@@ -93,9 +91,9 @@ state$.subscribe(state => console.log('counter1: ', state.count));
 </template>
 ```
 
-```vue {5,10-13,14-16,25-26,34-36} [Counter2.vue]
+```vue {0} [Counter2.vue]
 <script setup lang="ts">
-import { defineComponent, toRef } from 'vue';
+import { toRef } from 'vue';
 
 import { syncRef } from 'vuse-rx';
 import { useSharedState, delayReduce } from './state';
@@ -149,10 +147,8 @@ Finally, let's place all our components in an app to see how it all works togeth
 </ClientOnly>
 
 ::: code-group
-```vue {4-6,14-17} [App.vue]
+```vue [App.vue]
 <script setup lang="ts">
-import { defineComponent } from 'vue';
-
 import { useSharedState } from './state';
 import Counter1 from './counter1.vue';
 import Counter2 from './counter2.vue';
@@ -176,10 +172,8 @@ const { state } = useSharedState({});
 </template>
 ```
 
-```vue {4,9,11-13,16,18,25-30} [Counter1.vue]
+```vue {0} [Counter1.vue]
 <script setup lang="ts">
-import { defineComponent } from 'vue';
-
 import { useSharedState, delayReduce, CounterState } from './state';
 
 const { actions, state, state$ } = useSharedState({
@@ -205,9 +199,9 @@ state$.subscribe(state => console.log('counter1: ', state.count));
 </template>
 ```
 
-```vue {5,10-13,14-16,25-26,34-36} [Counter2.vue]
+```vue {0} [Counter2.vue]
 <script setup lang="ts">
-import { defineComponent, toRef } from 'vue';
+import { toRef } from 'vue';
 
 import { syncRef } from 'vuse-rx';
 import { useSharedState, delayReduce } from './state';
