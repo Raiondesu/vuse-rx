@@ -6,8 +6,8 @@ export default defineConfig({
       name: 'vuseRx',
 
       entry: 'src/index.ts',
-      formats: ['umd'],
-      fileName: () => 'umd.js'
+      formats: ['umd', 'es'],
+      fileName: (format) => `${format}.js`
     },
 
     sourcemap: true,
