@@ -75,8 +75,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="flex mt-2 justify evenly">
-    <p v-for="(value, key) in state" :key="key">{{key}}: {{value}}</p>
+  <div class="flex mt-2 justify evenly values">
+    <p v-for="(value, key) in state" :key="key">{{key}}: <span style="color:var(--vp-c-brand)">{{value}}</span></p>
   </div>
   <main class="stopwatch">
     <div class="flex grow justify center mt-2">
@@ -121,9 +121,19 @@ export default defineComponent({
   width: 40%;
 }
 
+@media (max-width: 1000px) {
+  .stopwatch {
+    width: 60%;
+  }
+}
+
 @media (max-width: 520px) {
   .stopwatch {
     width: 100%;
+  }
+
+  .values {
+    font-size: smaller;
   }
 }
 
@@ -135,6 +145,7 @@ input {
 .flex {
   display: flex;
   flex-wrap: nowrap;
+  column-gap: 8px;
 }
 
 .justify {
@@ -152,9 +163,6 @@ input {
 
 .mt-2 {
   margin-top: 8px;
-}
-.mt-2 :not(:first-child) {
-  margin-left: 8px;
 }
 
 </style>
