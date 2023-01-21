@@ -46,7 +46,10 @@ export default defineComponent({
 <style scoped>
   .sync-ref {
     display: flex;
+    flex-wrap: wrap;
     justify-content: space-between;
+    column-gap: 8px;
+    row-gap: 8px;
   }
 
   .hug {

@@ -62,26 +62,21 @@ export default defineComponent({
   <console/>
 </template>
 
-<style>
+<style scoped>
 
 .flex {
   display: flex;
-  flex-wrap: nowrap;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 8px;
 }
 
 .justify {
   align-items: center;
 }
 
-.evenly {
-  justify-content: space-between;
-}
-
 .mt-2 {
   margin-top: 8px;
-}
-.mt-2 :not(:first-child) {
-  margin-left: 8px;
 }
 
 </style>
