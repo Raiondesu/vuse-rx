@@ -23,7 +23,7 @@ This results in a seamless transition form reactive states to observables and vi
 
 ## Why?
 
-Widespread approach to using RxJS in Vue 3 (or even Vue 2) boils down to throwing away Vue's features where RxJS is used
+A widespread approach to using RxJS in Vue 3 (or even Vue 2) often boils down to throwing away Vue's features where RxJS is used
 and replacing them with either native DOM API calls (using `fromEvent` and `addEventListener`) on direct html element refs,
 or creating simple subjects which are updated on specific occasions.
 
@@ -39,4 +39,6 @@ while also adding some more benefits on top of that:
 + First-class TypeScript support;
 + [Sane state management](/api/use-rx-state) out-of the box;
 
+::: tip
 Thanks to that last one, `vuse-rx` also eliminates the need to use `vuex` for most projects that already use `rxjs`!
+:::

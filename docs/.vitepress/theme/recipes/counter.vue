@@ -11,7 +11,7 @@ export default defineComponent({
   props: {
     simple: Boolean,
   },
-  setup(props) {
+  setup() {
     const {
       actions,
       state,

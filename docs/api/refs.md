@@ -36,12 +36,12 @@ count.value = 1;
 
 ```ts
 function <R1, R2 = R1>(
-  ref1: Ref<R1>,
+  ref: Ref<R1>,
   map: {
     to?: (value: R1) => R2,
     from?: (value: R2) => R1,
   },
-  ref2?: Ref<R2> | R2,
+  origin?: Ref<R2> | R2,
 ): SyncedRef<R2>;
 ```
 
@@ -50,42 +50,78 @@ The binding can be:
 - One-way if only one mapper is defined.
 - Two-way if both mappers (`to` and `from`) are defined.
 
-If specified, the second ref (`ref2`) serves as an origin point for the binding,\
-i.e. values ***from*** `ref2` are mapped onto `ref1`\
-and mapped from `ref1` ***to*** `ref2`.
+::: info
+If specified, the second ref (`origin`) serves as an origin point for the binding as well as its default value,
+i.e. values ***from*** `origin` are mapped onto `ref`
+and mapped from `ref` ***to*** `origin`.
+:::
 
 ### Simple example
 
-```ts
-const count = ref(0);
+::: tip
+Every variable in this example is exposed to `window`,\
+so feel free to open the console and play with them!
+:::
+
+<ClientOnly>
+  <SyncRef/>
+</ClientOnly>
+
+::: code-group
+```ts [count.ts]
+import { ref } from 'vue';
+import { syncRef } from 'vuse-rx';
+
+const count = ref(0); // [!code focus]
 
 // two-way binding
 // Once `count` changes - `countStr` changes too
 // and vice versa,
 // according to the rules in the map.
-const countStr = syncRef(
-  count, // ref to bind
-  {
-    // how to convert value when mapping to the resulting ref
-    to: String,
-    // how to convert value when mapping from the resulting ref
-    from: Number
-  }
-);
+const countStr = syncRef(count, { // [!code focus]
+  // ref to bind ----------^ // [!code focus]
+  to: String, // how to convert value when mapping to the resulting ref // [!code focus]
+  from: Number // how to convert value when mapping from the resulting ref // [!code focus]
+}); // [!code focus]
 
 // one-way binding
 // Once `countInputStr` changes - `count` changes too,
 // according to the rules in the map.
 // But if `count` changes - `countInputStr` stays the same
-const countInputStr = syncRef(count, { from: Number }, '');
+const countInputStr = syncRef(count, { from: Number }, ''); // [!code focus]
+// default value (optional) ---------------------------^^
 ```
 
-Every variable is exposed to `window`,\
-so feel free to open the console and play with them!
+```vue [count.vue] {3}
+<script lang="ts">
+import { defineComponent } from 'vue';
+import { count, countStr, countInputStr } from './count.ts';
 
-<ClientOnly>
-  <SyncRef/>
-</ClientOnly>
+export default defineComponent(() => ({ count, countStr, countInputStr }));
+</script>
+
+<template>
+  <div>
+    <code>count</code>
+    <p>(original)</p>
+    <button @click="count--">-</button>
+    {{ count }}
+    <button @click="count++">+</button>
+  </div>
+  <div>
+    <code>countStr</code>
+    <p>(two-way binding with count)</p>
+    <input v-model="countStr">
+  </div>
+  <div>
+    <code>countInputStr</code>
+    <p>(one-way binding to count)</p>
+    <input v-model="countInputStr">
+  </div>
+</template>
+```
+:::
+
 
 ### Options - `.with`
 
@@ -132,7 +168,8 @@ For each previously set direction (`from` or `to`), you can:
 
 Where `[direction]` is either `from` or `to`.
 
-```ts
+::: code-group
+```ts [to]
 // Controls the incoming binding to this ref
 countStr.to
 // cuts the binding altogether
@@ -145,7 +182,8 @@ countStr.to.bind({
   map: String,
   watch: { flush: 'sync' }
 });
-
+```
+```ts [from]
 // Controls the outcoming binding from this ref
 countStr.from
 // cuts the binding altogether
@@ -159,8 +197,19 @@ countStr.from.bind({
   watch: { immediate: true }
 });
 ```
+```ts [countStr definition]
+const count = ref(0);
 
-You can also play with this in the browser console using the example above.
+const countStr = syncRef(count, {
+  to: String,
+  from: Number
+});
+```
+:::
+
+::: tip
+You can also play with the example above in the browser console.
+:::
 
 ## `refFrom`
 
@@ -179,7 +228,9 @@ These include:
 - `Array`
 - Vue's `Reactive`
 
+::: tip
 Will also work as a simple `ref` function as a safeguard or a convenience, in case it is given an unrecognizable value.
+:::
 
 ## `refsFrom`
 
@@ -197,22 +248,27 @@ Creates two refs from an observable input, same as [`refFrom`](#reffrom) (promis
 Until the observable emits, the refs will contain `undefined`,
 if default values for the refs are not given as a second parameter.
 
-Example:
-```ts
+::: code-group
+```vue [Example.vue]
+<script setup>
+import { refsFrom } from 'vuse-rx';
+
 // Suppose we have some function that either returns a promise or rejects it:
 declare function getPage(id: string): Promise<{ content: string }>;
 
 // Using `refsFrom` we can process both the success and error cases
 // without the need for try/then/catch!
 
-const { next: content, error } = refsFrom(
-  getPage('raiondesu')
-    // Extract content first
-    .then(obj => obj.content)
-);
+const { next: content, error } = refsFrom( // [!code focus]
+  getPage('raiondesu') // [!code focus]
+    // Extract content first // [!code focus]
+    .then(obj => obj.content) // [!code focus]
+); // [!code focus]
 
-// Normally the results are displayed in a template,
-// so `watch` here is just to get the point across:
-watch(content, value => console.log('promise is resolved!', value));
-watch(error, value => console.log('promise is rejected!', value));
+</script>
+<template>
+  <div v-show="!!content" v-html="content"></div> // [!code focus]
+  <p v-show="!!error">Couldn't load page: {{ error }}!</p> // [!code focus]
+</template>
 ```
+:::

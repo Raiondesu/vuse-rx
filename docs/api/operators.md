@@ -12,14 +12,14 @@
 
 Sets a ref's value to current observable value.
 
-```ts
+```ts {7}
 import { setRef } from 'vuse-rx';
 
 const result = ref(0);
 
 from(Promise.resolve(42))
   // sets result of the promise to `result`
-  .pipe(setRef(result))
+  .pipe(setRef(result)) // [!code focus]
   // equivalent to
   .pipe(tap(value => result.value = value))
   .subscribe();
@@ -27,7 +27,7 @@ from(Promise.resolve(42))
 
 Can be used in tandem with [`syncRef`](/api/refs.html#syncref):
 
-```ts
+```ts {10}
 import { setRef, syncRef } from 'vuse-rx';
 
 const result = ref('some string to display to the user');
@@ -37,7 +37,7 @@ const displayValue = value => `New value is: ${value}`;
 from(Promise.resolve(42))
   // sets result of the promise to `result`
   // but processed using display logic
-  .pipe(setRef(syncRef(result, { from: displayValue })))
+  .pipe(setRef(syncRef(result, { from: displayValue }))) // [!code focus]
   .subscribe();
 
 // wait for ref update
@@ -53,14 +53,14 @@ console.log(result.value);
 Same as [`map`](https://rxjs.dev/api/index/function/map) in RxJS, but interacts with the `error` value of an observable.\
 Accepts a callback similar to that of regular `map`.
 
-```ts
+```ts {7}
 import { tap } from 'rxjs/operators';
 import { mapError } from 'vuse-rx';
 
 from(Promise.reject('42'))
   .pipe(
     tap({ error: error => console.log('type of the error is', typeof error) }),
-    mapError(Number),
+    mapError(Number), // [!code focus]
     tap({ error: error => console.log('type of the error is', typeof error) }),
     tap({ error: error => console.log('error value is', error) }),
   )
@@ -92,4 +92,6 @@ An RxJS [operator](https://rxjs.dev/guide/operators).
 Applies `pipeUntil` to an observable to dispose of it automatically when the component unmounts,\
 shorthand for `obserable.pipe(pipeUntil(onUnmounted))`.
 
+::: tip
 If it's awkward to apply an operator for this purpose, consider using [`useSubscription`](hooks#usesubscription) hook.
+:::

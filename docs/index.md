@@ -33,14 +33,19 @@ features:
   details: Import small, atomic, tree-shakeable functions without worrying about bloat. Less than 300 bytes per-import on average!
 ---
 
-<div style="display:flex;justify-content:center;margin:32px auto 32px">
-  <pre><code>npm i vuse-rx</code></pre>
+
+<div style="display:flex;justify-content:center;margin:8px auto 32px">
+
+<pre onclick="navigator.clipboard.writeText('npm i vuse-rx')" title="Click to copy to clipboard!"><code>
+npm i vuse-rx
+</code></pre>
+
 </div>
 
 <div style="display:flex;margin:0 auto;justify-content:center;flex-wrap:wrap">
-  <a style="margin:4px" href="https://github.com/Raiondesu/vuse-rx/actions"><img src="https://img.shields.io/github/actions/workflow/status/raiondesu/vuse-rx/publish.yml?style=flat-square"/></a>
-  <a style="margin:4px" href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/v/vuse-rx?style=flat-square"/></a>
-  <a style="margin:4px" href="https://bundlephobia.com/result?p=vuse-rx"><img src="https://img.shields.io/bundlephobia/minzip/vuse-rx?style=flat-square"/></a>
-  <a style="margin:4px" href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/dt/vuse-rx?style=flat-square"/></a>
-  <a style="margin:4px" href="https://coveralls.io/github/Raiondesu/vuse-rx"><img src="https://img.shields.io/coveralls/github/Raiondesu/vuse-rx?style=flat-square"/></a>
+  <a style="margin:4px" href="https://github.com/Raiondesu/vuse-rx/actions"><img src="https://img.shields.io/github/actions/workflow/status/raiondesu/vuse-rx/publish.yml?style=flat"/></a>
+  <a style="margin:4px" href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/v/vuse-rx?style=flat"/></a>
+  <a style="margin:4px" href="https://bundlephobia.com/result?p=vuse-rx"><img src="https://img.shields.io/bundlephobia/minzip/vuse-rx?style=flat"/></a>
+  <a style="margin:4px" href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/dt/vuse-rx?style=flat"/></a>
+  <a style="margin:4px" href="https://coveralls.io/github/Raiondesu/vuse-rx"><img src="https://img.shields.io/coveralls/github/Raiondesu/vuse-rx?style=flat"/></a>
 </div>

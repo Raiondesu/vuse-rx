@@ -28,6 +28,7 @@ const onUnmounted$ = fromHook(onUnmounted);
 }
 ```
 
+::: warning
 Note that the hook is only connected to the component that subscribes to the resulting observable:
 
 ```ts
@@ -52,6 +53,7 @@ const component2 = {
   }
 }
 ```
+:::
 
 ## `useSubscription`
 
@@ -62,4 +64,6 @@ const component2 = {
 Allows to not worry about an observable not being resolved after a component unloads.\
 For this, just pass an RxJS [`Subscription`](https://rxjs.dev/guide/subscription) to this hook.
 
+::: tip
 If it's awkward to pass a subscription, consider using [`untilUnmounted`](operators#untilunmounted) operator.
+:::

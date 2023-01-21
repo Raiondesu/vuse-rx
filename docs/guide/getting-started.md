@@ -18,7 +18,7 @@ It's fully typed and therefore has **first-class TypeScript support**.
 `yarn add vuse-rx`
 
 ```ts
-import * as UseRX from 'vuse-rx';
+import { useRxState, syncRef, ... } from 'vuse-rx';
 ```
 
 ### UMD
@@ -26,14 +26,8 @@ import * as UseRX from 'vuse-rx';
 ```html
 <script src="https://unpkg.com/vuse-rx"></script>
 <script>
-  const { useRxState, syncRef } = vuseRx;
+  const { useRxState, syncRef, ... } = vuseRx;
 </script>
-```
-
-### In Node.js endvironment
-
-```ts
-import { useRxState, syncRef } from 'vuse-rx';
 ```
 
 See [recipes](/recipes/counter) or [api](/api/use-rx-state) for detailed usage instructions and full list of exports.
