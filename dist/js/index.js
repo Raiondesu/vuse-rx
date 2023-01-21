@@ -18,4 +18,5 @@ __exportStar(require("./use-rx"), exports);
 __exportStar(require("./operators"), exports);
 __exportStar(require("./rx-refs"), exports);
 __exportStar(require("./hooks/from"), exports);
+__exportStar(require("./hooks/use-subscription"), exports);
 //# sourceMappingURL=index.js.map
