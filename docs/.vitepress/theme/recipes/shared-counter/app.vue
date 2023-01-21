@@ -1,9 +1,11 @@
 <script lang="ts">
 import { defineComponent } from 'vue';
 import Console from '../../console.vue';
+import { setToWindow } from '../../set-window';
+
 import Counter1 from './counter1.vue';
 import Counter2 from './counter2.vue';
-import { useSharedState } from './state';
+import { delayReduce, useSharedState } from './state';
 
 export default defineComponent({
   components: {
@@ -12,9 +14,11 @@ export default defineComponent({
     Counter2,
   },
   setup() {
-    return {
-      state: useSharedState({}).state
-    };
+    return setToWindow({
+      state: useSharedState({}).state,
+      useSharedState,
+      delayReduce
+    });
   }
 });
 </script>

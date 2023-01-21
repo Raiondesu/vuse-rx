@@ -1,5 +1,5 @@
 <script lang="ts">
-import { defineComponent, toRef } from 'vue';
+import { defineComponent, toRef, getCurrentInstance } from 'vue';
 import { setToWindow } from '../../set-window';
 
 import { syncRef } from 'vuse-rx';
@@ -8,8 +8,8 @@ import { delayReduce, useSharedState } from './state';
 export default defineComponent({
   setup() {
     const {
-      actions,
-      state,
+      actions: counter2Actions,
+      state: counter2State,
       state$
     } = useSharedState({
       setCount: (count: string) => () => ({
@@ -24,12 +24,12 @@ export default defineComponent({
     state$.subscribe(state => console.log('counter2: ', state.count));
 
     return setToWindow({
-      actions,
-      state,
+      counter2Actions,
+      counter2State,
 
       // One-way data binding from reactive state (with type convertation)
-      countRef: syncRef(toRef(state, 'count'), { to: String }),
-    });
+      countRef: syncRef(toRef(counter2State, 'count'), { to: String }),
+    }, getCurrentInstance()!.parent);
   }
 });
 </script>
@@ -37,7 +37,7 @@ export default defineComponent({
 <template>
   <div class="flex justify mt-2">
     <input v-model="countRef"/>
-    <button @click="actions.setCount(countRef)">set count to {{ countRef }}</button>
-    <button @click="actions.setCountAfter(countRef, 1000)">set count to {{ countRef }} after 1 sec</button>
+    <button @click="counter2Actions.setCount(countRef)">set count to {{ countRef }}</button>
+    <button @click="counter2Actions.setCountAfter(countRef, 1000)">set count to {{ countRef }} after 1 sec</button>
   </div>
 </template>
