@@ -6,6 +6,8 @@ import { name, description, version } from '../../package.json';
 
 const links: Array<any> = [];
 
+const isNext = version.includes('rc');
+
 export default defineConfig({
   title: name,
   description: description,
@@ -32,8 +34,9 @@ export default defineConfig({
       {
         text: version,
         items: [
-          { text: 'next', link: 'https://next.vuse-rx.raiondesu.dev', activeMatch: version.includes('rc') ? '.' : '' },
-          { text: 'stable', link: 'https://vuse-rx.raiondesu.dev', activeMatch: version.includes('rc') ? '' : '.' },
+          // Always match if current version aligns with docs version
+          { text: 'next', link: 'https://next.vuse-rx.raiondesu.dev', activeMatch: isNext ? '.' : '' },
+          { text: 'stable', link: 'https://vuse-rx.raiondesu.dev', activeMatch: isNext ? '' : '.' },
         ]
       }
     ],
