@@ -32,8 +32,6 @@ count.value = 1;
 // > count is 1
 ```
 
----
-
 ## `syncRef`
 
 ```ts
@@ -164,8 +162,6 @@ countStr.from.bind({
 
 You can also play with this in the browser console using the example above.
 
----
-
 ## `refFrom`
 
 ```ts
@@ -184,8 +180,6 @@ These include:
 - Vue's `Reactive`
 
 Will also work as a simple `ref` function as a safeguard or a convenience, in case it is given an unrecognizable value.
-
----
 
 ## `refsFrom`
 

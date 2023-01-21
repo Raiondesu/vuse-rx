@@ -1,12 +1,16 @@
-# useRxState
+# State Management
+
+Tools for creating and managing a flux-like state with full RxJS compatibility.
+
+[[toc]]
+
+## `useRxState`
 
 Allows to bind reducers to a reactive state and observables.
 
 [Source](https://github.com/Raiondesu/vuse-rx/blob/main/src/use-rx/use-rx-state.ts)
 
-[[toc]]
-
-## Description
+### Description
 
 Implements a light flux pattern using rxjs' [Observables](https://rxjs.dev/guide/observable).
 
@@ -54,11 +58,11 @@ And returns a reactive state, actions, and some observables to make things easie
 
 `useRxState` automatically makes the state reactive for Vue, so you don't need to worry about applying `reactive` to it.
 
-### Options and fine-tuning
+#### Options and fine-tuning
 
 `useRxState` allows to change some of its behaviour via the optional `options` parameter in the first function.
 
-#### Mutation strategy
+##### Mutation strategy
 
 Via options you can change how new mutations are applied to the state:
 
@@ -126,7 +130,7 @@ useRxState({ count: 0 }, {
 });
 ```
 
-## Type Signature and overloads
+### Type Signature and overloads
 
 ```ts
 function <S extends Record<string, any>, Mutation>(
@@ -162,7 +166,7 @@ This function is split into two parts:
 
 This is done in order to enable [full type inference in reducers](https://github.com/microsoft/TypeScript/issues/14400#issuecomment-507638537).
 
-### 1. **State**-capturing function
+#### 1. **State**-capturing function
 
 ```ts
 function <S extends Record<string, any>, Mutation = deepReplaceArrayMutation>(
@@ -174,7 +178,7 @@ function <S extends Record<string, any>, Mutation = deepReplaceArrayMutation>(
 Accepts either a state object or a state factory function and an optional options object.\
 It remembers the state, applies the options, and then returns the second function.
 
-### 2. **Reducers**-capturing function
+#### 2. **Reducers**-capturing function
 
 ```ts
 function <R extends StateReducers<S>>(
@@ -193,7 +197,7 @@ There's a lot to unpack. Let's go one parameter at-a-time.
 
 For a detailed usage examples with both parameters see the [`stopwatch` recipe](/recipes/stopwatch).
 
-#### Parameter 1: `reducers`
+##### Parameter 1: `reducers`
 
 This function's primary goal is to bind reducers to the state.
 
@@ -279,7 +283,7 @@ if (Math.random() > 0.5) {
 }
 ```
 
-#### Parameter 2: `map$`
+##### Parameter 2: `map$`
 
 It's also possible to modify the resulting observable using the second parameter, `map$`.\
 It accepts a function with the following parameters:
@@ -312,16 +316,16 @@ useRxState(state)(
 )
 ```
 
-#### Returned value
+##### Returned value
 
-The function then returns a pretty complex object, with the first three properties being the main ones:
+The function then returns the following object:
 - `state` - a plain Vue reactive state, mutable.
 - `actions` - transformed reducers, they accept the defined parameters, but mutate the state, instead of just returning its parts.
 - `state$` - an observable that emits a new state each time there's an update.
 - `actions$` - a map of individual observables per each action, useful for tracking individual action calls.
 - `subscribe` - a shorthand for calling `subscribe` on the `state$`, returns the same object with rxjs [`Subscription`](https://rxjs.dev/guide/subscription) mixed-in.
 
-## [Basic example](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/counter.vue)
+### [Basic example](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/counter.vue)
 
 <ClientOnly>
   <CounterDemo simple/>
@@ -363,4 +367,17 @@ const countRef = syncRef(state, 'count', String),
   <input v-model="countRef"/>
   <button @click="setCount(countRef)">set count to {{ countRef }}</button>
 </template>
+```
+
+## `State`
+
+Allows to declaratively define the state type from the result of the first call of `useRxState`:
+
+```ts
+// state.ts
+import { useRxState, State } from 'vuse-rx';
+
+export const counterState = useRxState({ count: 0 });
+export type CounterState = State<typeof counterState>;
+// CounterState = { count: number }
 ```

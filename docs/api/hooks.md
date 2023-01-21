@@ -53,8 +53,6 @@ const component2 = {
 }
 ```
 
----
-
 ## `useSubscription`
 
 ```ts

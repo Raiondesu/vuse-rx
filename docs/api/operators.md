@@ -48,8 +48,6 @@ console.log(result.value);
 //> New value is 42
 ```
 
----
-
 ## `mapError`
 
 Same as [`map`](https://rxjs.dev/api/index/function/map) in RxJS, but interacts with the `error` value of an observable.\
@@ -75,8 +73,6 @@ from(Promise.reject('42'))
 //> 42
 ```
 
----
-
 ## `pipeUntil`
 
 ```ts
@@ -85,8 +81,6 @@ from(Promise.reject('42'))
 
 Creates an operator that halts the observable when a Vue hook is activated.\
 Only works for the component it is called within.
-
----
 
 ## `untilUnmounted`
 

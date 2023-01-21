@@ -106,6 +106,18 @@ export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepRe
   };
 }
 
+/**
+ * Extracts state type from the result of the first useRxState call,
+ * so that the state type can be defined declaratively from the object itself to use later.
+ *
+ * @example ```ts
+ * const countState = useRxState({ count: 0 });
+ * type CountState = State<typeof countState>;
+ * // CountState = { count: number }
+ * ```
+ */
+export type State<C extends CreateRxState<any, any>> = C extends CreateRxState<infer S, any> ? S : never;
+
 type CreateRxState<S, Mutation> = {
   /**
    * Allows to bind reducers to a state and an observable.
