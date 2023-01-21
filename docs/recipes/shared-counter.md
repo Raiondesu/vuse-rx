@@ -3,6 +3,10 @@
 An example of using useRxState to enforce separation of concerns between different components regarding how they can mutate the state.\
 This example also highlights the difference between passing a plain object vs a factory as a first parameter to `useRxState`.
 
+<ClientOnly>
+  <SharedCounter/>
+</ClientOnly>
+
 The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/shared-counter).
 
 Every variable in this example is exposed to `window`,
@@ -176,9 +180,3 @@ export default defineComponent({
   <console/>
 </template>
 ```
-
-Great! Now our app looks like this:
-
-<ClientOnly>
-  <SharedCounter/>
-</ClientOnly>
