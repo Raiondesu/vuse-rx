@@ -64,6 +64,7 @@ export default defineConfig({
         text: 'Cookbook',
         items: [
           { text: 'Simple counter', link: '/recipes/counter' },
+          { text: 'Shared counter', link: '/recipes/shared-counter' },
           { text: 'Stopwatch', link: '/recipes/stopwatch' },
         ]
       }

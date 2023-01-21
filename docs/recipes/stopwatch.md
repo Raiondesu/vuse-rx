@@ -2,7 +2,7 @@
 
 [[toc]]
 
-This is a simple stopwatch with configurable increment step, speed, interval and maximum value limit.
+This is a simple stopwatch with configurable increment step, speed, interval and maximum value limit, using [`syncRef`](/api/refs#syncref) and [`useRxState`](/api/use-rx-state).
 
 <ClientOnly>
   <StopwatchDemo/>
@@ -12,9 +12,7 @@ The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/ma
 
 Every variable is exposed to `window`, so feel free to open the console and play with it!
 
-## Step-by-step
-
-### Basics
+## Basics
 
 First, let's define some basic reactive state for our stopwatch:
 
@@ -64,7 +62,7 @@ const clampValue = (maxValue, value) => ({
 });
 ```
 
-### Reducers and counting logic
+## Reducers and counting logic
 
 The next step would be to define reducers for our state.
 These reducers contain atomic, pure state updates,
@@ -118,12 +116,12 @@ const useStopwatch = () => createStopwatch(
 );
 ```
 
-### Component
+## Component
 
 Now that we have defined the inner workings of the stopwatch,
 let's define how it's displayed to the user.
 
-#### `setup` function
+### `setup` function
 
 ```vue {5,9-12,21,22}
 <script>
@@ -157,7 +155,7 @@ export default defineComponent({
 </script>
 ```
 
-#### `template`
+### `template`
 
 ```vue
 <template>

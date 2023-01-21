@@ -162,9 +162,11 @@ function <S extends Record<string, any>, Mutation>(
 
 This function is split into two parts:
 1. State-capturing function - determines the shape and contents of the state and returns the second part:
-2. Reducers-capturing function - sets the reducers
+2. Reducers-capturing function - a.k.a. `useStateHook` - binds the reducers to the state and creates an observable for it.
 
-This is done in order to enable [full type inference in reducers](https://github.com/microsoft/TypeScript/issues/14400#issuecomment-507638537).
+This is done in order to enable [full type inference in reducers](https://github.com/microsoft/TypeScript/issues/14400#issuecomment-507638537),
+as well as to allow different reducers to share the same state without bundling them all in one place in contrast to other flux-like solutions.
+For an example of this, see the [shared counter state](/recipes/shared-counter) recipe.
 
 #### 1. **State**-capturing function
 
@@ -177,6 +179,8 @@ function <S extends Record<string, any>, Mutation = deepReplaceArrayMutation>(
 
 Accepts either a state object or a state factory function and an optional options object.\
 It remembers the state, applies the options, and then returns the second function.
+
+This allows to separate away the logic that operates on the state from the state itself.
 
 #### 2. **Reducers**-capturing function
 
@@ -192,6 +196,8 @@ function <R extends StateReducers<S>>(
   ) => Observable<Mutation>
 ) => SubscribableRxRes<ReducerActions<R>, S>
 ```
+
+This function is used to bind reducers to the state and produce an observable that reacts to the changes that reducers make on the state.
 
 There's a lot to unpack. Let's go one parameter at-a-time.
 

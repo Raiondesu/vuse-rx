@@ -1,6 +1,6 @@
 # Counter
 
-A simple example of a counter state with an increment reducer:
+A simple example of a counter state with an increment reducer, using [`syncRef`](/api/refs#syncref) and [`useRxState`](/api/use-rx-state):
 
 <ClientOnly>
   <CounterDemo/>

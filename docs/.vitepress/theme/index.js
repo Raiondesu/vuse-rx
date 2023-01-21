@@ -2,6 +2,7 @@ import DefaultTheme from 'vitepress/theme';
 import CounterDemo from './recipes/counter.vue';
 import StopwatchDemo from './recipes/stopwatch.vue';
 import SyncRef from './recipes/sync-ref.vue';
+import SharedCounter from './recipes/shared-counter/app.vue';
 import './custom.css';
 
 export default {
@@ -10,5 +11,6 @@ export default {
     app.component('CounterDemo', CounterDemo);
     app.component('StopwatchDemo', StopwatchDemo);
     app.component('SyncRef', SyncRef);
+    app.component('SharedCounter', SharedCounter);
   }
 };
