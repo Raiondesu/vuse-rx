@@ -191,8 +191,8 @@ function <R, E = unknown>(
 ```
 
 Creates two refs from an observable input, same as [`refFrom`](#reffrom) (promise, iterable, observable and alike):
-- `next` - is set when the resulting observable resolves
-- `error` - is set when the resulting observable errors
+- `next` - is set when the observable emits
+- `error` - is set when the observable errors
 
 Until the observable emits, the refs will contain `undefined`,
 if default values for the refs are not given as a second parameter.
