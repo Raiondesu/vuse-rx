@@ -1,4 +1,4 @@
-# What is vuse-rx?
+# What is `vuse-rx`?
 
 `vuse-rx` is a bridge library:
 it connects vue's reactive states and refs with RxJS observables and subjects
@@ -12,7 +12,7 @@ which allows to declaratively define the rules by which an application operates 
 
 In it's approach to concern separation,
 `vuse-rx` is very similar to `vuex` and other flux libraries,
-by separating components from state and state from reducers/actions.\
+in that it encourages separating components from state and state from reducers/actions.
 However, it tries to strike a balance between being specific for the purpose (`vuex`) and being very generic for all purposes (`vue-rx`).
 
 When it comes to RxJS integration, the big difference from other implementations is that `vuse-rx` treats both
@@ -23,20 +23,20 @@ This results in a seamless transition form reactive states to observables and vi
 
 ## Why?
 
-Current approach to using RxJS in Vue 3 (or even Vue 2) boils down to throwing away Vue's features, where RxJS is used,
-and replacing them with either native DOM APIs (using `fromEvent` and `addEventListener`) on direct html element refs,
+Widespread approach to using RxJS in Vue 3 (or even Vue 2) boils down to throwing away Vue's features where RxJS is used
+and replacing them with either native DOM API calls (using `fromEvent` and `addEventListener`) on direct html element refs,
 or creating simple subjects which are updated on specific occasions.
 
 The first approach feels tedious and low-level, while the other is often limiting and, well, also tedious.
 
-`vuse-rx` allows to reap all of the pros from both ways without any of the cons,
-while also adding some more pros on top of that:
-- Ease of integrating application logic;
-- Ease of use (most of the time - as simlpe as calling one function);
-- Seamless integration between Vue's reactivity and flexibility of RxJS;
-- Ability to use "native" Vue APIs in harmony with observables;
-- No need to worry about creating observables manually or losing control over them;
-- First-class TypeScript support;
-- [Sane state management](/api/use-rx-state) out-of the box;
+`vuse-rx` allows to reap all of the benefits from both approaches without any of the drawbacks,
+while also adding some more benefits on top of that:
++ Ease of integrating application logic;
++ Ease of use (most of the time - as simlpe as calling one function);
++ Seamless integration between Vue's reactivity and flexibility of RxJS;
++ Ability to use "native" Vue APIs in harmony with observables;
++ No need to worry about creating observables manually or losing control over them;
++ First-class TypeScript support;
++ [Sane state management](/api/use-rx-state) out-of the box;
 
 Thanks to that last one, `vuse-rx` also eliminates the need to use `vuex` for most projects that already use `rxjs`!

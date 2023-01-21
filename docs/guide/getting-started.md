@@ -30,12 +30,6 @@ import * as UseRX from 'vuse-rx';
 </script>
 ```
 
-### In browser ES modules environment
-
-```ts
-import { useRxState, syncRef } from 'https://unpkg.com/vuse-rx/dist/es/index.js';
-```
-
 ### In Node.js endvironment
 
 ```ts
