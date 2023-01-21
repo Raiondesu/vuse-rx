@@ -2,7 +2,7 @@
   <a href="https://vuse-rx.raiondesu.dev"><img src="docs/public/logo-g.svg"/></a>
 </h1>
 
-<h3 align="center" style="text-align: center">Complete first-class rxjs support for Vue 3</h3>
+<h3 align="center" style="text-align: center">Complete first-class RxJS 7+ support for Vue 3</h3>
 <p align="center" style="text-align: center">
   <a href="https://github.com/Raiondesu/vuse-rx/actions"><img src="https://img.shields.io/github/actions/workflow/status/raiondesu/vuse-rx/publish.yml?style=flat-square"/></a>
   <a href="https://npmjs.com/vuse-rx"><img src="https://img.shields.io/npm/v/vuse-rx?style=flat-square"/></a>
@@ -15,7 +15,7 @@
 
 ## What is this?
 
-`vuse-rx` is a bridge between vue 3 and rxjs:
+`vuse-rx` is a bridge between Vue 3 and RxJS:
 it connects reactive states and refs with observables and subjects
 in a way that enforces separation of concerns and drastically reduces the amount of boilerplate code.
 
@@ -35,7 +35,8 @@ The highlights are:
 
 ## Use
 
-A simple example of a counter state with an increment reducer:
+Below is a simple example of a counter component with a state and two simple reducers.
+See the docs for a [more detailed and interactive example](https://vuse-rx.raiondesu.dev/recipes/counter).
 
 ```vue
 <script lang="ts">
