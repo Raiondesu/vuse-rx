@@ -10,7 +10,7 @@ It's fully typed and therefore has **first-class TypeScript support**.
 
 [More details here](/guide/).
 
-## Install
+## Install & Use
 
 ### NPM / YARN
 `npm i vuse-rx`
@@ -30,6 +30,16 @@ import * as UseRX from 'vuse-rx';
 </script>
 ```
 
-## Use
+### In browser ES modules environment
 
-See [recipes](/recipes/counter) or [api](/api/use-rx-state) for detailed usage instructions.
+```ts
+import { useRxState, syncRef } from 'https://unpkg.com/vuse-rx/dist/es/index.js';
+```
+
+### In Node.js endvironment
+
+```ts
+import { useRxState, syncRef } from 'vuse-rx';
+```
+
+See [recipes](/recipes/counter) or [api](/api/use-rx-state) for detailed usage instructions and full list of exports.
