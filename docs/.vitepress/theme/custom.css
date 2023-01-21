@@ -4,6 +4,42 @@
   --vp-c-text-2: #6e7681;
 }
 
+/* TODO: remove after vitepress fixes their styles */
+.VPLocalNav ~ .VPNav {
+  position: relative !important;
+}
+.VPNav, .VPNav *, .VPNavBar {
+  transition: background-color 0 !important;
+}
+.VPContent:not(.has-sidebar) {
+  padding-top: var(--vp-nav-height);
+}
+.VPNavBar:not(.has-sidebar) {
+  background-color: var(--vp-nav-bg-color) !important;
+}
+.VPNavBar.fill {
+  border-bottom-color: var(--vp-c-gutter) !important;
+}
+@media (max-width: 960px) {
+  .VPNav {
+    position: relative !important;
+  }
+  .VPNavBar:not(.has-sidebar) {
+    position: fixed;
+    width: 100%;
+  }
+}
+.VPNavBar.has-sidebar .curtain {
+  bottom: -30px !important;
+}
+.VPNavBar.fill.has-sidebar {
+  border-bottom-color: transparent !important;
+}
+.vp-code-group .tabs label::after {
+  z-index: 9 !important;
+}
+/* TODO: ^ */
+
 .VPDoc .content button, .VPDoc .content input, .VPDoc .content .lines {
   color: var(--vp-c-text-1);
   background-color: var(--vp-sidebar-bg-color);
