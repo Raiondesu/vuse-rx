@@ -1,16 +1,16 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.useRxState = void 0;
+exports.useRxState = exports.defaultOptions = void 0;
 const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const until_1 = require("../operators/until");
 const deepReplaceArray_1 = require("./strategies/deepReplaceArray");
-const defaultOptions = {
+exports.defaultOptions = {
     mutationStrategy: deepReplaceArray_1.deepReplaceArray,
 };
 function useRxState(initialState, options) {
-    const { mutationStrategy: mergeKeys } = Object.assign(Object.assign({}, defaultOptions), options);
+    const { mutationStrategy: mergeKeys } = Object.assign(Object.assign({}, exports.defaultOptions), options);
     return function (reducers, map$) {
         const state = (0, vue_1.reactive)(callMeMaybe(initialState));
         const actions = {};
