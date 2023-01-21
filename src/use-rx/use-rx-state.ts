@@ -185,14 +185,19 @@ export interface MutationContext {
 export type StatefulMutation<S, Mutation> = (state: S, mutation?: MutationContext) => Mutation | Observable<Mutation>;
 
 /**
- * A reducer for the observable state
+ * A general type for a reducer of the observable state
  */
-export type StateReducer<S, Mutation, Args extends any[] = any[]> = (
+export type StateReducer<S, Mutation = DeepReplaceArrayMutation<S>, Args extends any[] = any[]> = (
   (...args: Args) =>
     | Mutation
     | Observable<Mutation>
     | StatefulMutation<S, Mutation>
 );
+
+/**
+ * A simple stateful reducer type that is returned by a stateful reducer upon the first call
+ */
+export type SimpleReducer<S> = (state: S) => Partial<S>;
 
 /**
  * A named collection of state reducers
