@@ -1,18 +1,18 @@
-import { Observable as j, Subject as U, isObservable as A, of as M, merge as E, from as d } from "rxjs";
-import { getCurrentInstance as F, onUnmounted as g, reactive as C, readonly as H, watch as v, ref as l, isProxy as I, toRef as K } from "vue";
-import { takeUntil as P, mergeScan as q, map as z, tap as k, scan as B, catchError as G } from "rxjs/operators";
-const J = (t) => new j(
+import { Observable as d, Subject as A, isObservable as M, of as E, merge as F, from as k } from "rxjs";
+import { getCurrentInstance as C, onUnmounted as O, reactive as H, readonly as I, watch as v, isProxy as R, ref as l, toRef as K } from "vue";
+import { takeUntil as P, mergeScan as q, map as z, tap as S, scan as B, catchError as G } from "rxjs/operators";
+const J = (t) => new d(
   (e) => {
-    F() && t(() => e.next());
+    C() && t(() => e.next());
   }
-), L = (t) => P(J(t)), x = L(g), O = (t, e, n) => e != null && typeof e[n] == "object" && typeof t[n] == "object", S = (t) => (e) => {
+), L = (t) => P(J(t)), x = L(O), g = (t, e, n) => e != null && typeof e[n] == "object" && typeof t[n] == "object", U = (t) => (e) => {
   for (const n in e) {
     const o = e[n];
-    t[n] = !Array.isArray(o) && O(t, e, n) ? S(t[n])(o) : o;
+    t[n] = !Array.isArray(o) && g(t, e, n) ? U(t[n])(o) : o;
   }
   return t;
 }, N = {
-  mutationStrategy: S
+  mutationStrategy: U
 };
 function _(t, e) {
   const { mutationStrategy: n } = {
@@ -20,7 +20,7 @@ function _(t, e) {
     ...e
   };
   return function(o, r) {
-    const c = C(R(t)), p = {}, i = {}, b = [];
+    const c = H(j(t)), p = {}, i = {}, b = [];
     let u = !1, y;
     const w = {
       error: (s) => {
@@ -31,22 +31,22 @@ function _(t, e) {
       }
     };
     for (const s in o) {
-      const a = new U();
+      const a = new A();
       p[s] = (...m) => a.next(
         o[s].apply(o, m)
       ), b.push(
-        i[`${s}$`] = q((m, f) => (f = R(f, m, w), (A(f) ? f : M(f)).pipe(
+        i[`${s}$`] = q((m, f) => (f = j(f, m, w), (M(f) ? f : E(f)).pipe(
           z(n(m, n)),
-          k({
+          S({
             next: () => y ? y = a.error(y) : u && a.complete()
           })
         )), c)(a)
       );
     }
-    const $ = E(...b);
+    const $ = F(...b);
     return Q({
       actions: p,
-      state: H(c),
+      state: I(c),
       state$: x(
         r ? r(
           $,
@@ -68,9 +68,9 @@ const Q = (t) => ({
     ...t,
     subscription: t.state$.subscribe(...e)
   })
-}), R = (t, ...e) => typeof t == "function" ? t(...e) : t, T = (t) => (e) => {
+}), j = (t, ...e) => typeof t == "function" ? t(...e) : t, T = (t) => (e) => {
   for (const n in e)
-    t[n] = O(t, e, n) ? T(t[n])(e[n]) : e[n];
+    t[n] = g(t, e, n) ? T(t[n])(e[n]) : e[n];
   return t;
 }, V = (t) => (e) => {
   for (const n in e)
@@ -78,25 +78,25 @@ const Q = (t) => ({
   return t;
 }, D = (t) => G((e, n) => {
   throw t(e, n);
-}), tt = (t) => k({ next: (e) => t.value = e });
+}), tt = (t) => S({ next: (e) => t.value = e });
 function et(t, e) {
   return x(
-    new j((n) => v(t, (o) => n.next(o), e))
+    new d((n) => v(t, (o) => n.next(o), e))
   );
 }
 function nt(t, e) {
-  if (typeof t == "object")
+  if (typeof t == "object" && !R(t))
     try {
       const n = l(e);
-      return x(d(t)).subscribe({
+      return x(k(t)).subscribe({
         next: (o) => n.value = o
       }), n;
     } catch {
     }
-  return I(t) ? K(t, e) : l(t);
+  return R(t) ? K(t, e) : l(t);
 }
 function ot(t, e = {}) {
-  const n = l(e.next), o = l(e.error), r = x(d(t));
+  const n = l(e.next), o = l(e.error), r = x(k(t));
   return {
     next: n,
     error: o,
@@ -135,10 +135,10 @@ const W = (t, e, n, o, r) => ({
   },
   stop: () => {
   }
-}), rt = (t) => g(() => t.unsubscribe());
+}), rt = (t) => O(() => t.unsubscribe());
 export {
   T as deep,
-  S as deepReplaceArray,
+  U as deepReplaceArray,
   N as defaultOptions,
   J as fromHook,
   et as fromRef,
