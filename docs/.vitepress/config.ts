@@ -3,17 +3,23 @@ import { SitemapStream } from 'sitemap';
 import { SearchPlugin } from 'vitepress-plugin-search';
 import { resolve } from 'node:path';
 import { createWriteStream } from 'node:fs';
-import { name, description } from '../../package.json';
+import { name, description, version } from '../../package.json';
 
 const links: Array<any> = [];
+
+const isNext = version.includes('rc');
 
 export default defineConfig({
   title: name,
   description: description,
-  head: [['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo-small.svg' }]],
+  head: [
+    ['link', { rel: 'icon', type: 'image/svg+xml', href: '/logo-small.svg' }],
+    ['meta', { name: 'theme-color', content: '#3c8772' }]
+  ],
+
   lastUpdated: true,
 
-  cleanUrls: 'without-subfolders',
+  cleanUrls: 'with-subfolders',
 
   mpa: true,
   useWebFonts: true,
@@ -38,14 +44,19 @@ export default defineConfig({
 
     nav: [
       {
-        text: 'NPM',
-        link: 'https://npmjs.com/vuse-rx'
+        text: version,
+        items: [
+          // Always match if current version aligns with docs version
+          { text: 'next', link: 'https://next.vuse-rx.raiondesu.dev', activeMatch: isNext ? '.' : '' },
+          { text: 'stable', link: 'https://vuse-rx.raiondesu.dev', activeMatch: isNext ? '' : '.' },
+        ]
       }
     ],
 
     lastUpdatedText: 'Last Updated',
     socialLinks: [
       { icon: 'github', link: 'https://github.com/raiondesu/vuse-rx' },
+      { icon: { svg: '<svg viewBox="0 0 27.23 27.23"><rect fill="#333333" width="27.23" height="27.23" rx="2"></rect><polygon fill="#fff" points="5.8 21.75 13.66 21.75 13.67 9.98 17.59 9.98 17.58 21.76 21.51 21.76 21.52 6.06 5.82 6.04 5.8 21.75"></polygon></svg>' }, link: 'https://npmjs.com/vuse-rx' },
     ],
 
     sidebar: [
@@ -69,6 +80,7 @@ export default defineConfig({
         text: 'Cookbook',
         items: [
           { text: 'Simple counter', link: '/recipes/counter' },
+          { text: 'Shared counter', link: '/recipes/shared-counter' },
           { text: 'Stopwatch', link: '/recipes/stopwatch' },
         ]
       }
@@ -77,6 +89,11 @@ export default defineConfig({
     editLink: {
       pattern: 'https://github.com/raiondesu/vuse-rx/edit/dev/docs/:path',
       text: 'Edit this page on GitHub'
+    },
+
+    footer: {
+      message: 'Released under the MIT License.',
+      copyright: 'Copyright © 2021-present Alexey Iskhakov'
     }
   },
 

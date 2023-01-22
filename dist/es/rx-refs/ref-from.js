@@ -2,7 +2,7 @@ import { from } from 'rxjs';
 import { isProxy, ref, toRef } from 'vue';
 import { untilUnmounted } from '../operators/until';
 export function refFrom(arg, subArg) {
-    if (typeof arg === 'object')
+    if (typeof arg === 'object' && !isProxy(arg))
         try {
             const ref$ = ref(subArg);
             untilUnmounted(from(arg)).subscribe({

@@ -5,9 +5,9 @@ const rxjs_1 = require("rxjs");
 const vue_1 = require("vue");
 const until_1 = require("../operators/until");
 function refsFrom(input, defaultValues = {}) {
-    const next = vue_1.ref(defaultValues.next);
-    const error = vue_1.ref(defaultValues.error);
-    const value$ = until_1.untilUnmounted(rxjs_1.from(input));
+    const next = (0, vue_1.ref)(defaultValues.next);
+    const error = (0, vue_1.ref)(defaultValues.error);
+    const value$ = (0, until_1.untilUnmounted)((0, rxjs_1.from)(input));
     return {
         next,
         error,

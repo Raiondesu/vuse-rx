@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -14,4 +18,5 @@ __exportStar(require("./use-rx"), exports);
 __exportStar(require("./operators"), exports);
 __exportStar(require("./rx-refs"), exports);
 __exportStar(require("./hooks/from"), exports);
+__exportStar(require("./hooks/use-subscription"), exports);
 //# sourceMappingURL=index.js.map

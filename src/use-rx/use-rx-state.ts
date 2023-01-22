@@ -13,7 +13,7 @@ export interface RxStateOptions<S extends Record<PropertyKey, any>, Mutaiton> {
   mutationStrategy: MutationStrategy<S, Mutaiton>;
 }
 
-const defaultOptions = {
+export const defaultOptions = {
   mutationStrategy: deepReplaceArray,
 };
 
@@ -106,6 +106,18 @@ export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepRe
   };
 }
 
+/**
+ * Extracts state type from the result of the first useRxState call,
+ * so that the state type can be defined declaratively from the object itself to use later.
+ *
+ * @example ```ts
+ * const countState = useRxState({ count: 0 });
+ * type CountState = State<typeof countState>;
+ * // CountState = { count: number }
+ * ```
+ */
+export type State<C extends CreateRxState<any, any>> = C extends CreateRxState<infer S, any> ? S : never;
+
 type CreateRxState<S, Mutation> = {
   /**
    * Allows to bind reducers to a state and an observable.
@@ -173,14 +185,19 @@ export interface MutationContext {
 export type StatefulMutation<S, Mutation> = (state: S, mutation?: MutationContext) => Mutation | Observable<Mutation>;
 
 /**
- * A reducer for the observable state
+ * A general type for a reducer of the observable state
  */
-export type StateReducer<S, Mutation, Args extends any[] = any[]> = (
+export type StateReducer<S, Mutation = DeepReplaceArrayMutation<S>, Args extends any[] = any[]> = (
   (...args: Args) =>
     | Mutation
     | Observable<Mutation>
     | StatefulMutation<S, Mutation>
 );
+
+/**
+ * A simple stateful reducer type that is returned by a stateful reducer upon the first call
+ */
+export type SimpleReducer<S> = (state: S) => Partial<S>;
 
 /**
  * A named collection of state reducers
