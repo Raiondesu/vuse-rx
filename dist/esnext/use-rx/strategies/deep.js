@@ -1,4 +1,4 @@
-import { canMergeDeep } from '../common';
+import { canMergeDeep } from './common';
 export const deep = (state) => (mutation) => {
     for (const key in mutation) {
         state[key] = canMergeDeep(state, mutation, key)

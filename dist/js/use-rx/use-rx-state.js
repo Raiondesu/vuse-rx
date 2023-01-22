@@ -5,12 +5,14 @@ const rxjs_1 = require("rxjs");
 const operators_1 = require("rxjs/operators");
 const vue_1 = require("vue");
 const until_1 = require("../operators/until");
-const deepReplaceArray_1 = require("./strategies/deepReplaceArray");
+const deepReplaceBuiltin_1 = require("./strategies/deepReplaceBuiltin");
 exports.defaultOptions = {
-    mutationStrategy: deepReplaceArray_1.deepReplaceArray,
+    mutationStrategy: deepReplaceBuiltin_1.deepReplaceBuiltin,
+    strategyContext: deepReplaceBuiltin_1.defaultBuiltin
 };
 function useRxState(initialState, options) {
-    const { mutationStrategy: mergeKeys } = Object.assign(Object.assign({}, exports.defaultOptions), options);
+    const { mutationStrategy, strategyContext } = Object.assign(Object.assign({}, exports.defaultOptions), options);
+    const mergeKeys = mutationStrategy.bind(strategyContext);
     return function (reducers, map$) {
         const state = (0, vue_1.reactive)(callMeMaybe(initialState));
         const actions = {};

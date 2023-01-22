@@ -1,102 +1,112 @@
-import { Observable as d, Subject as A, isObservable as M, of as E, merge as F, from as k } from "rxjs";
-import { getCurrentInstance as C, onUnmounted as O, reactive as H, readonly as I, watch as v, isProxy as R, ref as l, toRef as K } from "vue";
-import { takeUntil as P, mergeScan as q, map as z, tap as S, scan as B, catchError as G } from "rxjs/operators";
-const J = (t) => new d(
+import { Observable as O, Subject as C, isObservable as M, of as B, merge as F, from as S } from "rxjs";
+import { getCurrentInstance as H, onUnmounted as E, reactive as I, readonly as K, watch as v, isProxy as j, ref as b, toRef as P } from "vue";
+import { takeUntil as q, mergeScan as z, map as G, tap as U, scan as J, catchError as L } from "rxjs/operators";
+const N = (t) => new O(
   (e) => {
-    C() && t(() => e.next());
+    H() && t(() => e.next());
   }
-), L = (t) => P(J(t)), x = L(O), g = (t, e, n) => e != null && typeof e[n] == "object" && typeof t[n] == "object", U = (t) => (e) => {
-  for (const n in e) {
-    const o = e[n];
-    t[n] = !Array.isArray(o) && g(t, e, n) ? U(t[n])(o) : o;
-  }
-  return t;
-}, N = {
-  mutationStrategy: U
-};
-function _(t, e) {
-  const { mutationStrategy: n } = {
-    ...N,
-    ...e
+), Q = (t) => q(N(t)), x = Q(E), A = (t, e, n) => e != null && typeof e[n] == "object" && typeof t[n] == "object", T = [
+  Array,
+  Date,
+  RegExp,
+  Error
+];
+function w(t) {
+  return (e) => {
+    for (const n in e) {
+      const o = e[n];
+      t[n] = A(t, e, n) && !this.some((r) => [t[n].constructor, o.constructor].includes(r)) ? w.call(this, t[n])(o) : o;
+    }
+    return t;
   };
-  return function(o, r) {
-    const c = H(j(t)), p = {}, i = {}, b = [];
-    let u = !1, y;
-    const w = {
-      error: (s) => {
-        y = s;
+}
+const W = {
+  mutationStrategy: w,
+  strategyContext: T
+};
+function tt(t, e) {
+  const { mutationStrategy: n, strategyContext: o } = {
+    ...W,
+    ...e
+  }, r = n.bind(o);
+  return function(c, l) {
+    const s = I(k(t)), p = {}, i = {}, d = [];
+    let R = !1, y;
+    const $ = {
+      error: (u) => {
+        y = u;
       },
       complete: () => {
-        u = !0;
+        R = !0;
       }
     };
-    for (const s in o) {
-      const a = new A();
-      p[s] = (...m) => a.next(
-        o[s].apply(o, m)
-      ), b.push(
-        i[`${s}$`] = q((m, f) => (f = j(f, m, w), (M(f) ? f : E(f)).pipe(
-          z(n(m, n)),
-          S({
-            next: () => y ? y = a.error(y) : u && a.complete()
+    for (const u in c) {
+      const a = new C();
+      p[u] = (...m) => a.next(
+        c[u].apply(c, m)
+      ), d.push(
+        i[`${u}$`] = z((m, f) => (f = k(f, m, $), (M(f) ? f : B(f)).pipe(
+          G(r(m, r)),
+          U({
+            next: () => y ? y = a.error(y) : R && a.complete()
           })
-        )), c)(a)
+        )), s)(a)
       );
     }
-    const $ = F(...b);
-    return Q({
+    const g = F(...d);
+    return X({
       actions: p,
-      state: I(c),
+      state: K(s),
       state$: x(
-        r ? r(
-          $,
-          o,
+        l ? l(
+          g,
           c,
+          s,
           i,
-          w
+          $
         ).pipe(
-          B((s, a) => n(s, n)(a), c)
-        ) : $
+          J((u, a) => r(u, r)(a), s)
+        ) : g
       ),
       actions$: i
     });
   };
 }
-const Q = (t) => ({
+const X = (t) => ({
   ...t,
   subscribe: (...e) => ({
     ...t,
     subscription: t.state$.subscribe(...e)
   })
-}), j = (t, ...e) => typeof t == "function" ? t(...e) : t, T = (t) => (e) => {
+}), k = (t, ...e) => typeof t == "function" ? t(...e) : t, Y = (t) => (e) => {
   for (const n in e)
-    t[n] = g(t, e, n) ? T(t[n])(e[n]) : e[n];
+    t[n] = A(t, e, n) ? Y(t[n])(e[n]) : e[n];
   return t;
-}, V = (t) => (e) => {
+}, et = (t) => (e) => {
   for (const n in e)
     t[n] = e[n];
   return t;
-}, D = (t) => G((e, n) => {
+}, nt = (t) => (e) => w.apply([Array], [t])(e), ot = (t) => L((e, n) => {
   throw t(e, n);
-}), tt = (t) => S({ next: (e) => t.value = e });
-function et(t, e) {
+}), rt = (t) => U({ next: (e) => t.value = e });
+function ct(t, e) {
   return x(
-    new d((n) => v(t, (o) => n.next(o), e))
+    new O((n) => v(t, (o) => n.next(o), e))
   );
 }
-function nt(t, e) {
-  if (typeof t == "object" && !R(t))
+function st(t, e) {
+  if (typeof t == "object" && !j(t))
     try {
-      const n = l(e);
-      return x(k(t)).subscribe({
+      const n = b(e);
+      return x(S(t)).subscribe({
         next: (o) => n.value = o
       }), n;
     } catch {
     }
-  return R(t) ? K(t, e) : l(t);
+  return j(t) ? P(t, e) : b(t);
 }
-function ot(t, e = {}) {
-  const n = l(e.next), o = l(e.error), r = x(k(t));
+function it(t, e = {}) {
+  const n = b(e.next), o = b(e.error), r = x(S(t));
   return {
     next: n,
     error: o,
@@ -108,49 +118,52 @@ function ot(t, e = {}) {
   };
 }
 function h(t, e, n) {
-  const o = l(
+  const o = b(
     n ?? (e.to ? e.to(t.value) : t.value)
   );
   for (const r in e)
-    (o[r] = W(t, o, e, r, this)).bind();
+    (o[r] = Z(t, o, e, r, this)).bind();
   return o;
 }
 h.with = (...t) => {
   const e = Object.assign({}, ...t), n = h.bind(e);
   return n.with = h.with.bind(e), n;
 };
-const W = (t, e, n, o, r) => ({
+const Z = (t, e, n, o, r) => ({
   bind: (c) => {
     const {
-      ref: p,
-      map: i,
-      watch: b
+      ref: l,
+      map: s,
+      watch: p
     } = {
       ref: t,
       map: n[o],
       watch: r,
       ...c
     };
-    e[o].stop(), e[o].stop = o === "to" ? v(p, (u) => e.value = i(u), Object.assign({}, r, b)) : v(e, (u) => p.value = i(u), Object.assign({}, r, b));
+    e[o].stop(), e[o].stop = o === "to" ? v(l, (i) => e.value = s(i), Object.assign({}, r, p)) : v(e, (i) => l.value = s(i), Object.assign({}, r, p));
   },
   stop: () => {
   }
-}), rt = (t) => O(() => t.unsubscribe());
+}), ut = (t) => E(() => t.unsubscribe());
 export {
-  T as deep,
-  U as deepReplaceArray,
-  N as defaultOptions,
-  J as fromHook,
-  et as fromRef,
-  D as mapError,
-  L as pipeUntil,
-  nt as refFrom,
-  ot as refsFrom,
-  tt as setRef,
-  V as shallow,
+  A as canMergeDeep,
+  Y as deep,
+  nt as deepReplaceArray,
+  w as deepReplaceBuiltin,
+  T as defaultBuiltin,
+  W as defaultOptions,
+  N as fromHook,
+  ct as fromRef,
+  ot as mapError,
+  Q as pipeUntil,
+  st as refFrom,
+  it as refsFrom,
+  rt as setRef,
+  et as shallow,
   h as syncRef,
   x as untilUnmounted,
-  _ as useRxState,
-  rt as useSubscription
+  tt as useRxState,
+  ut as useSubscription
 };
 //# sourceMappingURL=es.js.map

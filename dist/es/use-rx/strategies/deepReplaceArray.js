@@ -1,11 +1,3 @@
-import { canMergeDeep } from '../common';
-export const deepReplaceArray = (state) => (mutation) => {
-    for (const key in mutation) {
-        const submutation = mutation[key];
-        state[key] = !Array.isArray(submutation) && canMergeDeep(state, mutation, key)
-            ? deepReplaceArray(state[key])(submutation)
-            : submutation;
-    }
-    return state;
-};
+import { deepReplaceBuiltin } from './deepReplaceBuiltin';
+export const deepReplaceArray = (state) => (mutation) => deepReplaceBuiltin.apply([Array], [state])(mutation);
 //# sourceMappingURL=deepReplaceArray.js.map
