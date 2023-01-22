@@ -124,9 +124,7 @@ Now that we have defined the inner workings of the stopwatch,
 let's define how it's displayed to the user.
 
 ::: code-group
-```ts {5,9-12,21,22} [stopwatch.vue(script)]
-// paste the code from earlier steps here
-
+```ts {3,7-10,19,20} [stopwatch.vue(script)]
 import { defineComponent, ref, toRef, watch } from 'vue';
 import { syncRef } from 'vuse-rx';
 import { useStopwatch } from './stopwatch.js';
