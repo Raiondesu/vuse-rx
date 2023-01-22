@@ -1,5 +1,5 @@
 
-name: publish
+name: 'Publish @latest'
 
 on:
   pull_request:
@@ -8,6 +8,7 @@ on:
 
 jobs:
   latest:
+    if: !contains(github.event.commits[*].message, '--skip-version--')
     runs-on: ubuntu-latest
 
     steps:
@@ -33,11 +34,9 @@ jobs:
 
     - name: Release
       run: npm run ${{ steps.release.outputs.level }}
-      if: ${{ !contains(github.event.head_commit.message, '--skip-version--') }}
 
     - name: Commit dist
       uses: EndBug/add-and-commit@v7.0.0
-      if: ${{ !contains(github.event.head_commit.message, '--skip-version--') }}
       with:
         add: '-A .'
         message: Update dist
@@ -46,7 +45,6 @@ jobs:
 
     - name: Publish
       uses: JS-DevTools/npm-publish@v1
-      if: ${{ !contains(github.event.head_commit.message, '--skip-version--') }}
       with:
         token: ${{ secrets.NPM_TOKEN }}
 
