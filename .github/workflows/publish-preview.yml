@@ -15,6 +15,14 @@ jobs:
         node-version: 18.x
 
     - run: npm ci
+    - run: npm run docs:build
+
+    - name: Commit docs
+      uses: EndBug/add-and-commit@v7.0.0
+      with:
+        add: '-A .'
+        message: Update docs
+        push: false
 
     - name: Read SemVer
       uses: actions-ecosystem/action-release-label@v1
@@ -31,22 +39,6 @@ jobs:
     - name: Pre new release
       run: npm run pre-${{ steps.release.outputs.level }}
       if: ${{ !contains(steps.package.outputs.current-version, '-rc.') }}
-
-    - name: Commit dist
-      uses: EndBug/add-and-commit@v7.0.0
-      with:
-        add: '-A .'
-        message: Update dist
-        push: false
-
-    - run: npm run docs:build
-
-    - name: Commit docs
-      uses: EndBug/add-and-commit@v7.0.0
-      with:
-        add: '-A .'
-        message: Update docs
-        push: false
 
     - name: Publish
       uses: JS-DevTools/npm-publish@v1
