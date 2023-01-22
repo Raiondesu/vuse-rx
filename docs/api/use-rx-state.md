@@ -367,11 +367,15 @@ The function then returns the following object:
 
 `useRxState` allows to change some of its behaviour via the optional `options` parameter in the first function.
 
+It accepts the following type of object:
+
+<<< @/../src/use-rx/use-rx-state.ts#options-type
+
 There are 4 [mutation strategies](#mutation-strategies) provided out-of the box:
 - [`shallow`](#shallow)
 - [`deep`](#deep)
-- [`deepReplaceArray`](#deepreplacearray-deprecated) - **DEPRECATED** in favor of [`deepReplaceBuiltin`]
-- [`deepReplaceBuiltin`](#deepreplacebuiltin-default) - **DEFAULT**
+- [`deepReplaceArray`](#deepreplacearray) - **DEPRECATED** in favor of [`deepReplaceBuiltin`](#deepreplacebuiltin)
+- [`deepReplaceBuiltin`](#deepreplacebuiltin) - **DEFAULT**
 
 Each out-of-the-box mutation strategy also sets its own *mutation conerter* type, so a mutation for the `deep` strategy may be different from a mutation for the `shallow` strategy.
 
@@ -422,7 +426,7 @@ useRxState(initialState, {
 ::: warning
 This may not be enough to get correct type inference in mutations.\
 To make sure that the types represent actual behavior,
-pass a *mutation converter* type as a second type parameter to `useRxState`.
+add a *mutation converter* type as a type guard for the mutation.
 
 <details><summary>Example</summary>
 
@@ -433,9 +437,9 @@ type SymbolMutation<T> = T extends Record<any, any> // [!code focus]
   ? { [K in keyof Partial<T>]: SymbolMutation<T[K]> } // [!code focus]
   : DeepReplaceBuiltinMutation<T>; // [!code focus]
 
-useRxState<typeof initialState, SymbolMutation<typeof initialState>>(initialState, { // [!code focus]
-  mutationStrategy(state, mutate) {
-    return (mutation) => {
+useRxState(initialState, {
+  mutationStrategy(state, mutate) { // [!code focus]
+    return (mutation: SymbolMutation<typeof state>) => { // [!code focus]
       for (const key of Object.getOwnPropertySymbols(mutation)) {
         state[key] = canMergeDeep(state, mutation, key)
           ? mutate(state[key])(mutation[key])
@@ -490,13 +494,18 @@ so that there's no need to reimplement them every time there's a need for mutati
 Surface-level merge, equivalent to an object spread (`state = { ...state, ...mutation }`).
 
 ### `deep`
-Recursively merges mutations with the state.
+Recursively merges mutations with the state, iterating on keys of *any* object.
 
-### `deepReplaceArray` **\[DEPRECATED\]**
+### `deepReplaceArray`
 Same as `deep`, but does a simple shallow replacement for arrays.
-**DEPRECATED** in favor of [`deepReplaceBuiltin`](#deepreplacebuiltin-default).
 
-### `deepReplaceBuiltin` **\[DEFAULT\]**
+::: danger **DEPRECATED**
+This strategy is deprecated in favor of [`deepReplaceBuiltin`](#deepreplacebuiltin).
+:::
+
+### `deepReplaceBuiltin`
+::: tip DEFAULT
+:::
 Same as `deep`, but does a simple shallow replacement for builtin types, like Array, Date, RegExp and Error.
 
 You can control what counts as builtin by setting the `strategyContext` parameter in options:

@@ -9,10 +9,12 @@ import { MutationStrategy } from './strategies/common';
 import { defaultBuiltin, deepReplaceBuiltin, DeepReplaceBuiltinMutation } from './strategies/deepReplaceBuiltin';
 
 
+// #region options-type
 export interface RxStateOptions<S extends Record<PropertyKey, any>, Mutaiton> {
   mutationStrategy?: MutationStrategy<S, Mutaiton>;
   strategyContext?: any;
 }
+// #endregion options-type
 
 export const defaultOptions = {
   mutationStrategy: deepReplaceBuiltin,
