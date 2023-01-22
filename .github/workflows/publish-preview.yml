@@ -34,11 +34,11 @@ jobs:
 
     - name: Pre existing release
       run: npm run prerelease
-      if: ${{ contains(steps.package.outputs.current-version, '-rc.') }}
+      if: ${{ contains(steps.package.outputs.current-version, '-rc.') && !contains(github.event.head_commit.message, '--skip-version--') }}
 
     - name: Pre new release
       run: npm run pre-${{ steps.release.outputs.level }}
-      if: ${{ !contains(steps.package.outputs.current-version, '-rc.') }}
+      if: ${{ !contains(steps.package.outputs.current-version, '-rc.') && !contains(github.event.head_commit.message, '--skip-version--') }}
 
     - name: Commit dist
       uses: EndBug/add-and-commit@v7.0.0
@@ -49,6 +49,7 @@ jobs:
 
     - name: Publish
       uses: JS-DevTools/npm-publish@v1
+      if: ${{ !contains(github.event.head_commit.message, '--skip-version--') }}
       with:
         token: ${{ secrets.NPM_TOKEN }}
         tag: next
