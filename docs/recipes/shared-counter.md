@@ -159,16 +159,13 @@ const { state } = useSharedState({});
 </script>
 
 <template>
-  <main class="counter-app">
-    <p>counter in app.vue: {{ state.count }}</p>
+  <p>counter in app.vue: {{ state.count }}</p>
 
-    <p>counter1.vue:</p>
-    <counter1/>
+  <p>counter1.vue:</p>
+  <counter1/>
 
-    <p>counter2.vue:</p>
-    <counter2/>
-  </main>
-  <console/>
+  <p>counter2.vue:</p>
+  <counter2/>
 </template>
 ```
 
