@@ -29,6 +29,9 @@
     width: 100%;
   }
 }
+.DocSearch-Button-Keys {
+  display: none;
+}
 .VPNavBar.has-sidebar .curtain {
   bottom: -30px !important;
 }
