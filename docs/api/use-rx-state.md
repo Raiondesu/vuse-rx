@@ -367,6 +367,16 @@ The function then returns the following object:
 
 `useRxState` allows to change some of its behaviour via the optional `options` parameter in the first function.
 
+There are 4 [mutation strategies](#mutation-strategies) provided out-of the box:
+- [`shallow`](#shallow)
+- [`deep`](#deep)
+- [`deepReplaceArray`](#deepreplacearray-deprecated) - **DEPRECATED** in favor of [`deepReplaceBuiltin`]
+- [`deepReplaceBuiltin`](#deepreplacebuiltin-default) - **DEFAULT**
+
+Each out-of-the-box mutation strategy also sets its own *mutation conerter* type, so a mutation for the `deep` strategy may be different from a mutation for the `shallow` strategy.
+
+A *mutation converter* is simply a `type` that mimics the way the strategy processes any given value in a mutation.
+
 Via options you can change how new mutations are applied to the state:
 
 ```ts
@@ -384,38 +394,63 @@ useRxState(initialState, {
     this, // the `strategyContext` option
     state, // A full base state to mutate
     mutate // Current mutation strategy (this exact function)
-  ) => (
-    mutation // Mutation to apply
-  ) => {
-    // Let's say we also need to apply our mutations to symbols:
-    for (const key of Object.getOwnPropertySymbols(mutation)) {
-      // Check if we can go deeper
-      state[key] = canMergeDeep(state, mutation, key)
-        // If yes - mutate the state further using our function
-        ? mutate(state[key])(mutation[key])
-        // if no - just assign the value of our mutation
-        : mutation[key];
+  ) {
+    return (mutation /*Mutation to apply*/) => {
+      // Let's say we also need to apply our mutations to symbols:
+      for (const key of Object.getOwnPropertySymbols(mutation)) {
+        // Check if we can go deeper
+        state[key] = canMergeDeep(state, mutation, key)
+          // If yes - mutate the state further using our function
+          ? mutate.call(this, state[key])(mutation[key])
+          // if no - just assign the value of our mutation
+          : mutation[key];
+      }
+
+      // Apply the default strategy once we're done
+      return deepReplaceBuiltin.apply(this, [state])(mutation);
+      // or...
+
+      // if we need to restrict our mutations to symbols only
+      // we can just return the state
+      // without applying the default strategy
+      return state;
     }
-
-    // Apply the default strategy once we're done
-    return deepReplaceArray(state)(mutation);
-    // or...
-
-    // if we need to restrict our mutations to symbols only
-    // we can just return the state
-    // without applying the default strategy
-    return state;
   }
 });
 ```
 
-There are 4 [mutation strategies](#mutation-strategies) provided out-of the box:
-- [`shallow`](#shallow)
-- [`deep`](#deep)
-- [`deepReplaceArray`](#deepreplacearray-deprecated) - **DEPRECATED** in favor of [`deepReplaceBuiltin`]
-- [`deepReplaceBuiltin`](#deepreplacebuiltin-default) - **DEFAULT**
+::: warning
+This may not be enough to get correct type inference in mutations.\
+To make sure that the types represent actual behavior,
+pass a *mutation converter* type as a second type parameter to `useRxState`.
 
-Each mutation strategy sets its own mutation type, so a mutation for the `deep` strategy may be different from a mutation for the `shallow` strategy.
+<details><summary>Example</summary>
+
+```ts
+import { DeepReplaceBuiltinMutation } from 'vuse-rx';
+
+type SymbolMutation<T> = T extends Record<any, any> // [!code focus]
+  ? { [K in keyof Partial<T>]: SymbolMutation<T[K]> } // [!code focus]
+  : DeepReplaceBuiltinMutation<T>; // [!code focus]
+
+useRxState<typeof initialState, SymbolMutation<typeof initialState>>(initialState, { // [!code focus]
+  mutationStrategy(state, mutate) {
+    return (mutation) => {
+      for (const key of Object.getOwnPropertySymbols(mutation)) {
+        state[key] = canMergeDeep(state, mutation, key)
+          ? mutate(state[key])(mutation[key])
+          : mutation[key];
+      }
+
+      return deepReplaceBuiltin.apply(this, [state])(mutation);
+    }
+  }
+});
+```
+
+</details>
+
+:::
 
 ::: tip
 Mutation type is not restricted to a product of the initial state or an object even!\
@@ -485,8 +520,11 @@ You can control what counts as builtin by setting the `strategyContext` paramete
   useRxState(state, { strategyContext: [MyBuiltin] })
   ```
 
-However, this may not be enough to get complete type inference in mutations.
-To make sure that the types represent actual behavior
+::: warning
+This may not be enough to get correct type inference in mutations.\
+To make sure that the types represent actual behavior,
+pass a *mutation converter* type as a second type parameter to `useRxState`.
+:::
 
 ## Type helpers
 
