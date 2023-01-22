@@ -17,15 +17,6 @@ jobs:
         node-version: 18.x
 
     - run: npm ci
-    - run: npm run docs:build
-
-    - name: Commit docs
-      uses: EndBug/add-and-commit@v7.0.0
-      with:
-        add: '-A .'
-        message: Update docs
-        branch: main
-        push: false
 
     - name: Read SemVer
       uses: actions-ecosystem/action-release-label@v1
@@ -39,6 +30,16 @@ jobs:
       with:
         add: '-A .'
         message: Update dist
+        branch: main
+        push: false
+
+    - run: npm run docs:build
+
+    - name: Commit docs
+      uses: EndBug/add-and-commit@v7.0.0
+      with:
+        add: '-A .'
+        message: Update docs
         branch: main
         push: false
 
