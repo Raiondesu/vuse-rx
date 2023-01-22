@@ -34,6 +34,15 @@ jobs:
     - name: Release
       run: npm run ${{ steps.release.outputs.level }}
 
+    - run: npm run docs:build
+
+    - name: Commit docs
+      uses: EndBug/add-and-commit@v7.0.0
+      with:
+        add: '-A .'
+        message: Update docs
+        push: false
+
     - name: Publish
       uses: JS-DevTools/npm-publish@v1
       with:
