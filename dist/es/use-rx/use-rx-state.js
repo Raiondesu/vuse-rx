@@ -2,14 +2,16 @@ import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from '../operators/until';
-import { deepReplaceArray } from './strategies/deepReplaceArray';
-const defaultOptions = {
-    mutationStrategy: deepReplaceArray,
+import { defaultBuiltin, deepReplaceBuiltin } from './strategies/deepReplaceBuiltin';
+export const defaultOptions = {
+    mutationStrategy: deepReplaceBuiltin,
+    strategyContext: defaultBuiltin
 };
 export function useRxState(initialState, options) {
-    const { mutationStrategy: mergeKeys } = Object.assign(Object.assign({}, defaultOptions), options);
+    const { mutationStrategy, strategyContext } = Object.assign(Object.assign({}, defaultOptions), options);
+    const mergeKeys = mutationStrategy.bind(strategyContext);
     return function (reducers, map$) {
-        const state = reactive(maybeCall(initialState));
+        const state = reactive(callMeMaybe(initialState));
         const actions = {};
         const actions$ = {};
         const actions$Arr = [];
@@ -23,7 +25,7 @@ export function useRxState(initialState, options) {
             const mutations$ = new Subject();
             actions[key] = ((...args) => mutations$.next(reducers[key].apply(reducers, args)));
             actions$Arr.push(actions$[`${key}$`] = (mergeScan((prev, curr) => {
-                curr = maybeCall(curr, prev, context);
+                curr = callMeMaybe(curr, prev, context);
                 return (isObservable(curr)
                     ? curr
                     : of(curr)).pipe(map(mergeKeys(prev, mergeKeys)), tap({
@@ -43,7 +45,7 @@ export function useRxState(initialState, options) {
     };
 }
 const createRxResult = (result) => (Object.assign(Object.assign({}, result), { subscribe: (...args) => (Object.assign(Object.assign({}, result), { subscription: result.state$.subscribe(...args) })) }));
-const maybeCall = (fn, ...args) => (typeof fn === 'function'
+const callMeMaybe = (fn, ...args) => (typeof fn === 'function'
     ? fn(...args)
     : fn);
 ;

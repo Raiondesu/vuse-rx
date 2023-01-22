@@ -34,7 +34,7 @@ export function syncRef<R1, R2>(
  * The resulting ref serves as an origin point for the binding,\
  * values **from** the resulting ref and **to** the resulting ref are mapped onto the first.
  */
- export function syncRef<R1, R2, M extends Readonly<Mappers<R1, R2>> = Mappers<R1, R2>>(
+export function syncRef<R1, R2, M extends Readonly<Mappers<R1, R2>> = Mappers<R1, R2>>(
   ref1: Ref<R1>,
   { to, from }: M,
   defaultValue?: R2,
@@ -170,19 +170,29 @@ type Binders<R1, R2, Keys extends PropertyKey> = {
   };
 };
 
-type BindingOptions<R1, R2, Key extends PropertyKey> = {
+/**
+ * Allows to correctly declare a reusable options object for the [`.bind`](https://vuse-rx.raiondesu.dev/api/refs#change-ref-bindings) method.
+ */
+export type BindingOptions<R1, R2, Key extends PropertyKey> = {
   ref?: Ref<R1>;
   map?: Key extends 'to' ? Mapper<R1, R2> : Mapper<R2, R1>;
   watch?: WatchOptions;
 }
 
-type CustomBindingOptions<T, R2, Key extends PropertyKey> = {
+/**
+ * Allows to correctly declare a reusable options object for the [`.bind`](https://vuse-rx.raiondesu.dev/api/refs#change-ref-bindings) method.
+ * Has a semantic difference from `BindingOptions` in that it's supposed to be used with a new ref type instead of the original first ref
+ */
+export type CustomBindingOptions<T, R2, Key extends PropertyKey> = {
   ref: Ref<T>;
   map: Key extends 'to' ? Mapper<T, R2> : Mapper<R2, T>;
   watch?: WatchOptions;
 }
 
-type SyncedRef<
+/**
+ * Return type of the `syncRef` function, combined Vue Ref with `syncRef`'s bindings
+ */
+export type SyncedRef<
   R1,
   Keys extends PropertyKey,
   R2,

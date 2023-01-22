@@ -1,6 +1,6 @@
 <script lang="ts">
-import { defineComponent, ref, toRef, watch } from 'vue';
-import { map, mapTo, switchMap } from 'rxjs/operators';
+import { defineComponent, ref, toRef } from 'vue';
+import { map, takeWhile, switchMap } from 'rxjs/operators';
 import { of, interval } from 'rxjs';
 import { useRxState, syncRef } from 'vuse-rx';
 import { setToWindow } from '../set-window';
@@ -14,9 +14,11 @@ const createStopwatch = useRxState(() => ({
   step: 1,
 }));
 
-const paused = state => !state.count || state.step === 0 || (
-  state.step > 0 && state.value >= state.maxValue
+const valueIsBelowMax = state => isNaN(state.maxValue) || (
+  state.value < state.maxValue
 );
+
+const paused = state => !state.count || state.step === 0 || !valueIsBelowMax(state);
 
 const clampValue = (maxValue: number, value: number) => ({
   maxValue,
@@ -38,8 +40,9 @@ const useStopwatch = () => createStopwatch(
       paused(state)
         ? of(state)
         : interval(1000 / state.speed).pipe(
-            mapTo(state),
+            map(() => state),
             map(increment()),
+            takeWhile(valueIsBelowMax, true),
           )
     ),
   )
@@ -72,8 +75,8 @@ export default defineComponent({
 </script>
 
 <template>
-  <div class="flex mt-2 justify evenly">
-    <p v-for="(value, key) in state" :key="key">{{key}}: {{value}}</p>
+  <div class="flex mt-2 justify evenly values">
+    <p v-for="(value, key) in state" :key="key">{{key}}: <span style="color:var(--vp-c-brand)">{{value}}</span></p>
   </div>
   <main class="stopwatch">
     <div class="flex grow justify center mt-2">
@@ -89,8 +92,8 @@ export default defineComponent({
     </div>
     <div class="flex justify center mt-2">
       <input v-model="speedRef" @blur.capture="setSpeed(+speedRef)"/>
-      <button @click="setSpeed(+speedRef - 1)">-</button>
-      <button @click="setSpeed(+speedRef + 1)">+</button>
+      <button @click="setSpeed(+speedRef - 1)">Speed -</button>
+      <button @click="setSpeed(+speedRef + 1)">Speed +</button>
     </div>
     <div class="flex justify center mt-2">
       <input v-model="stepRef"/>
@@ -118,9 +121,19 @@ export default defineComponent({
   width: 40%;
 }
 
+@media (max-width: 1000px) {
+  .stopwatch {
+    width: 60%;
+  }
+}
+
 @media (max-width: 520px) {
   .stopwatch {
     width: 100%;
+  }
+
+  .values {
+    font-size: smaller;
   }
 }
 
@@ -129,9 +142,10 @@ input {
   flex-grow: 1;
 }
 
-div {
+.flex {
   display: flex;
   flex-wrap: nowrap;
+  column-gap: 8px;
 }
 
 .justify {
@@ -149,9 +163,6 @@ div {
 
 .mt-2 {
   margin-top: 8px;
-}
-.mt-2 :not(:first-child) {
-  margin-left: 8px;
 }
 
 </style>

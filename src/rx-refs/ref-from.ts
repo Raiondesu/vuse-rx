@@ -88,7 +88,7 @@ export function refFrom<R>(arg: ObservableInput<R> | R): Ref<UnwrapRef<R> | unde
 export function refFrom<R>(arg: ObservableInput<R> | R, defaultValue: R): Ref<UnwrapRef<R>>;
 
 export function refFrom(arg: unknown, subArg?: unknown) {
-  if (typeof arg === 'object') try {
+  if (typeof arg === 'object' && !isProxy(arg)) try {
     const ref$ = ref(subArg);
 
     untilUnmounted(from(arg as any)).subscribe({
@@ -96,7 +96,7 @@ export function refFrom(arg: unknown, subArg?: unknown) {
     });
 
     return ref$;
-  } catch (_) { /* Silence the error to try another ways */ }
+  } catch (_) { /* Silence the error to try other ways */ }
 
   return isProxy(arg)
     ? toRef(arg as Record<any, any>, subArg)

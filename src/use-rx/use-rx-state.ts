@@ -1,20 +1,24 @@
 import type { Observable, PartialObserver, Subscription } from 'rxjs';
-import type { DeepReadonly } from 'vue';
+import type { DeepReadonly, UnwrapNestedRefs } from 'vue';
 
 import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from '../operators/until';
-import { MutationStrategy, UnwrapNestedRefs } from './common';
-import { deepReplaceArray, DeepReplaceArrayMutation } from './strategies/deepReplaceArray';
+import { MutationStrategy } from './strategies/common';
+import { defaultBuiltin, deepReplaceBuiltin, DeepReplaceBuiltinMutation } from './strategies/deepReplaceBuiltin';
 
 
+// #region options-type
 export interface RxStateOptions<S extends Record<PropertyKey, any>, Mutaiton> {
-  mutationStrategy: MutationStrategy<S, Mutaiton>;
+  mutationStrategy?: MutationStrategy<S, Mutaiton>;
+  strategyContext?: any;
 }
+// #endregion options-type
 
-const defaultOptions = {
-  mutationStrategy: deepReplaceArray,
+export const defaultOptions = {
+  mutationStrategy: deepReplaceBuiltin,
+  strategyContext: defaultBuiltin
 };
 
 /**
@@ -26,21 +30,22 @@ const defaultOptions = {
  * @param initialState - a factory or initial value for the reactive state
  * @param options - options to customize the behavior, for example - to apply a custom strategy of merging a mutation with an old state
  */
-export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepReplaceArrayMutation<UnwrapNestedRefs<T>>>(
+export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepReplaceBuiltinMutation<UnwrapNestedRefs<T>>>(
   initialState: T | (() => T),
   options?: Partial<RxStateOptions<UnwrapNestedRefs<T>, Mutation>>
 ): CreateRxState<UnwrapNestedRefs<T>, Mutation> {
-  const { mutationStrategy: mergeKeys } = {
+  const { mutationStrategy, strategyContext } = {
     ...defaultOptions as RxStateOptions<UnwrapNestedRefs<T>, Mutation>,
     ...options
   };
+  const mergeKeys = mutationStrategy!.bind(strategyContext);
 
   return function (reducers, map$?) {
     type S = UnwrapNestedRefs<T>;
     type ReducerResult = ReturnType<StateReducer<S, Mutation>>;
     type Actions = ReducerActions<typeof reducers>;
 
-    const state = reactive(maybeCall(initialState));
+    const state = reactive(callMeMaybe(initialState));
 
     const actions = <Actions> {};
     const actions$ = <ReducerObservables<Actions, S>> {};
@@ -66,7 +71,7 @@ export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepRe
       actions$Arr.push(
         actions$[`${key}$` as const] = (
           mergeScan((prev: S, curr: ReducerResult) => {
-            curr = maybeCall(curr, prev, context);
+            curr = callMeMaybe(curr, prev, context);
 
             return (
               isObservable(curr)
@@ -105,6 +110,18 @@ export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepRe
     });
   };
 }
+
+/**
+ * Extracts state type from the result of the first useRxState call,
+ * so that the state type can be defined declaratively from the object itself to use later.
+ *
+ * @example ```ts
+ * const countState = useRxState({ count: 0 });
+ * type CountState = State<typeof countState>;
+ * // CountState = { count: number }
+ * ```
+ */
+export type State<C extends CreateRxState<any, any>> = C extends CreateRxState<infer S, any> ? S : never;
 
 type CreateRxState<S, Mutation> = {
   /**
@@ -156,7 +173,7 @@ const createRxResult = <S, Actions>(result: {
   }),
 })
 
-const maybeCall = <T, A extends any[]>(
+const callMeMaybe = <T, A extends any[]>(
   fn: T | ((...args: A) => T),
   ...args: A
 ) => (
@@ -165,6 +182,12 @@ const maybeCall = <T, A extends any[]>(
     : fn
 );
 
+/**
+ * Context of a mutation.
+ *
+ * It is used to inform observables about errors or make them complete
+ * from within the reducers.
+ */
 export interface MutationContext {
   error(error: any): void;
   complete(): void;
@@ -173,14 +196,19 @@ export interface MutationContext {
 export type StatefulMutation<S, Mutation> = (state: S, mutation?: MutationContext) => Mutation | Observable<Mutation>;
 
 /**
- * A reducer for the observable state
+ * A general type for a reducer of the observable state
  */
-export type StateReducer<S, Mutation, Args extends any[] = any[]> = (
+export type StateReducer<S, Mutation = DeepReplaceBuiltinMutation<S>, Args extends any[] = any[]> = (
   (...args: Args) =>
     | Mutation
     | Observable<Mutation>
     | StatefulMutation<S, Mutation>
 );
+
+/**
+ * A simple stateful reducer type that is returned by a stateful reducer upon the first call
+ */
+export type SimpleReducer<S> = (state: S) => Partial<S>;
 
 /**
  * A named collection of state reducers

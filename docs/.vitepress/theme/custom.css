@@ -1,34 +1,57 @@
-@media (prefers-color-scheme: dark) {
-  :root {
-    --c-bg: #0c1117;
-    --c-text: #f0f6fc;
-    --c-text-light: #c9d1d9;
-    --c-text-lighter: #6e7681;
-    --c-divider: #21262d;
-    --code-inline-bg-color: rgba(240, 246, 252, 0.15);
-  }
+:root.dark {
+  --vp-c-text: #f0f6fc;
+  --vp-c-text-1: #c9d1d9;
+  --vp-c-text-2: #6e7681;
+}
 
-  h2 code {
-    background-color: var(--c-bg);
+/* TODO: remove after vitepress fixes their styles */
+.VPLocalNav ~ .VPNav {
+  position: relative !important;
+}
+.VPNav, .VPNav *, .VPNavBar {
+  transition: background-color 0 !important;
+}
+.VPContent:not(.has-sidebar) {
+  padding-top: var(--vp-nav-height);
+}
+.VPNavBar:not(.has-sidebar) {
+  background-color: var(--vp-nav-bg-color) !important;
+}
+.VPNavBar.fill {
+  border-bottom-color: var(--vp-c-gutter) !important;
+}
+@media (max-width: 960px) {
+  .VPNav {
+    position: relative !important;
   }
+  .VPNavBar:not(.has-sidebar) {
+    position: fixed;
+    width: 100%;
+  }
+}
+.VPNavBar.has-sidebar .curtain {
+  bottom: -30px !important;
+}
+.VPNavBar.fill.has-sidebar {
+  border-bottom-color: transparent !important;
+}
+.vp-code-group .tabs label::after {
+  z-index: 9 !important;
+}
+/* TODO: ^ */
 
-  pre code {
-    background-color: transparent;
-  }
+.custom-block-title:only-child {
+  margin-bottom: 8px !important;
+}
 
-  .highlight-lines .highlighted {
-      /* background-color: rgba(0, 0, 0, .66); */
-      background-color: var(--code-inline-bg-color);
-  }
+.VPDoc .content button, .VPDoc .content input, .VPDoc .content .lines {
+  color: var(--vp-c-text-1);
+  background-color: var(--vp-sidebar-bg-color);
+  box-shadow: none;
+  padding: 4px 16px;
+  border-radius: 12px;
+}
 
-  .nav-bar {
-    background-color: #161b22 !important;
-  }
-
-  button, input {
-    color: var(--c-text);
-    background-color: var(--code-inline-bg-color);
-    border: 2px solid var(--c-text-lighter);
-    box-shadow: none;
-  }
+.title > .VPImage.logo {
+  margin-left: -4px;
 }

@@ -1,28 +1,14 @@
-import { canMergeDeep } from '../common';
+import { canMergeDeep } from './common';
 
-export type Builtin =
-  | Function
-  | Date
-  | Error
-  | RegExp
-  | Uint8Array
-  | string
-  | number
-  | boolean
-  | bigint
-  | symbol
-  | undefined
-  | null;
-
-export type DeepMutation<T> = T extends Builtin
-  ? T
-  : T extends Array<infer U>
+export type DeepMutation<T> = T extends object
+  ? T extends Array<infer U>
   ? Array<DeepMutation<U>>
   : T extends ReadonlyArray<infer U>
   ? ReadonlyArray<DeepMutation<U>>
   : T extends Record<any, any>
   ? { [K in keyof Partial<T>]: DeepMutation<T[K]> }
-  : Partial<T>;
+  : Partial<T>
+  : T;
 
 /**
  * A deep-merge strategy for mutations

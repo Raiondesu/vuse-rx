@@ -11,7 +11,7 @@ export default defineComponent({
   props: {
     simple: Boolean,
   },
-  setup(props) {
+  setup() {
     const {
       actions,
       state,
@@ -20,7 +20,7 @@ export default defineComponent({
       increment: () => state => ({ count: state.count + 1 }),
 
       setCount: (count: string) => ({
-        count: isNaN(count) ? 0 : +count
+        count: isNaN(Number(count)) ? 0 : +count
       }),
 
       setCountAfter(count: string, timeout: number) {
@@ -49,12 +49,34 @@ export default defineComponent({
 
 <template>
   <main>
-    <button @click="actions.increment">increment to {{ state.count + 1 }}</button>
-    <button v-if="!simple" @click="actions.incrementAfter(1000)">increment to {{ state.count + 1 }} after 1 sec</button>
-    <br>
-    <input v-model="countRef"/>
-    <button @click="actions.setCount(countRef)">set count to {{ countRef }}</button>
-    <button v-if="!simple" @click="actions.setCountAfter(countRef, 1000)">set count to {{ countRef }} after 1 sec</button>
+    <div class="flex justify mt-2">
+      <button @click="actions.increment">increment to {{ state.count + 1 }}</button>
+      <button v-if="!simple" @click="actions.incrementAfter(1000)">increment to {{ state.count + 1 }} after 1 sec</button>
+    </div>
+    <div class="flex justify mt-2">
+      <input v-model="countRef"/>
+      <button @click="actions.setCount(countRef)">set count to {{ countRef }}</button>
+      <button v-if="!simple" @click="actions.setCountAfter(countRef, 1000)">set count to {{ countRef }} after 1 sec</button>
+    </div>
   </main>
   <console/>
 </template>
+
+<style scoped>
+
+.flex {
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 8px;
+  row-gap: 8px;
+}
+
+.justify {
+  align-items: center;
+}
+
+.mt-2 {
+  margin-top: 8px;
+}
+
+</style>
