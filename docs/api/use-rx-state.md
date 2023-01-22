@@ -134,7 +134,7 @@ const countRef = syncRef(state, 'count', String);
 
 ::: tip
 Every variable in this example is exposed to `window`,
-so feel free to open the console and play with it in the console!
+so feel free to open the console and play with it!
 :::
 
 

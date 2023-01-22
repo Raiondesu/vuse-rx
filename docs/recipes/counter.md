@@ -9,7 +9,7 @@ A simple example of a counter state with an increment reducer, using [`syncRef`]
 The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/counter.vue).
 
 ::: tip
-Every variable is exposed to `window`, so feel free to open the console and play with it!
+Every variable in this example is exposed to `window`, so feel free to open the console and play with it!
 :::
 
 ::: code-group

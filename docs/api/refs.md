@@ -60,7 +60,7 @@ and mapped from `ref` ***to*** `origin`.
 
 ::: tip
 Every variable in this example is exposed to `window`,\
-so feel free to open the console and play with them!
+so feel free to open the console and play with it!
 :::
 
 <ClientOnly>

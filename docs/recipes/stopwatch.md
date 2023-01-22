@@ -11,7 +11,7 @@ This is a simple stopwatch with configurable increment step, speed, interval and
 The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/main/docs/.vitepress/theme/recipes/stopwatch.vue).
 
 ::: tip
-Every variable is exposed to `window`, so feel free to open the console and play with it!
+Every variable in this example is exposed to `window`, so feel free to open the console and play with it!
 :::
 
 ## Basics

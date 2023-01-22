@@ -7,7 +7,7 @@ The full source can be found [here](https://github.com/Raiondesu/vuse-rx/blob/ma
 
 ::: tip
 Every variable in this example is exposed to `window`,
-so feel free to open the console and play with it in the console!
+so feel free to open the console and play with it!
 :::
 
 ## State
