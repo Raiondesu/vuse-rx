@@ -40,6 +40,10 @@
 }
 /* TODO: ^ */
 
+.custom-block-title:only-child {
+  margin-bottom: 8px !important;
+}
+
 .VPDoc .content button, .VPDoc .content input, .VPDoc .content .lines {
   color: var(--vp-c-text-1);
   background-color: var(--vp-sidebar-bg-color);

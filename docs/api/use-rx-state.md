@@ -341,7 +341,7 @@ useRxState(state)(
     console.log('This is logged only once');
     console.log('These are all reducers defined above, unchanged:', reducers);
     console.log('This is an initial reactive state:', state);
-    console.log('This is a map of all actions to their secific observables:', actions$);
+    console.log('This is a map of all actions to their specific observables:', actions$);
     console.log('This context can be used to create an error or to complete the observable:', context);
 
     // By the way, state$ is just merged actions$,
@@ -377,9 +377,11 @@ There are 4 [mutation strategies](#mutation-strategies) provided out-of the box:
 - [`deepReplaceArray`](#deepreplacearray) - **DEPRECATED** in favor of [`deepReplaceBuiltin`](#deepreplacebuiltin)
 - [`deepReplaceBuiltin`](#deepreplacebuiltin) - **DEFAULT**
 
-Each out-of-the-box mutation strategy also sets its own *mutation conerter* type, so a mutation for the `deep` strategy may be different from a mutation for the `shallow` strategy.
+Each out-of-the-box mutation strategy also sets its own *mutation converter* type,
+so a mutation type for the `deep` strategy may be different from a mutation type for the `shallow` strategy.
 
 A *mutation converter* is simply a `type` that mimics the way the strategy processes any given value in a mutation.
+It's named `Mutation` in the options type signature above.
 
 Via options you can change how new mutations are applied to the state:
 
@@ -509,7 +511,7 @@ This strategy is deprecated in favor of [`deepReplaceBuiltin`](#deepreplacebuilt
 Same as `deep`, but does a simple shallow replacement for builtin types, like Array, Date, RegExp and Error.
 
 You can control what counts as builtin by setting the `strategyContext` parameter in options:
-- to add to current builtins
+- to add to default builtins
   ```ts
   import { defaultBuiltin } from 'vuse-rx';
 
@@ -520,7 +522,7 @@ You can control what counts as builtin by setting the `strategyContext` paramete
   useRxState(state, { strategyContext: [...defaultBuiltin, MyBuiltin] })
   ```
 
-- to replace current builtins
+- to replace default builtins
   ```ts
   class MyBuiltin {}
 
