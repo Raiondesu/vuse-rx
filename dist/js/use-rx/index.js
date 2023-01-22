@@ -15,7 +15,9 @@ var __exportStar = (this && this.__exportStar) || function(m, exports) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 __exportStar(require("./use-rx-state"), exports);
+__exportStar(require("./strategies/common"), exports);
 __exportStar(require("./strategies/deep"), exports);
 __exportStar(require("./strategies/shallow"), exports);
 __exportStar(require("./strategies/deepReplaceArray"), exports);
+__exportStar(require("./strategies/deepReplaceBuiltin"), exports);
 //# sourceMappingURL=index.js.map

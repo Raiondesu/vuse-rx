@@ -2,15 +2,17 @@ import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from '../operators/until';
-import { deepReplaceArray } from './strategies/deepReplaceArray';
+import { defaultBuiltin, deepReplaceBuiltin } from './strategies/deepReplaceBuiltin';
 export const defaultOptions = {
-    mutationStrategy: deepReplaceArray,
+    mutationStrategy: deepReplaceBuiltin,
+    strategyContext: defaultBuiltin
 };
 export function useRxState(initialState, options) {
-    const { mutationStrategy: mergeKeys } = {
+    const { mutationStrategy, strategyContext } = {
         ...defaultOptions,
         ...options
     };
+    const mergeKeys = mutationStrategy.bind(strategyContext);
     return function (reducers, map$) {
         const state = reactive(callMeMaybe(initialState));
         const actions = {};
