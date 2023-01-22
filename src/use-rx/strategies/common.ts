@@ -1,25 +1,11 @@
-export type Builtin =
-  | Function
-  | Date
-  | Error
-  | RegExp
-  | Uint8Array
-  | string
-  | number
-  | boolean
-  | bigint
-  | symbol
-  | undefined
-  | null;
-
-export type MutationStrategy<S extends Record<PropertyKey, any>, M> = {
+export type MutationStrategy<S extends Record<PropertyKey, any>, M, C = any> = {
   /**
    * Creates a mutation applier
    *
    * @param state - a base state to mutate
    * @param strategy - current mutation strategy
    */
-  (state: S, strategy: MutationStrategy<S, M>): (mutation: M) => S;
+  (this: C, state: S, strategy: MutationStrategy<S, M, C>): (mutation: M) => S;
 };
 
 /**

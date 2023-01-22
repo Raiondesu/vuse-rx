@@ -19,6 +19,8 @@ Each time a ref's value is changed - observable emits.\
 Can also accept vue reactive objects and value factories.
 
 ```ts
+import { fromRef } from 'vuse-rx';
+
 const count = ref(0);
 
 fromRef(count).subscribe(value => console.log('count is', value));

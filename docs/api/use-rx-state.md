@@ -379,7 +379,9 @@ import {
 } from 'vuse-rx';
 
 useRxState(initialState, {
-  mutationStrategy: (
+  strategyContext: [], // will be passed as `this` to the mutationStrategy
+  mutationStrategy(
+    this, // the `strategyContext` option
     state, // A full base state to mutate
     mutate // Current mutation strategy (this exact function)
   ) => (
@@ -407,11 +409,11 @@ useRxState(initialState, {
 });
 ```
 
-There are 3 mutation strategies provided out-of the box:
-- `shallow` - surface-level merge, equivalent to an object spread\
-  (`state = { ...state, ...mutation }`)
-- `deep` - recursively merges mutations with the state
-- `deepReplaceArray` - **DEFAULT** - same as `deep`, but does a simple shallow replacement for arrays
+There are 4 [mutation strategies](#mutation-strategies) provided out-of the box:
+- [`shallow`](#shallow)
+- [`deep`](#deep)
+- [`deepReplaceArray`](#deepreplacearray-deprecated) - **DEPRECATED** in favor of [`deepReplaceBuiltin`]
+- [`deepReplaceBuiltin`](#deepreplacebuiltin-default) - **DEFAULT**
 
 Each mutation strategy sets its own mutation type, so a mutation for the `deep` strategy may be different from a mutation for the `shallow` strategy.
 
@@ -432,7 +434,63 @@ useRxState({ count: 0 }, {
 ```
 :::
 
-## `State`
+## Mutation strategies
+
+These are the 4 mutations strategies that `vuse-rx` provides "out-of-the-box",
+so that there's no need to reimplement them every time there's a need for mutations to work a little differently.
+
+::: details Here's how the strategies are implemented
+
+::: code-group
+
+<<< @/../src/use-rx/strategies/shallow.ts
+<<< @/../src/use-rx/strategies/deep.ts
+<<< @/../src/use-rx/strategies/deepReplaceArray.ts
+<<< @/../src/use-rx/strategies/deepReplaceBuiltin.ts
+<<< @/../src/use-rx/strategies/common.ts
+
+:::
+
+### `shallow`
+Surface-level merge, equivalent to an object spread (`state = { ...state, ...mutation }`).
+
+### `deep`
+Recursively merges mutations with the state.
+
+### `deepReplaceArray` **\[DEPRECATED\]**
+Same as `deep`, but does a simple shallow replacement for arrays.
+**DEPRECATED** in favor of [`deepReplaceBuiltin`](#deepreplacebuiltin-default).
+
+### `deepReplaceBuiltin` **\[DEFAULT\]**
+Same as `deep`, but does a simple shallow replacement for builtin types, like Array, Date, RegExp and Error.
+
+You can control what counts as builtin by setting the `strategyContext` parameter in options:
+- to add to current builtins
+  ```ts
+  import { defaultBuiltin } from 'vuse-rx';
+
+  class MyBuiltin {}
+
+  // Now all mutations also replace instances of MyBuiltin,
+  // in addition to Array, Date, RegExp and Error
+  useRxState(state, { strategyContext: [...defaultBuiltin, MyBuiltin] })
+  ```
+
+- to replace current builtins
+  ```ts
+  class MyBuiltin {}
+
+  // Now all mutations replace only instances of MyBuiltin,
+  // while deep-merging any other type
+  useRxState(state, { strategyContext: [MyBuiltin] })
+  ```
+
+However, this may not be enough to get complete type inference in mutations.
+To make sure that the types represent actual behavior
+
+## Type helpers
+
+### `State`
 
 Allows to declaratively define the state type from the result of the first call of `useRxState`:
 

@@ -5,16 +5,18 @@ import { isObservable, merge, of, Subject } from 'rxjs';
 import { map, mergeScan, scan, tap } from 'rxjs/operators';
 import { reactive, readonly } from 'vue';
 import { untilUnmounted } from '../operators/until';
-import { MutationStrategy } from './common';
-import { deepReplaceArray, DeepReplaceArrayMutation } from './strategies/deepReplaceArray';
+import { MutationStrategy } from './strategies/common';
+import { defaultBuiltin, deepReplaceBuiltin, DeepReplaceBuiltinMutation } from './strategies/deepReplaceBuiltin';
 
 
 export interface RxStateOptions<S extends Record<PropertyKey, any>, Mutaiton> {
-  mutationStrategy: MutationStrategy<S, Mutaiton>;
+  mutationStrategy?: MutationStrategy<S, Mutaiton>;
+  strategyContext?: any;
 }
 
 export const defaultOptions = {
-  mutationStrategy: deepReplaceArray,
+  mutationStrategy: deepReplaceBuiltin,
+  strategyContext: defaultBuiltin
 };
 
 /**
@@ -26,14 +28,15 @@ export const defaultOptions = {
  * @param initialState - a factory or initial value for the reactive state
  * @param options - options to customize the behavior, for example - to apply a custom strategy of merging a mutation with an old state
  */
-export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepReplaceArrayMutation<UnwrapNestedRefs<T>>>(
+export function useRxState<T extends Record<PropertyKey, any>, Mutation = DeepReplaceBuiltinMutation<UnwrapNestedRefs<T>>>(
   initialState: T | (() => T),
   options?: Partial<RxStateOptions<UnwrapNestedRefs<T>, Mutation>>
 ): CreateRxState<UnwrapNestedRefs<T>, Mutation> {
-  const { mutationStrategy: mergeKeys } = {
+  const { mutationStrategy, strategyContext } = {
     ...defaultOptions as RxStateOptions<UnwrapNestedRefs<T>, Mutation>,
     ...options
   };
+  const mergeKeys = mutationStrategy!.bind(strategyContext);
 
   return function (reducers, map$?) {
     type S = UnwrapNestedRefs<T>;
@@ -177,6 +180,12 @@ const callMeMaybe = <T, A extends any[]>(
     : fn
 );
 
+/**
+ * Context of a mutation.
+ *
+ * It is used to inform observables about errors or make them complete
+ * from within the reducers.
+ */
 export interface MutationContext {
   error(error: any): void;
   complete(): void;
@@ -187,7 +196,7 @@ export type StatefulMutation<S, Mutation> = (state: S, mutation?: MutationContex
 /**
  * A general type for a reducer of the observable state
  */
-export type StateReducer<S, Mutation = DeepReplaceArrayMutation<S>, Args extends any[] = any[]> = (
+export type StateReducer<S, Mutation = DeepReplaceBuiltinMutation<S>, Args extends any[] = any[]> = (
   (...args: Args) =>
     | Mutation
     | Observable<Mutation>
