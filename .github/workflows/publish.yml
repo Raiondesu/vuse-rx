@@ -8,7 +8,7 @@ on:
 
 jobs:
   latest:
-    if: !contains(github.event.commits[*].message, '--skip-version--')
+    if: !contains(github.event.commits[0].message, '--skip-version--')
     runs-on: ubuntu-latest
 
     steps:
